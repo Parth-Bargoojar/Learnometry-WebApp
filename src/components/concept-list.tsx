@@ -3,18 +3,25 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowDownRight, ArrowUpRight, ChevronRight } from "lucide-react";
-import { confidenceFor, severityFor, showsMasteryNumber, type Severity } from "@/lib/config";
+import { confidenceFor, severityFor, showsMasteryNumber } from "@/lib/config";
 import { chapters, concepts, stateFor } from "@/lib/data";
-import { ago } from "@/lib/format";
-import { ProgressBar, SeverityBadge, severityLabel } from "./ui";
+import { ProgressBar, SeverityBadge } from "./ui";
 
-const FILTERS: (Severity | "all" | "unassessed")[] = ["all", "critical", "weak", "needs_work", "stable", "strong", "insufficient", "unassessed"];
+/* Four groups instead of eight severities; each row still shows its own badge. */
+type Filter = "all" | "needs_work" | "strong" | "unassessed";
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "needs_work", label: "Needs work" },
+  { key: "strong", label: "Strong" },
+  { key: "unassessed", label: "Not enough data" },
+];
 
 /** All concepts by chapter — Web App Structure §8.13. Filter in `?status=`. */
 export function ConceptList() {
   const router = useRouter();
   const params = useSearchParams();
-  const filter = (params.get("status") as (typeof FILTERS)[number]) || "all";
+  const raw = params.get("status");
+  const filter: Filter = FILTERS.some((f) => f.key === raw) ? (raw as Filter) : "all";
 
   const rows = concepts.map((c) => {
     const s = stateFor(c.id);
@@ -22,23 +29,31 @@ export function ConceptList() {
     const sev = s ? severityFor(s.mastery, conf) : null;
     return { c, s, conf, sev };
   });
-  const match = (r: (typeof rows)[number]) => (filter === "all" ? true : filter === "unassessed" ? !r.s : r.sev === filter);
-  const counts = Object.fromEntries(FILTERS.map((f) => [f, rows.filter((r) => (f === "all" ? true : f === "unassessed" ? !r.s : r.sev === f)).length]));
+  const matches = (r: (typeof rows)[number], f: Filter) =>
+    f === "all"
+      ? true
+      : f === "unassessed"
+        ? !r.s || r.sev === "insufficient"
+        : f === "strong"
+          ? r.sev === "strong" || r.sev === "stable"
+          : r.sev === "critical" || r.sev === "weak" || r.sev === "needs_work";
+  const match = (r: (typeof rows)[number]) => matches(r, filter);
+  const counts = Object.fromEntries(FILTERS.map((f) => [f.key, rows.filter((r) => matches(r, f.key)).length])) as Record<Filter, number>;
 
   return (
     <div className="flex flex-col gap-5">
       <div role="group" aria-label="Filter by status" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {FILTERS.filter((f) => f === "all" || counts[f] > 0).map((f) => (
+        {FILTERS.filter((f) => f.key === "all" || counts[f.key] > 0).map((f) => (
           <button
-            key={f}
+            key={f.key}
             type="button"
-            aria-pressed={filter === f}
-            onClick={() => router.replace(f === "all" ? "?" : `?status=${f}`, { scroll: false })}
+            aria-pressed={filter === f.key}
+            onClick={() => router.replace(f.key === "all" ? "?" : `?status=${f.key}`, { scroll: false })}
             className={`h-10 touch:h-11 shrink-0 rounded-full border px-4 text-sm font-semibold ${
-              filter === f ? "border border-primary bg-primary/10 text-ink" : "border-border-subtle text-muted hover:text-ink"
+              filter === f.key ? "border border-primary bg-primary/10 text-ink" : "border-border-subtle text-muted hover:text-ink"
             }`}
           >
-            {f === "all" ? "All" : f === "unassessed" ? "Not assessed" : severityLabel(f)} ({counts[f]})
+            {f.label} ({counts[f.key]})
           </button>
         ))}
       </div>
@@ -57,10 +72,7 @@ export function ConceptList() {
                 return (
                   <li key={c.id}>
                     <Link href={`/progress/concepts/${c.id}`} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 px-5 py-3.5 hover:bg-sunken sm:grid-cols-[1fr_11rem_7rem_auto]">
-                      <span className="min-w-0">
-                        <span className="block font-medium text-ink">{c.name}</span>
-                        <span className="block text-xs text-muted">Last practised: {ago(s?.lastPracticed ?? null)}</span>
-                      </span>
+                      <span className="min-w-0 font-medium text-ink">{c.name}</span>
                       <span className="order-3 col-span-2 sm:order-none sm:col-span-1">
                         {s && showsMasteryNumber(conf) ? (
                           <span className="flex items-center gap-2">

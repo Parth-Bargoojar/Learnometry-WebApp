@@ -538,7 +538,6 @@ export function Player({ config }: { config: AttemptConfig }) {
             <p className="font-display text-2xl text-ink">
               {finishing === "timeout" ? "Time's up. Submitting your answers." : practice ? "Saving your practice" : "Scoring your answers"}
             </p>
-            <p className="text-sm text-muted">Marked by fixed rules on our server, negative marking included.</p>
           </div>
         </div>
       ) : null}
@@ -704,24 +703,9 @@ function NumericAnswer({
 function PracticeHeader({ config, total }: { config: AttemptConfig; total: number }) {
   const c = conceptById(config.targetConceptId!);
   return (
-    <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-card border border-border-subtle bg-surface px-4 py-3 text-sm sm:grid-cols-4">
-      <div className="col-span-2 sm:col-span-1">
-        <dt className="text-xs text-muted">Target</dt>
-        <dd className="font-semibold text-ink">{c.name}</dd>
-      </div>
-      <div className="col-span-2 sm:col-span-1">
-        <dt className="text-xs text-muted">Goal</dt>
-        <dd className="font-semibold text-ink">{config.goal}</dd>
-      </div>
-      <div>
-        <dt className="text-xs text-muted">Questions</dt>
-        <dd className="font-semibold tabular-nums text-ink">{total}</dd>
-      </div>
-      <div>
-        <dt className="text-xs text-muted">Difficulty</dt>
-        <dd className="font-semibold text-ink">Matched to you</dd>
-      </div>
-    </dl>
+    <p className="mb-4 text-sm text-muted">
+      <span className="font-semibold text-ink">{c.name}</span> · {total} questions · {config.goal}
+    </p>
   );
 }
 

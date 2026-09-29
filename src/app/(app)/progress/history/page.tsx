@@ -96,7 +96,6 @@ export default async function ProgressHistoryPage(props: PageProps<"/progress/hi
           action={<ButtonLink href="/progress/history" variant="secondary">Show all</ButtonLink>}
         />
       )}
-      <p className="text-sm text-muted">Scores count toward progress only from diagnostics and retests. Practice shows how a set went, not your mastery.</p>
     </div>
   );
 }

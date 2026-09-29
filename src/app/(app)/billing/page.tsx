@@ -54,7 +54,7 @@ export default function BillingPage() {
         {refund.eligible ? (
           <>
             <p className="mt-3 text-sm text-ink">
-              You can request a full refund until {shortDate(refund.until)} because you&apos;ve used under 20% of this cycle&apos;s credits.
+              Full refund available until {shortDate(refund.until)}.
             </p>
             <div className="mt-4">
               <RefundRequest lastDay={shortDate(refund.until)} />

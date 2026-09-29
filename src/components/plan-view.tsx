@@ -48,12 +48,8 @@ export function PlanView() {
       <div className="flex items-start gap-3 rounded-card-lg border border-line bg-surface p-5 sm:p-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-muted">
-              Week {planMeta.week} of {planMeta.weeks} · {planMeta.focus.length} concepts · {learner.dailyMinutes} min a day
-            </p>
-            <p className="mt-1 text-lg font-semibold text-ink">
-              This week: {conceptById(planMeta.focus[0]).name} first · retest {relativeDay(planMeta.retestOn)}
-            </p>
+            <p className="text-sm text-muted">Week {planMeta.week} of {planMeta.weeks}</p>
+            <p className="mt-1 text-lg font-semibold text-ink">Retest {relativeDay(planMeta.retestOn)}</p>
           </div>
           <div className="w-full sm:w-64 sm:shrink-0">
             <div className="mb-1.5 flex justify-between text-xs text-muted">
@@ -63,7 +59,6 @@ export function PlanView() {
               </span>
             </div>
             <ProgressBar value={done} max={week.length} label="Tasks done this week" tone="ink" />
-            <p className="mt-1.5 text-xs text-muted">Finishing tasks doesn&apos;t change mastery. The retest does.</p>
           </div>
         </div>
         <PlanMenu />
@@ -110,7 +105,7 @@ export function PlanView() {
               ) : null}
             </div>
             <aside className="lg:col-span-4">
-              <details open className="group rounded-card border border-border-subtle bg-surface">
+              <details className="group rounded-card border border-border-subtle bg-surface">
                 <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-5 font-semibold text-ink [&::-webkit-details-marker]:hidden">
                   Why this order
                   <ChevronDown aria-hidden="true" className="size-5 text-muted transition-transform group-open:rotate-180" />
@@ -222,7 +217,7 @@ function WeekView() {
                 <span className="text-sm text-muted">20 min</span>
               </Link>
             ) : (
-              <TaskList tasks={tasks} primaryFirst={d === TODAY && !past} compact />
+              <TaskList tasks={tasks} primaryFirst={d === TODAY && !past} />
             )}
           </section>
         );

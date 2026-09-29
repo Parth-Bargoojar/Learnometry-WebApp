@@ -47,7 +47,6 @@ type Answers = {
   guardianContact?: string;
   confirmGuardian?: boolean;
   exam?: string;
-  subjects?: string[];
   examMonth?: string;
   examYear?: string;
   notSure?: boolean;
@@ -58,16 +57,15 @@ type Answers = {
 };
 
 const KEY = "lm-onboarding";
-const STEPS_ADULT = ["about-you", "exam", "subjects", "exam-date", "study-time"];
-const STEPS_MINOR = ["about-you", "guardian", "exam", "subjects", "exam-date", "study-time"];
-const STEPS_GUARDIAN = ["child", "consent", "exam", "subjects", "exam-date", "study-time"];
+const STEPS_ADULT = ["about-you", "exam", "exam-date", "study-time"];
+const STEPS_MINOR = ["about-you", "guardian", "exam", "exam-date", "study-time"];
+const STEPS_GUARDIAN = ["child", "consent", "exam", "exam-date", "study-time"];
 const TITLES: Record<string, string> = {
   child: "Your child",
   consent: "Consent",
   "about-you": "About you",
   guardian: "Parent or guardian",
   exam: "Your exam",
-  subjects: "Subjects",
   "exam-date": "Exam date",
   "study-time": "Daily time",
 };
@@ -187,7 +185,6 @@ export function Onboarding({ step }: { step: string }) {
           {step === "about-you" ? <AboutYou a={a} update={update} /> : null}
           {step === "guardian" ? <Guardian a={a} update={update} /> : null}
           {step === "exam" ? <Exam a={a} update={update} child={child} /> : null}
-          {step === "subjects" ? <Subjects child={child} /> : null}
           {step === "exam-date" ? <ExamDate a={a} update={update} child={child} /> : null}
           {step === "study-time" ? <StudyTime a={a} update={update} child={child} /> : null}
           {error ? (
@@ -332,7 +329,7 @@ function AboutYou({ a, update }: { a: Answers; update: (p: Partial<Answers>) => 
       <div className="mb-6">
         <Mascot size="md" />
       </div>
-      <Heading title="First, a bit about you" help="We ask your age because students under 18 need a parent or guardian's consent (DPDP Act 2023)." />
+      <Heading title="First, a bit about you" help="Students under 18 need a parent or guardian's OK, so we ask your age." />
       <div className="mt-7">
         <DobFields a={a} update={update} legend="Date of birth" />
       </div>
@@ -488,7 +485,7 @@ function Waiting({ a, learnerName, onApproved }: { a: Answers; learnerName: stri
         </li>
         <li className="flex items-center gap-2.5">
           <Lock aria-hidden="true" className="size-5 text-muted" />
-          Exam, subjects and study time unlock after approval
+          Exam and study time unlock after approval
         </li>
         <li className="flex items-start gap-2.5">
           <Lock aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted" />
@@ -632,29 +629,7 @@ function Exam({ a, update, child }: { a: Answers; update: (p: Partial<Answers>) 
           ))}
         </div>
       </fieldset>
-    </>
-  );
-}
-
-function Subjects({ child }: { child: string | null }) {
-  return (
-    <>
-      <Heading title="Which subjects should we cover?" help={child ? `${child}'s diagnostic will cover these chapters.` : "Your diagnostic will cover these chapters."} />
-      <div className="mt-7 flex flex-col gap-3">
-        <div className="rounded-card border border-primary/40 bg-primary/10 p-4">
-          <div className="flex items-center justify-between">
-            <p className="font-semibold text-ink">Physics · Class 11 Mechanics</p>
-            <span className="flex size-6 items-center justify-center rounded-full bg-ink text-on-ink"><Check aria-hidden="true" className="size-3.5" strokeWidth={3} /></span>
-          </div>
-          <p className="mt-1 text-sm text-muted">Motion in a Straight Line · Motion in a Plane · Laws of Motion · Work, Energy and Power · Rotational Motion · Gravitation</p>
-        </div>
-        {["Chemistry", "Mathematics", "Biology"].map((s) => (
-          <div key={s} aria-disabled="true" className="flex items-center justify-between rounded-card border border-dashed border-border-subtle p-4 opacity-70">
-            <p className="font-semibold text-muted">{s}</p>
-            <span className="text-xs font-semibold text-muted">Coming later</span>
-          </div>
-        ))}
-      </div>
+      <p className="mt-5 text-sm text-muted">Physics · Class 11 Mechanics comes first. Chemistry, Mathematics and Biology are coming later.</p>
     </>
   );
 }

@@ -5,7 +5,7 @@ import { TODAY, guardianAccount, guardianLearners } from "@/lib/data";
 import { guardianSummary } from "@/lib/guardian-summary";
 import { maskContact } from "@/lib/guardian";
 import { dayMonth, fullDate, shortDate } from "@/lib/format";
-import { ButtonLink, Card, ProgressBar, SeverityBadge } from "@/components/ui";
+import { ButtonLink, Card, ProgressBar } from "@/components/ui";
 import { ApprovalsCount, PendingApprovalsBanner, ResendInvite } from "@/components/guardian";
 
 export const metadata: Metadata = { title: "Guardian overview" };
@@ -43,7 +43,6 @@ export default function GuardianOverviewPage() {
 function ActiveLearner({ id }: { id: string }) {
   const s = guardianSummary(id);
   if (!s) return null;
-  const latest = s.retests[s.retests.length - 1];
   return (
     <Card level="structural" as="article" className="p-5 sm:p-7" aria-labelledby={`${id}-h`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -94,34 +93,6 @@ function ActiveLearner({ id }: { id: string }) {
         </div>
       </dl>
 
-      <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <div>
-          <h4 className="text-sm font-semibold text-muted">Weakest topics</h4>
-          <ul className="mt-2 flex flex-col gap-2">
-            {s.weakTopics.map((t) => (
-              <li key={t.name} className="flex items-center justify-between gap-3">
-                <span className="min-w-0 text-[15px] text-ink">{t.name}</span>
-                <SeverityBadge value={t.severity} size="sm" />
-              </li>
-            ))}
-          </ul>
-        </div>
-        {latest ? (
-          <div>
-            <h4 className="text-sm font-semibold text-muted">Latest retest · {dayMonth(latest.date)}</h4>
-            <ul className="mt-2 flex flex-col gap-2 text-[15px] text-ink">
-              {latest.outcomes.map((o) => (
-                <li key={o.name}>
-                  {o.name}:{" "}
-                  <span className="font-semibold">
-                    {o.outcome === "improved" ? `improved (+${o.after - o.before} points)` : o.outcome === "declined" ? "slipped" : o.outcome === "stable" ? "about the same" : "not enough questions to tell"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </div>
     </Card>
   );
 }

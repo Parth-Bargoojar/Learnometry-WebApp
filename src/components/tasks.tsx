@@ -5,8 +5,7 @@ import { useState } from "react";
 import { ArrowRight, Check, CircleSlash, MoreHorizontal, RotateCcw } from "lucide-react";
 import type { PlanTask } from "@/lib/types";
 import { conceptById } from "@/lib/data";
-import { relativeDay } from "@/lib/format";
-import { PriorityBadge, btn } from "./ui";
+import { btn } from "./ui";
 import { Dialog } from "./dialog";
 import { Toast, toastAction } from "./toast";
 
@@ -22,7 +21,7 @@ const TYPE_LABEL: Record<PlanTask["type"], string> = {
  * Study tasks with optimistic complete/skip + Undo (Web App Structure §9.3).
  * Completion never changes mastery (DS §17) — only assessments do.
  */
-export function TaskList({ tasks, primaryFirst = true, compact = false }: { tasks: PlanTask[]; primaryFirst?: boolean; compact?: boolean }) {
+export function TaskList({ tasks, primaryFirst = true }: { tasks: PlanTask[]; primaryFirst?: boolean }) {
   const [items, setItems] = useState(tasks);
   const [toast, setToast] = useState<{ text: string; undo: PlanTask[] } | null>(null);
   const [skipFor, setSkipFor] = useState<PlanTask | null>(null);
@@ -80,7 +79,6 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
                 </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <PriorityBadge value={task.priority} compact />
                     <Link href={`/plan/tasks/${task.id}`} className="inline-flex min-h-6 touch:min-h-11 items-center font-semibold text-ink hover:underline hover:underline-offset-4">
                       {concept.name}
                     </Link>
@@ -89,13 +87,6 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
                   <p className="mt-1.5 text-[15px] text-ink">
                     <span className="font-semibold">{TYPE_LABEL[task.type]}:</span> {task.action}
                   </p>
-                  {!compact && (task.then || task.reviewOn) ? (
-                    <p className="mt-1 text-sm text-muted">
-                      {task.then ? <>Then: {task.then}</> : null}
-                      {task.then && task.reviewOn ? " · " : null}
-                      {task.reviewOn ? <>Review: {relativeDay(task.reviewOn)}</> : null}
-                    </p>
-                  ) : null}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <Link href={`/plan/tasks/${task.id}`} className={btn(isPrimary ? "primary" : "secondary", "sm")}>
                       Start task <ArrowRight aria-hidden="true" className="size-4" />

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CalendarClock, ClipboardCheck, Route, Target, Zap } from "lucide-react";
-import { COST, PLANS } from "@/lib/config";
+import { ArrowRight, ClipboardCheck, Route, Target, Zap } from "lucide-react";
+import { COST, PLANS, enoughFor } from "@/lib/config";
 import {
   DIAGNOSTIC_ID,
   TODAY,
@@ -17,7 +17,7 @@ import {
 } from "@/lib/data";
 import { diagnose } from "@/lib/diagnosis";
 import { daysFromToday, relativeDay, shortDate } from "@/lib/format";
-import { Alert, ButtonLink, Card, CardHeader, Cost, PriorityBadge, ProgressBar, SeverityBadge, TextLink } from "@/components/ui";
+import { Alert, ButtonLink, Card, CardHeader, Cost, ProgressBar, SeverityBadge, TextLink } from "@/components/ui";
 import { GetCreditsButton } from "@/components/credit-gate";
 import { Mascot } from "@/components/feedback";
 import { PairedBar } from "@/components/charts";
@@ -30,25 +30,13 @@ export const metadata: Metadata = { title: "Home" };
  * Home — a state machine, not a widget grid (Web App Structure §8.3).
  * `?state=new` previews S0 and `?state=out` previews S7 (credits exhausted);
  * the sample learner is in S4 (active plan).
+ * Every block answers one question no other block answers: what now, what can I spend,
+ * what else today, when is the retest, what am I weak at, am I improving (§8.3, §8.22).
  */
 export default async function DashboardPage(props: PageProps<"/dashboard">) {
   const { state } = await props.searchParams;
   if (state === "new") return <NewLearner />;
   return <ActivePlan balance={state === "out" ? 0 : credits.balance} />;
-}
-
-/** Turns a balance into decisions (DS §14): what can I still do today? */
-function enoughFor(balance: number) {
-  if (balance >= COST.retest + COST.practiceSet5) {
-    const sets = Math.floor((balance - COST.retest) / COST.practiceSet5);
-    return `Enough for 1 retest and ${sets} practice ${sets === 1 ? "set" : "sets"}.`;
-  }
-  if (balance >= COST.practiceSet5) {
-    const sets = Math.floor(balance / COST.practiceSet5);
-    return `Enough for ${sets} practice ${sets === 1 ? "set" : "sets"}.`;
-  }
-  if (balance >= COST.hint) return "Enough for hints and explanations only.";
-  return "Your plan and revision tasks don't need credits.";
 }
 
 function ContextLine() {
@@ -89,11 +77,11 @@ function NewLearner() {
             <Mascot size="md" />
           </div>
         </Card>
-        <Card level="structural" className="p-6 lg:col-span-4">
+        <Card level="structural" className="flex flex-col p-6 lg:col-span-4">
           <CardHeader title="Your credits" />
           <p className="mt-3 font-display text-4xl tabular-nums text-ink">100</p>
           <p className="mt-1 text-sm text-muted">Welcome credits · expire in 30 days</p>
-          <p className="mt-4 text-sm text-ink">Enough for your diagnostic and your first study plan.</p>
+          <p className="mt-auto pt-4 text-sm text-ink">Enough for your diagnostic and your first study plan.</p>
         </Card>
       </div>
       <section aria-labelledby="how" className="mt-8">
@@ -124,8 +112,9 @@ function ActivePlan({ balance }: { balance: number }) {
   const today = planTasks.filter((t) => t.date === TODAY);
   const priority = today.find((t) => t.status === "pending")!;
   const pConcept = conceptById(priority.conceptId);
-  const others = today.filter((t) => t.status === "pending" && t.id !== priority.id);
-  const planned = today.reduce((a, t) => a + t.minutes, 0);
+  // The priority card already shows the first task; the list below is everything else today.
+  const rest = today.filter((t) => t.id !== priority.id);
+  const restPending = rest.filter((t) => t.status === "pending");
 
   const cfg = getAttemptConfig(DIAGNOSTIC_ID)!;
   const findings = diagnose(cfg.questionIds, sampleDiagnosticResponses);
@@ -157,10 +146,9 @@ function ActivePlan({ balance }: { balance: number }) {
         </div>
       ) : null}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-        {/* Today's priority — the one dominant action (DS §14) */}
-        <Card level="primary" className="flex flex-col p-5 sm:p-7 lg:col-span-8" aria-labelledby="today-priority">
+        {/* Row 1 · Today's priority — the one dominant action (DS §14) */}
+        <Card level="primary" className="flex flex-col p-5 sm:p-7 lg:col-span-8 lg:col-start-1 lg:row-start-1" aria-labelledby="today-priority">
           <div className="flex flex-wrap items-center gap-2">
-            <PriorityBadge value={priority.priority} />
             <span className="text-sm text-muted">Today&apos;s priority</span>
             <span className="ml-auto text-sm font-semibold tabular-nums text-ink">{priority.minutes} min</span>
           </div>
@@ -175,20 +163,94 @@ function ActivePlan({ balance }: { balance: number }) {
               Why: {pFinding.total - pFinding.correct} of {pFinding.total} incorrect in your diagnostic.
             </p>
           ) : null}
-          <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-3 pt-6">
+          <div className="mt-auto pt-6">
             <ButtonLink href={`/plan/tasks/${priority.id}`} size="lg">
               Start task <ArrowRight aria-hidden="true" className="size-5" />
             </ButtonLink>
-            {others.length ? (
-              <span className="text-sm text-muted">
-                {others.length} more {others.length === 1 ? "task" : "tasks"} today · {others.reduce((a, t) => a + t.minutes, 0)} min
-              </span>
-            ) : null}
           </div>
         </Card>
 
-        {/* Credits — turned into decisions ("Enough for…") */}
-        <Card level="structural" className="relative flex flex-col overflow-hidden p-5 sm:p-6 lg:col-span-4" aria-labelledby="credits-h">
+        {/* Row 2 · The rest of today (the priority task is not repeated here) */}
+        {rest.length ? (
+          <Card level="supporting" className="p-5 sm:p-6 lg:col-span-7" aria-labelledby="plan-h">
+            <CardHeader
+              id="plan-h"
+              title="Also today"
+              meta={restPending.length ? `${restPending.length} to do · ${restPending.reduce((a, t) => a + t.minutes, 0)} min` : "All done"}
+              action={<TextLink href="/plan">Full plan <ArrowRight aria-hidden="true" className="size-4" /></TextLink>}
+            />
+            <div className="mt-4">
+              <TaskList tasks={rest} primaryFirst={false} />
+            </div>
+          </Card>
+        ) : null}
+
+        {/* Row 2 · Next retest */}
+        <Card level="supporting" className={`flex flex-col p-5 sm:p-6 ${rest.length ? "lg:col-span-5" : "lg:col-span-12"}`} aria-labelledby="retest-h">
+          <CardHeader id="retest-h" title="Next retest" meta={relativeDay(planMeta.retestOn)} />
+          <p className="mt-3 text-sm text-muted">About 20 min · new questions on these concepts</p>
+          <ul className="mt-2 divide-y divide-border-subtle">
+            {planMeta.focus.map((id) => (
+              <li key={id} className="flex items-center gap-2.5 py-2.5 text-[15px] text-ink">
+                <Target aria-hidden="true" className="size-4 shrink-0 text-muted" />
+                {conceptById(id).name}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4">
+            <div className="mb-1.5 flex justify-between text-xs text-muted">
+              <span>Tasks done this week</span>
+              <span className="tabular-nums">
+                {done} of {week.length}
+              </span>
+            </div>
+            <ProgressBar value={done} max={week.length} label="Tasks completed this week" tone="ink" />
+          </div>
+          <TextLink href="/plan?view=retest" className="mt-auto pt-3">
+            See retest details
+          </TextLink>
+        </Card>
+
+        {/* Row 3 · What to work on */}
+        <Card level="supporting" className="flex flex-col p-5 sm:p-6 lg:col-span-5" aria-labelledby="weak-h">
+          <CardHeader id="weak-h" title="Top weaknesses" meta="From your 27 Sep diagnostic" />
+          <ul className="mt-3 divide-y divide-border-subtle">
+            {weak.map((f) => (
+              <li key={f.conceptId}>
+                <Link
+                  href={`/assess/results/${DIAGNOSTIC_ID}?concept=${f.conceptId}`}
+                  className="-mx-2 flex min-h-14 items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-sunken/50"
+                >
+                  <SeverityBadge value={f.severity} size="sm" />
+                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">{conceptById(f.conceptId).name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <TextLink href={`/assess/results/${DIAGNOSTIC_ID}`} className="mt-auto pt-3">
+            View full report
+          </TextLink>
+        </Card>
+
+        {/* Row 3 · Am I improving? */}
+        <Card level="supporting" className="p-5 sm:p-6 lg:col-span-7" aria-labelledby="progress-h">
+          <CardHeader
+            id="progress-h"
+            title={`Targeted concepts: ${baseAvg}% → ${nowAvg}%`}
+            meta={`+${nowAvg - baseAvg} pts since your first diagnostic`}
+            action={<TextLink href="/progress">Progress <ArrowRight aria-hidden="true" className="size-4" /></TextLink>}
+          />
+          <div className="mt-5 flex flex-col gap-5">
+            {targeted.map((s) => (
+              <div key={s.conceptId}>
+                <p className="mb-2 text-sm font-semibold text-ink">{conceptById(s.conceptId).name}</p>
+                <PairedBar before={s.baselineMastery ?? 0} after={s.mastery} label={conceptById(s.conceptId).name} />
+              </div>
+            ))}
+          </div>
+        </Card>
+        {/* Credits, turned into decisions ("Enough for…"). Last in the markup so small screens and keyboard order end here (the chip is already in the top bar); on desktop it is placed beside the priority card by grid position. */}
+        <Card level="structural" className="flex flex-col p-5 sm:p-6 lg:col-span-4 lg:col-start-9 lg:row-start-1" aria-labelledby="credits-h">
           <CardHeader id="credits-h" title="Credits" meta={`${plan.name} plan`} />
           <p className="mt-4 text-lg font-semibold leading-snug text-ink">{enoughFor(balance)}</p>
           <p className="mt-2 text-sm text-muted tabular-nums">
@@ -202,84 +264,6 @@ function ActivePlan({ balance }: { balance: number }) {
           </TextLink>
         </Card>
 
-        {/* Today's plan */}
-        <Card level="supporting" className="p-5 sm:p-6 lg:col-span-12" aria-labelledby="plan-h">
-          <CardHeader
-            id="plan-h"
-            title="Today"
-            meta={`${planned} of ${learner.dailyMinutes} min planned`}
-            action={<TextLink href="/plan">Full plan <ArrowRight aria-hidden="true" className="size-4" /></TextLink>}
-          />
-          <div className="mt-4">
-            <TaskList tasks={today} primaryFirst={false} compact />
-          </div>
-        </Card>
-
-        {/* Weaknesses */}
-        <Card level="supporting" className="p-5 sm:p-6 lg:col-span-7" aria-labelledby="weak-h">
-          <CardHeader id="weak-h" title="Top weaknesses" meta="From your 27 Sep diagnostic" />
-          <ul className="mt-3 divide-y divide-border-subtle">
-            {weak.map((f) => (
-              <li key={f.conceptId}>
-                <Link
-                  href={`/assess/results/${DIAGNOSTIC_ID}?concept=${f.conceptId}`}
-                  className="-mx-2 flex min-h-14 items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-sunken/50"
-                >
-                  <SeverityBadge value={f.severity} size="sm" />
-                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">{conceptById(f.conceptId).name}</span>
-                  <PriorityBadge value={f.priority} compact />
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <TextLink href={`/assess/results/${DIAGNOSTIC_ID}`} className="mt-2">
-            View full report
-          </TextLink>
-        </Card>
-
-        {/* Next retest */}
-        <Card level="supporting" className="flex flex-col p-5 sm:p-6 lg:col-span-5" aria-labelledby="retest-h">
-          <CardHeader id="retest-h" title="Next retest" />
-          <div className="mt-3 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-sunken px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-muted">
-              <CalendarClock aria-hidden="true" className="size-3.5" /> Scheduled
-            </span>
-            <span className="text-sm font-semibold text-ink">{relativeDay(planMeta.retestOn)}</span>
-          </div>
-          <p className="mt-3 text-sm text-ink">
-            {planMeta.focus.length} concepts · about 20 min · new questions on this week&apos;s concepts
-          </p>
-          <div className="mt-4">
-            <div className="mb-1.5 flex justify-between text-xs text-muted">
-              <span>Finish this week&apos;s tasks to unlock it early</span>
-              <span className="tabular-nums">
-                {done} of {week.length}
-              </span>
-            </div>
-            <ProgressBar value={done} max={week.length} label="Tasks completed this week" tone="ink" />
-          </div>
-          <TextLink href="/plan?view=retest" className="mt-auto pt-3">
-            See retest details
-          </TextLink>
-        </Card>
-
-        {/* Progress */}
-        <Card level="supporting" className="p-5 sm:p-6 lg:col-span-12" aria-labelledby="progress-h">
-          <CardHeader
-            id="progress-h"
-            title={`Targeted concepts: ${baseAvg}% → ${nowAvg}%`}
-            meta={`+${nowAvg - baseAvg} pts since your first diagnostic, measured by 1 retest`}
-            action={<TextLink href="/progress">Progress <ArrowRight aria-hidden="true" className="size-4" /></TextLink>}
-          />
-          <div className="mt-6 grid gap-8 md:grid-cols-2">
-            {targeted.map((s) => (
-              <div key={s.conceptId}>
-                <p className="mb-3 text-sm font-semibold text-ink">{conceptById(s.conceptId).name}</p>
-                <PairedBar before={s.baselineMastery ?? 0} after={s.mastery} label={conceptById(s.conceptId).name} />
-              </div>
-            ))}
-          </div>
-        </Card>
       </div>
       {/* Only after a first diagnosis (§9.8). Last on the page so it can't shift anything above it. */}
       <InstallCard />

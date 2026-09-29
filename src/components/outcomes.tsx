@@ -61,9 +61,6 @@ export function PracticeResults({ config }: { config: AttemptConfig }) {
           <p className="mt-4 text-sm text-success-text">No mistakes this session.</p>
         )}
       </section>
-      <p className="rounded-card border border-border-subtle bg-surface p-4 text-sm text-ink">
-        Practice updates your concept state. Your mastery is confirmed at the retest, on fresh questions.
-      </p>
       <div className="flex flex-wrap gap-3">
         <Link href="/plan" className={btn("primary")}>
           Back to your plan <ArrowRight aria-hidden="true" className="size-5" />

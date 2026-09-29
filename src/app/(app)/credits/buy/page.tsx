@@ -14,9 +14,8 @@ export default function BuyCreditsPage() {
   const refill = plan.period === "daily" ? `Your plan credits refill to ${plan.periodCredits} at 00:00 IST.` : "Your free credits refill on the 1st of the month.";
   return (
     <div className="mx-auto max-w-[960px]">
-      <p className="text-[15px] text-ink">{refill}</p>
-      <p className="mt-1 text-[15px] text-muted">
-        Need more before then? Packs last 90 days and are used after your daily and promotional credits, so they don&apos;t get wasted.
+      <p className="text-[15px] text-ink">
+        {refill} Packs last 90 days and are used after your daily credits.
         {needsApproval && learner.guardian ? ` ${learner.guardian.guardianFirstName} approves and pays for packs.` : null}
       </p>
       <ul className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">

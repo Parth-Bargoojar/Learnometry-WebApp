@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CircleCheck } from "lucide-react";
 import { COST } from "@/lib/config";
-import { CHAPTER_DIAGNOSTICS, DIAGNOSTIC_ID, chapters, credits, learner } from "@/lib/data";
+import { CHAPTER_DIAGNOSTICS, DIAGNOSTIC_ID, chapters } from "@/lib/data";
 import { SpendLink } from "./credit-gate";
 
 /** Diagnostic introduction — Web App Structure §8.5: remove every surprise before the timer starts. */
@@ -13,14 +13,6 @@ export function DiagnosticIntro() {
   const [chapter, setChapter] = useState(available[0].id);
   const full = scope === "full";
   const cost = full ? COST.fullDiagnostic : COST.chapterDiagnostic;
-  const enough = credits.balance >= cost;
-
-  const facts = [
-    [full ? "30 min" : "15 min", "timed"],
-    [full ? "15 Qs" : "8 Qs", "MCQ + numerical"],
-    ["+4 / −1", "JEE Main marking"],
-    [`⚡ ${cost}`, "credits"],
-  ];
 
   return (
     <div className="mx-auto max-w-[760px]">
@@ -67,15 +59,9 @@ export function DiagnosticIntro() {
         ) : null}
       </fieldset>
 
-      <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-card border border-line bg-surface sm:grid-cols-4">
-        {facts.map(([v, l], i) => (
-          <div key={l} className={`p-4 ${i % 2 ? "" : "border-r border-border-subtle"} ${i < 2 ? "border-b sm:border-b-0" : ""} border-border-subtle sm:border-r sm:last:border-r-0`}>
-            <dt className="sr-only">{l}</dt>
-            <dd className="font-display text-2xl leading-none tabular-nums text-ink">{v}</dd>
-            <dd className="mt-1.5 text-xs text-muted">{l}</dd>
-          </div>
-        ))}
-      </dl>
+      <p className="mt-6 text-[15px] font-semibold text-ink">
+        {full ? "30 min · 15 questions" : "15 min · 8 questions"} · +4 / −1 marking
+      </p>
 
       <section aria-labelledby="before-h" className="mt-6">
         <h2 id="before-h" className="text-base font-semibold text-ink">
@@ -85,8 +71,6 @@ export function DiagnosticIntro() {
           {[
             `Find ${full ? "30" : "15"} quiet minutes. The timer keeps running if you leave.`,
             "Keep paper and a pen for rough work. No calculator.",
-            "Answers save automatically, even if your connection drops.",
-            "You can mark questions and come back to them before submitting.",
           ].map((t) => (
             <li key={t} className="flex gap-2.5 text-[15px] text-ink">
               <CircleCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-success" />
@@ -96,16 +80,10 @@ export function DiagnosticIntro() {
         </ul>
       </section>
 
-      <p className="mt-6 rounded-card border border-border-subtle bg-surface p-4 text-[15px] text-ink">
-        <span className="font-semibold">What you&apos;ll get:</span> a score, the concepts behind each wrong answer, and a study plan sized to your{" "}
-        {learner.dailyMinutes} minutes a day.
-      </p>
-
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <SpendLink href={full ? `/attempt/${DIAGNOSTIC_ID}` : `/attempt/diag-${chapter}`} cost={cost} what="Starting a diagnostic" size="lg">
           Start diagnostic
         </SpendLink>
-        {enough ? <p className="text-sm text-muted">You have {credits.balance} credits.</p> : null}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { PLANS, creditStateFor } from "@/lib/config";
+import { PLANS, creditStateFor, enoughFor } from "@/lib/config";
 import { credits, learner } from "@/lib/data";
 import { routeInfo } from "@/lib/routes";
 import { clearDeviceData, useStandalone } from "@/lib/pwa";
@@ -117,7 +117,6 @@ function ShellFrame({ children }: { children: ReactNode }) {
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
               <CreditChip />
               <NotificationBell />
-              <ThemeToggle />
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
@@ -175,19 +174,11 @@ function Sidebar({ section, onShortcuts }: { section: string; onShortcuts: () =>
           </Link>
         ))}
       </nav>
-      <button
-        type="button"
-        onClick={onShortcuts}
-        className="mx-3 mb-2 flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm font-medium text-muted hover:bg-sunken hover:text-ink"
-      >
-        <Keyboard aria-hidden="true" className="size-4 shrink-0" />
-        Keyboard shortcuts
-      </button>
       <Link href="/help" className="mx-3 mb-2 flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm font-medium text-muted hover:bg-sunken hover:text-ink">
         <LifeBuoy aria-hidden="true" className="size-4 shrink-0" />
         Help
       </Link>
-      <UserBlock />
+      <UserBlock onShortcuts={onShortcuts} />
     </aside>
   );
 }
@@ -220,24 +211,6 @@ function BottomTabs({ section }: { section: string }) {
   );
 }
 
-/** Cycles System → Light → Dark, so following the device setting stays one click away. */
-function ThemeToggle() {
-  const { pref, setPref } = useTheme();
-  const next: ThemePref = pref === "system" ? "light" : pref === "light" ? "dark" : "system";
-  const Icon = pref === "system" ? Monitor : pref === "light" ? Sun : Moon;
-  const label = pref === "system" ? "System" : pref === "light" ? "Light" : "Dark";
-  return (
-    <button
-      type="button"
-      onClick={() => setPref(next)}
-      aria-label={`Theme: ${label}. Switch to ${next}`}
-      className="hidden size-9 items-center justify-center rounded-btn text-muted transition-colors duration-150 hover:bg-sunken hover:text-ink lg:flex"
-    >
-      <Icon aria-hidden="true" className="size-5" />
-    </button>
-  );
-}
-
 function Avatar() {
   return (
     <span className="flex size-9 items-center justify-center rounded-full border border-line bg-primary/20 text-xs font-bold text-ink">
@@ -246,7 +219,7 @@ function Avatar() {
   );
 }
 
-function UserBlock() {
+function UserBlock({ onShortcuts }: { onShortcuts: () => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="border-t border-border-subtle p-3">
@@ -266,12 +239,13 @@ function UserBlock() {
           </span>
         </span>
       </button>
-      <AccountSheet open={open} onClose={() => setOpen(false)} />
+      <AccountSheet open={open} onClose={() => setOpen(false)} onShortcuts={onShortcuts} />
     </div>
   );
 }
 
-function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+/** `onShortcuts` is passed only where a keyboard is likely (the desktop sidebar's account menu). */
+function AccountSheet({ open, onClose, onShortcuts }: { open: boolean; onClose: () => void; onShortcuts?: () => void }) {
   const { pref, setPref } = useTheme();
   const themes: { value: ThemePref; label: string; icon: LucideIcon }[] = [
     { value: "system", label: "System", icon: Monitor },
@@ -292,6 +266,19 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
           <LifeBuoy aria-hidden="true" className="size-5 text-muted" />
           Help
         </Link>
+        {onShortcuts ? (
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onShortcuts();
+            }}
+            className={`${link} w-full text-left`}
+          >
+            <Keyboard aria-hidden="true" className="size-5 text-muted" />
+            Keyboard shortcuts
+          </button>
+        ) : null}
       </nav>
       <fieldset className="mt-5">
         <legend className="mb-2 text-sm font-semibold text-ink">Theme</legend>
@@ -345,6 +332,7 @@ function CreditChip() {
         <span className="sr-only">. View credit details</span>
       </button>
       <Dialog open={open} onClose={() => setOpen(false)} title={`${credits.balance} credits`} description={`${plan.name} plan · ${plan.periodCredits} a day, refilled at 00:00 IST`}>
+        <p className="mb-2 text-[15px] font-semibold text-ink">{enoughFor(credits.balance)}</p>
         <ul className="divide-y divide-border-subtle">
           {credits.buckets.map((b) => (
             <li key={b.label} className="flex items-center justify-between gap-4 py-3">

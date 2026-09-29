@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import { COST, confidenceFor, priorityFor, severityFor, showsMasteryNumber } from "@/lib/config";
+import { COST, confidenceFor, severityFor, showsMasteryNumber } from "@/lib/config";
 import { chapterById, conceptById, concepts, hasQuestions, stateFor } from "@/lib/data";
 import { CATEGORY_LABEL } from "@/lib/diagnosis";
-import { ago, duration } from "@/lib/format";
+import { ago } from "@/lib/format";
 import type { ErrorCategory } from "@/lib/types";
-import { ConfidenceMeter, PriorityBadge, SeverityBadge } from "@/components/ui";
+import { ConfidenceMeter, SeverityBadge } from "@/components/ui";
 import { EmptyState } from "@/components/feedback";
 import { SpendLink } from "@/components/credit-gate";
 
@@ -28,7 +28,6 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
     <div className="mx-auto flex max-w-[860px] flex-col gap-5">
       <div className="flex flex-wrap items-center gap-2">
         {sev ? <SeverityBadge value={sev} /> : null}
-        {s ? <PriorityBadge value={priorityFor(s.priorityScore)} /> : null}
         <span className="text-sm text-muted">
           {chapterById(c.chapterId).name} › {c.topic}
         </span>
@@ -48,14 +47,11 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
         />
       ) : (
         <>
-          <dl className="grid grid-cols-2 gap-5 rounded-card-lg border border-line bg-surface p-5 sm:grid-cols-5 sm:p-6">
+          <dl className="grid grid-cols-2 gap-5 rounded-card-lg border border-line bg-surface p-5 sm:grid-cols-3 sm:p-6">
             <div>
               <dt className="text-xs font-semibold text-muted">Mastery</dt>
               <dd className="mt-1 font-display text-3xl leading-none tabular-nums text-ink">{showsMasteryNumber(conf) ? `${s.mastery}%` : "—"}</dd>
               {!showsMasteryNumber(conf) ? <dd className="mt-1 text-xs text-muted">Needs more answers</dd> : null}
-            </div>
-            <div>
-              <dt className="text-xs font-semibold text-muted">Confidence</dt>
               <dd className="mt-2">
                 <ConfidenceMeter value={conf} />
               </dd>
@@ -66,11 +62,6 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
                 {s.recentCorrect}
                 <span className="text-base text-muted"> of {s.recentTotal}</span>
               </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-semibold text-muted">Avg time</dt>
-              <dd className="mt-1 font-display text-3xl leading-none tabular-nums text-ink">{duration(s.avgSeconds)}</dd>
-              <dd className="mt-1 text-xs text-muted">expected {duration(s.expectedSeconds)}</dd>
             </div>
             <div>
               <dt className="text-xs font-semibold text-muted">Last practised</dt>

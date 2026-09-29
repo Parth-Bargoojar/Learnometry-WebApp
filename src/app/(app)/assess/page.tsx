@@ -22,22 +22,7 @@ export default function AssessPage() {
               New diagnostic
             </h2>
             <p className="mt-1 text-[15px] text-muted">Find the concepts behind your wrong answers in Class 11 Mechanics.</p>
-            <ul className="mt-4 divide-y divide-border-subtle rounded-card-sm border border-border-subtle">
-              <li className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="font-semibold text-ink">Full diagnostic</p>
-                  <p className="text-sm text-muted">30 min · 15 questions · all 6 chapters</p>
-                </div>
-                <span className="inline-flex items-center gap-1 text-sm font-semibold tabular-nums text-ink">⚡ {COST.fullDiagnostic}</span>
-              </li>
-              <li className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="font-semibold text-ink">One chapter</p>
-                  <p className="text-sm text-muted">15 min · 8 questions</p>
-                </div>
-                <span className="inline-flex items-center gap-1 text-sm font-semibold tabular-nums text-ink">⚡ {COST.chapterDiagnostic}</span>
-              </li>
-            </ul>
+            <p className="mt-3 text-sm text-muted">Full: 30 min, 15 questions. Or pick one chapter: 15 min, 8 questions.</p>
             <ButtonLink href="/assess/diagnostic" className="mt-5">
               Start diagnostic <ArrowRight aria-hidden="true" className="size-5" />
             </ButtonLink>
@@ -59,7 +44,6 @@ export default function AssessPage() {
             </Link>
           </li>
         </ul>
-        <p className="mt-3 text-sm text-muted">Retests use new questions on the concepts you worked on, so the result measures the fix, not your memory.</p>
       </Card>
 
       <section aria-labelledby="reports-h" className="lg:col-span-12">
@@ -85,9 +69,6 @@ export default function AssessPage() {
           })}
         </ul>
       </section>
-      <p className="text-xs text-muted lg:col-span-12">
-        Starting a test shows its credit cost first. Reading reports is always free.
-      </p>
     </div>
   );
 }

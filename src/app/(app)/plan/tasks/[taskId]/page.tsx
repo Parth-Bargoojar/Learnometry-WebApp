@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookOpen, CalendarClock } from "lucide-react";
-import { COST, practiceCost } from "@/lib/config";
+import { practiceCost } from "@/lib/config";
 import { DIAGNOSTIC_ID, chapterById, conceptById, getAttemptConfig, planTasks, practicePoolSize, sampleDiagnosticResponses } from "@/lib/data";
 import { diagnose } from "@/lib/diagnosis";
 import { relativeDay } from "@/lib/format";
-import { Card, FieldLabel, PriorityBadge } from "@/components/ui";
 import { ExplainButton, StepDone } from "@/components/task-steps";
 import { SpendLink } from "@/components/credit-gate";
 
@@ -46,36 +45,17 @@ export default async function TaskPage(props: PageProps<"/plan/tasks/[taskId]">)
 
   return (
     <div className="mx-auto flex max-w-[760px] flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <PriorityBadge value={task.priority} />
-        <span className="text-sm text-muted">
-          {chapterById(concept.chapterId).name} › {concept.topic} · {relativeDay(task.date)} · {task.minutes} min
-        </span>
-      </div>
+      <p className="text-sm text-muted">
+        {relativeDay(task.date)} · {task.minutes} min
+      </p>
 
       {finding && finding.total - finding.correct > 0 ? (
-        <Card level="supporting" className="p-5">
-          <h2 className="text-base font-semibold text-ink">Why this task</h2>
-          <dl className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <dt>
-                <FieldLabel note="from your answers">Evidence</FieldLabel>
-              </dt>
-              <dd className="mt-1 text-sm text-ink">
-                {finding.total - finding.correct} of {finding.total} incorrect in your 27 Sep diagnostic ·{" "}
-                <Link href={`/assess/results/${DIAGNOSTIC_ID}?concept=${task.conceptId}`} className="font-semibold text-primary-text underline underline-offset-4">
-                  See the questions
-                </Link>
-              </dd>
-            </div>
-            <div>
-              <dt>
-                <FieldLabel note="interpretation">Likely cause</FieldLabel>
-              </dt>
-              <dd className="mt-1 text-sm text-ink">{finding.causeText}</dd>
-            </div>
-          </dl>
-        </Card>
+        <p className="text-[15px] text-ink">
+          Why: {finding.total - finding.correct} of {finding.total} incorrect in your 27 Sep diagnostic ·{" "}
+          <Link href={`/assess/results/${DIAGNOSTIC_ID}?concept=${task.conceptId}`} className="font-semibold text-primary-text underline underline-offset-4">
+            See the questions
+          </Link>
+        </p>
       ) : null}
 
       <section aria-labelledby="steps-h">
@@ -144,7 +124,6 @@ export default async function TaskPage(props: PageProps<"/plan/tasks/[taskId]">)
           ) : null}
         </ol>
       </section>
-      <p className="text-xs text-muted">Explanations cost {COST.explanation} credits. Reading this page is free.</p>
     </div>
   );
 }

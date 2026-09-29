@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { COST, PLANS } from "@/lib/config";
+import { ChevronDown } from "lucide-react";
+import { COST, PLANS, enoughFor } from "@/lib/config";
 import { creditHistory, credits, learner } from "@/lib/data";
 import { dayMonth } from "@/lib/format";
 import { ButtonLink, Card, CardHeader } from "@/components/ui";
@@ -29,18 +30,25 @@ export default function CreditsPage() {
         <p className="mt-2 text-sm text-muted">
           {plan.name} plan · {plan.periodCredits} a day
         </p>
-        <ul className="mt-5 divide-y divide-border-subtle border-t border-border-subtle">
-          {credits.buckets.map((b) => (
-            <li key={b.label} className="flex items-center justify-between gap-4 py-3">
-              <div>
-                <p className="font-medium text-ink">{b.label}</p>
-                <p className="text-xs text-muted">{b.note}</p>
-              </div>
-              <p className="text-lg font-semibold tabular-nums text-ink">{b.amount}</p>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-sm text-muted">We use credits that expire soonest first.</p>
+        <p className="mt-4 text-[15px] font-semibold text-ink">{enoughFor(credits.balance)}</p>
+        <details className="group mt-4 border-t border-border-subtle">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+            Breakdown
+            <ChevronDown aria-hidden="true" className="size-5 text-muted transition-transform group-open:rotate-180" />
+          </summary>
+          <ul className="divide-y divide-border-subtle">
+            {credits.buckets.map((b) => (
+              <li key={b.label} className="flex items-center justify-between gap-4 py-3">
+                <div>
+                  <p className="font-medium text-ink">{b.label}</p>
+                  <p className="text-xs text-muted">{b.note}</p>
+                </div>
+                <p className="text-lg font-semibold tabular-nums text-ink">{b.amount}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm text-muted">We use credits that expire soonest first.</p>
+        </details>
         <ButtonLink href="/credits/buy" variant="secondary" className="mt-4">
           Get credits
         </ButtonLink>
@@ -61,13 +69,12 @@ export default function CreditsPage() {
       <Card level="supporting" className="p-5 sm:p-6 lg:col-span-12" aria-labelledby="hist-h">
         <CardHeader id="hist-h" title="History" />
         <div role="region" aria-label="Credit history" tabIndex={0} className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left text-[15px]">
+          <table className="w-full min-w-[420px] text-left text-[15px]">
             <caption className="sr-only">Credit transactions, newest first</caption>
             <thead>
               <tr className="border-b border-border-subtle text-xs text-muted">
                 <th scope="col" className="py-2 font-semibold">Date</th>
                 <th scope="col" className="py-2 font-semibold">What</th>
-                <th scope="col" className="py-2 font-semibold">Bucket</th>
                 <th scope="col" className="py-2 text-right font-semibold">Credits</th>
               </tr>
             </thead>
@@ -76,7 +83,6 @@ export default function CreditsPage() {
                 <tr key={t.id} className="border-b border-border-subtle last:border-0">
                   <td className="py-3 tabular-nums text-muted">{dayMonth(t.date)}</td>
                   <td className="py-3 text-ink">{t.description}</td>
-                  <td className="py-3 text-muted">{t.bucket}</td>
                   <td className={`py-3 text-right font-semibold tabular-nums ${t.amount > 0 ? "text-success-text" : "text-ink"}`}>
                     {t.amount > 0 ? `+${t.amount}` : `−${Math.abs(t.amount)}`}
                   </td>

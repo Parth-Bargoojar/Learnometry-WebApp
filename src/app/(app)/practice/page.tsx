@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { ChevronDown, Target } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { COST, severityFor, confidenceFor } from "@/lib/config";
 import { chapters, conceptById, concepts, hasQuestions, planMeta, stateFor } from "@/lib/data";
-import { ago } from "@/lib/format";
-import { ProgressBar, SeverityBadge } from "@/components/ui";
+import { SeverityBadge } from "@/components/ui";
 import { SpendLink } from "@/components/credit-gate";
 
 export const metadata: Metadata = { title: "Practice" };
@@ -22,21 +21,17 @@ export default function PracticePage() {
         <h2 id="rec-h" className="text-lg font-semibold text-ink">
           Recommended for you
         </h2>
-        <p className="mt-1 text-sm text-muted">From this week&apos;s plan, in priority order.</p>
+        <p className="mt-1 text-sm text-muted">From this week&apos;s plan, in priority order. Each set is 5 questions, about 8 min, with instant feedback.</p>
         <ul className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           {planMeta.focus.map((id, i) => {
             const c = conceptById(id);
             return (
               <li key={id} className="flex flex-col rounded-card-lg border border-border-subtle bg-surface p-5">
-                <div className="flex items-center justify-between gap-2">
-                  <Target aria-hidden="true" className="size-5 text-primary-text" />
-                  {i === 0 ? (
-                    <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-text">Priority focus</span>
-                  ) : null}
-                </div>
-                <h3 className="mt-3 font-semibold leading-snug text-ink">{c.name}</h3>
+                {i === 0 ? (
+                  <span className="mb-3 self-start rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-text">Priority focus</span>
+                ) : null}
+                <h3 className="font-semibold leading-snug text-ink">{c.name}</h3>
                 <p className="mt-1 text-sm text-muted">{REASON[id]}</p>
-                <p className="mt-3 text-xs text-muted">5 questions · about 8 min · instant feedback</p>
                 <SpendLink href={`/attempt/prac-${id}-5`} cost={COST.practiceSet5} what="A practice set" variant={i === 0 ? "primary" : "secondary"} className="mt-4 self-start">
                   Start practice
                 </SpendLink>
@@ -51,8 +46,8 @@ export default function PracticePage() {
           By chapter
         </h2>
         <div className="mt-4 flex flex-col gap-3">
-          {chapters.map((ch, idx) => (
-            <details key={ch.id} open={idx === 1} className="group rounded-card border border-border-subtle bg-surface">
+          {chapters.map((ch) => (
+            <details key={ch.id} className="group rounded-card border border-border-subtle bg-surface">
               <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 font-semibold text-ink [&::-webkit-details-marker]:hidden">
                 {ch.name}
                 <ChevronDown aria-hidden="true" className="size-5 text-muted transition-transform group-open:rotate-180" />
@@ -68,16 +63,8 @@ export default function PracticePage() {
                       <li key={c.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
                         <div className="min-w-0 flex-1 basis-56">
                           <p className="font-medium text-ink">{c.name}</p>
-                          <p className="text-xs text-muted">Last practised: {ago(s?.lastPracticed ?? null)}</p>
                         </div>
-                        <div className="w-40">
-                          {sev ? <SeverityBadge value={sev} size="sm" /> : <span className="text-xs text-muted">Not assessed yet</span>}
-                          {s && sev !== "insufficient" ? (
-                            <div className="mt-1.5">
-                              <ProgressBar value={s.mastery} label={`${c.name} mastery`} size="sm" tone="ink" />
-                            </div>
-                          ) : null}
-                        </div>
+                        <div>{sev ? <SeverityBadge value={sev} size="sm" /> : <span className="text-xs text-muted">Not assessed yet</span>}</div>
                         {hasQuestions(c.id) ? (
                           <SpendLink href={`/attempt/prac-${c.id}-5`} cost={COST.practiceSet5} what="A practice set" variant="secondary" size="sm">
                             Practice

@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ArrowRight, Check, ChevronDown, Info, Minus, X as XIcon } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Minus, X as XIcon } from "lucide-react";
 import type { AttemptConfig, Response, WeaknessFinding } from "@/lib/types";
 import { COST, showsMasteryNumber } from "@/lib/config";
-import { chapterById, conceptById, credits, learner, questionById } from "@/lib/data";
+import { conceptById, credits, learner, questionById } from "@/lib/data";
 import { CATEGORY_LABEL, diagnose, isCorrect, scoreAttempt } from "@/lib/diagnosis";
 import { clock, duration } from "@/lib/format";
 import { AIStatus } from "./ai-status";
 import { Dialog } from "./dialog";
 import { MathText } from "./math";
-import { ConfidenceMeter, Cost, FieldLabel, PriorityBadge, SeverityBadge, btn } from "./ui";
+import { ConfidenceMeter, Cost, FieldLabel, SeverityBadge, btn } from "./ui";
 import { useAttemptResponses } from "./use-result";
 import { GetCreditsButton, SpendLink } from "./credit-gate";
 
@@ -35,9 +35,6 @@ export function Report({ config, fallback }: { config: AttemptConfig; fallback: 
 
   return (
     <div className="flex flex-col gap-5 sm:gap-6">
-      <p className="text-sm text-muted">
-        {learner.subject} · {learner.exam} · {config.questionIds.length} questions{own ? " · your attempt" : " · 27 Sep"}
-      </p>
       <ScoreSummary score={score} durationSeconds={config.durationSeconds} />
       {stage === "analyzing" ? (
         <AIStatus title="Building your diagnosis" steps={DIAGNOSIS_STEPS} stepMs={700} onDone={() => setStage("ready")} />
@@ -68,7 +65,7 @@ function ScoreSummary({ score, durationSeconds }: { score: ReturnType<typeof sco
       <h2 id="score-h" className="sr-only">
         Your score
       </h2>
-      <dl className="grid grid-cols-2 gap-5 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-5">
         <div>
           <dt className="text-xs font-semibold text-muted">Score</dt>
           <dd className="mt-1 font-display text-3xl leading-none tabular-nums text-ink sm:text-4xl">
@@ -80,22 +77,9 @@ function ScoreSummary({ score, durationSeconds }: { score: ReturnType<typeof sco
           <dt className="text-xs font-semibold text-muted">Accuracy</dt>
           <dd className="mt-1 font-display text-3xl leading-none tabular-nums text-ink sm:text-4xl">{score.accuracy}%</dd>
         </div>
-        <div>
-          <dt className="text-xs font-semibold text-muted">Attempted</dt>
-          <dd className="mt-1 font-display text-3xl leading-none tabular-nums text-ink sm:text-4xl">
-            {score.attempted}
-            <span className="text-lg text-muted"> of {score.total}</span>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs font-semibold text-muted">Time used</dt>
-          <dd className="mt-1 font-display text-3xl leading-none tabular-nums text-ink sm:text-4xl">{clock(score.seconds)}</dd>
-          {durationSeconds ? <dd className="mt-1 text-xs text-muted">of {clock(durationSeconds)}</dd> : null}
-        </div>
       </dl>
-      <p className="mt-5 flex items-center gap-1.5 border-t border-border-subtle pt-3 text-xs text-muted">
-        <Info aria-hidden="true" className="size-3.5 shrink-0" />
-        Marked by fixed rules on our server, negative marking included. No AI decides your score.
+      <p className="mt-4 text-sm text-muted">
+        Attempted {score.attempted} of {score.total} · {clock(score.seconds)} used{durationSeconds ? ` of ${clock(durationSeconds)}` : ""}
       </p>
     </section>
   );
@@ -113,8 +97,7 @@ function Diagnosis({ findings, config, responses }: { findings: WeaknessFinding[
   const insufficient = findings.filter((f) => f.severity === "insufficient");
   const strong = findings.filter((f) => f.severity === "strong" || f.severity === "stable");
   const top = weak[0];
-  const shown = showAll ? weak : weak.slice(0, 5);
-  const minutes = weak.reduce((a, f) => a + f.minutes, 0);
+  const shown = showAll ? weak : weak.slice(0, 3);
 
   const setConcept = (id: string | null) => {
     const sp = new URLSearchParams(params.toString());
@@ -134,9 +117,8 @@ function Diagnosis({ findings, config, responses }: { findings: WeaknessFinding[
             <p className="mt-1.5 text-lg font-semibold leading-snug text-ink sm:text-xl">
               {conceptById(top.conceptId).name}. {top.causeText}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
+            <div className="mt-2 text-sm text-muted">
               <ConfidenceMeter value={top.confidence} />
-              <span>Based on the {top.total} questions on this concept</span>
             </div>
           </div>
         </section>
@@ -149,18 +131,15 @@ function Diagnosis({ findings, config, responses }: { findings: WeaknessFinding[
 
       {weak.length ? (
         <section aria-labelledby="fix-h">
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <h2 id="fix-h" className="text-lg font-semibold text-ink">
-              Fix these first
-            </h2>
-            <p className="text-sm text-muted">Sorted by priority</p>
-          </div>
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <h2 id="fix-h" className="mb-3 text-lg font-semibold text-ink">
+            Fix these first
+          </h2>
+          <div className="flex flex-col gap-3">
             {shown.map((f, i) => (
-              <WeaknessCard key={f.conceptId} f={f} emphasis={i < 2} onEvidence={() => setConcept(f.conceptId)} />
+              <WeaknessCard key={f.conceptId} f={f} defaultOpen={i === 0} onEvidence={() => setConcept(f.conceptId)} />
             ))}
           </div>
-          {weak.length > 5 && !showAll ? (
+          {weak.length > 3 && !showAll ? (
             <button type="button" onClick={() => setShowAll(true)} className={btn("ghost", "md", "mt-3")}>
               Show all {weak.length}
             </button>
@@ -192,8 +171,7 @@ function Diagnosis({ findings, config, responses }: { findings: WeaknessFinding[
         <div className="sticky bottom-[calc(var(--bottomnav-h)+12px)] z-10 lg:bottom-4">
           <div className="flex flex-col gap-3 rounded-card-lg border border-line bg-surface px-4 py-3 shadow-brutal sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <p className="text-sm text-ink">
-              <span className="font-semibold">{weak.length} concepts to fix.</span> Your plan fits them into {learner.dailyMinutes} min a day
-              <span className="hidden sm:inline"> (about {Math.round(minutes / 5) * 5} min of work)</span>.
+              <span className="font-semibold">{weak.length} concepts to fix.</span> Your plan fits them into {learner.dailyMinutes} min a day.
             </p>
             {credits.balance >= COST.studyPlan ? (
               <button type="button" onClick={() => setPlanOpen(true)} className={btn("primary", "md", "w-full sm:w-auto")}>
@@ -270,35 +248,27 @@ export function EvidenceDots({ marks }: { marks: WeaknessFinding["marks"] }) {
   );
 }
 
-function WeaknessCard({ f, emphasis, onEvidence }: { f: WeaknessFinding; emphasis: boolean; onEvidence: () => void }) {
+function WeaknessCard({ f, defaultOpen, onEvidence }: { f: WeaknessFinding; defaultOpen: boolean; onEvidence: () => void }) {
   const c = conceptById(f.conceptId);
   return (
-    <article className={`flex flex-col bg-surface ${emphasis ? "rounded-card-lg border border-line" : "rounded-card border border-border-subtle"}`}>
-      <div className="p-5 pb-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <SeverityBadge value={f.severity} />
-          <PriorityBadge value={f.priority} />
-          <span className="ml-auto text-sm text-muted">{f.minutes} min fix</span>
-        </div>
-        <h3 className="mt-3 text-xl font-semibold leading-snug text-ink">{c.name}</h3>
-        <p className="mt-0.5 text-sm text-muted">
-          {chapterById(c.chapterId).name} › {c.topic}
-        </p>
-      </div>
-      <div className="grid grid-cols-1 border-t border-border-subtle sm:grid-cols-2">
-        <div className="border-b border-border-subtle p-5 py-4 sm:border-r">
+    <details open={defaultOpen} className="group rounded-card border border-border-subtle bg-surface">
+      <summary className="flex min-h-16 cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3 [&::-webkit-details-marker]:hidden">
+        <SeverityBadge value={f.severity} size="sm" />
+        <h3 className="min-w-0 flex-1 basis-40 text-[17px] font-semibold leading-snug text-ink">{c.name}</h3>
+        <span className="text-sm text-muted">
+          {f.total - f.correct} of {f.total} incorrect
+        </span>
+        <ChevronDown aria-hidden="true" className="size-5 text-muted transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="grid grid-cols-1 gap-4 border-t border-border-subtle p-5 sm:grid-cols-2">
+        <div>
           <FieldLabel note="from your answers">Evidence</FieldLabel>
-          <p className="mt-1.5 font-semibold text-ink">
-            {f.total - f.correct} of {f.total} incorrect
-          </p>
           <div className="mt-2">
             <EvidenceDots marks={f.marks} />
           </div>
-          <p className="mt-2 text-xs text-muted">
-            Avg {duration(f.avgSeconds)} (expected {duration(f.expectedSeconds)})
-          </p>
+          {showsMasteryNumber(f.confidence) ? <p className="mt-2 text-xs text-muted">Estimated mastery {f.mastery}%</p> : null}
         </div>
-        <div className="border-b border-border-subtle p-5 py-4">
+        <div>
           <FieldLabel note="interpretation">Likely cause</FieldLabel>
           {f.cause ? (
             <span className="mt-1.5 inline-flex rounded-full border border-border-subtle bg-sunken px-2.5 py-0.5 text-xs font-semibold text-ink">
@@ -307,19 +277,12 @@ function WeaknessCard({ f, emphasis, onEvidence }: { f: WeaknessFinding; emphasi
           ) : null}
           <p className="mt-1.5 text-sm text-ink">{f.causeText}</p>
         </div>
-        <div className="border-b border-border-subtle p-5 py-4 sm:border-b-0 sm:border-r">
-          <FieldLabel>Confidence</FieldLabel>
-          <div className="mt-1.5">
-            <ConfidenceMeter value={f.confidence} />
-          </div>
-          {showsMasteryNumber(f.confidence) ? <p className="mt-1.5 text-xs text-muted">Estimated mastery {f.mastery}%</p> : null}
-        </div>
-        <div className="p-5 py-4">
+        <div className="sm:col-span-2">
           <FieldLabel>Next</FieldLabel>
           <p className="mt-1.5 text-sm font-medium text-ink">{f.next}</p>
         </div>
       </div>
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-5 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-5 py-3">
         <button type="button" onClick={onEvidence} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary-text underline underline-offset-4 hover:text-ink">
           See the {f.total} questions
         </button>
@@ -327,7 +290,7 @@ function WeaknessCard({ f, emphasis, onEvidence }: { f: WeaknessFinding; emphasi
           Practice this
         </SpendLink>
       </div>
-    </article>
+    </details>
   );
 }
 
