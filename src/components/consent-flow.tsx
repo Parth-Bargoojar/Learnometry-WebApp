@@ -271,8 +271,8 @@ function Verify({ req, headingRef, onVerified }: { req: ConsentRequest; headingR
             disabled={locked}
             aria-invalid={!!error}
             aria-describedby={error ? "otp-err otp-help" : "otp-help"}
-            className={`mt-1.5 h-14 w-full rounded-input border bg-surface px-4 text-center font-display text-2xl tracking-[0.4em] text-ink tabular-nums outline-none focus:border-line ${
-              error ? "border-danger" : "border-border-subtle"
+            className={`mt-1.5 h-14 w-full rounded-input border bg-surface px-4 text-center font-display text-2xl tracking-[0.4em] text-ink tabular-nums focus:border-ink ${
+              error ? "border-danger" : "border-control"
             }`}
           />
           {error ? (

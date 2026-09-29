@@ -463,7 +463,7 @@ export function Player({ config }: { config: AttemptConfig }) {
           <ol className="flex flex-wrap gap-2">
             {qs.map((x, i) => (
               <li key={`${x.id}-${i}`}>
-                <button type="button" onClick={() => go(i)} className={`size-11 rounded-card-sm border text-sm font-semibold ${i === index ? "border-2 border-primary" : "border-border-subtle"}`}>
+                <button type="button" onClick={() => go(i)} className={`size-11 rounded-card-sm border text-sm font-semibold ${i === index ? "border-2 border-primary" : "border-control"}`}>
                   {i + 1}
                 </button>
               </li>
@@ -690,8 +690,8 @@ function NumericAnswer({
             onEnter?.();
           }
         }}
-        className={`mt-2 h-14 w-full rounded-input border-2 bg-surface px-4 text-xl font-semibold tabular-nums text-ink outline-none focus:border-line ${
-          reveal ? (correct ? "border-success" : "border-danger") : invalid ? "border-danger" : "border-border-subtle"
+        className={`mt-2 h-14 w-full rounded-input border-2 bg-surface px-4 text-xl font-semibold tabular-nums text-ink focus:border-ink ${
+          reveal ? (correct ? "border-success" : "border-danger") : invalid ? "border-danger" : "border-control"
         }`}
       />
       <p id="numeric-help" className={`mt-2 text-sm ${invalid ? "text-danger-text" : "text-muted"}`}>
@@ -812,11 +812,12 @@ function QuestionMap({
                 aria-current={current ? "step" : undefined}
                 className={`relative flex size-11 items-center justify-center rounded-card-sm text-sm font-semibold tabular-nums xl:size-10 ${
                   answered ? "bg-primary/20 text-ink" : "bg-surface text-muted"
-                } ${marked ? "border-2 border-warning" : current ? "border-2 border-primary" : answered ? "border border-line" : "border border-border-subtle"} ${
+                } ${marked ? "border-2 border-warning" : current ? "border-2 border-primary" : answered ? "border border-line" : "border border-control"} ${
                   current && marked ? "ring-2 ring-line ring-offset-1" : ""
                 }`}
               >
                 {i + 1}
+                {answered ? <Check aria-hidden="true" className="absolute bottom-0.5 right-0.5 size-3 text-ink" strokeWidth={3} /> : null}
                 {marked ? <Flag aria-hidden="true" className="absolute -right-1 -top-1 size-3.5 fill-warning text-warning-text" /> : null}
               </button>
             </li>
@@ -824,7 +825,7 @@ function QuestionMap({
         })}
       </ol>
       <ul className="mt-4 flex flex-col gap-1.5 text-xs text-muted">
-        <li className="flex items-center gap-2"><span aria-hidden="true" className="size-3 rounded-sm border border-line bg-primary/20" />Answered</li>
+        <li className="flex items-center gap-2"><span aria-hidden="true" className="flex size-3 items-center justify-center rounded-sm border border-line bg-primary/20"><Check className="size-2.5 text-ink" strokeWidth={3} /></span>Answered</li>
         <li className="flex items-center gap-2"><span aria-hidden="true" className="size-3 rounded-sm border-2 border-warning" />Marked for review</li>
         <li className="flex items-center gap-2"><span aria-hidden="true" className="size-3 rounded-sm border border-border-subtle" />Not answered</li>
       </ul>

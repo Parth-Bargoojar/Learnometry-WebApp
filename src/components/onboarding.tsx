@@ -272,7 +272,7 @@ function OptionCard({ selected, onSelect, title, desc, type = "radio", name }: {
   );
 }
 
-const sel = "mt-1.5 h-12 w-full rounded-input border border-border-subtle bg-surface px-3 text-base text-ink focus:border-line";
+const sel = "mt-1.5 h-12 w-full rounded-input border border-control bg-surface px-3 text-base text-ink focus:border-ink";
 
 const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 

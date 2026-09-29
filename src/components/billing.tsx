@@ -122,7 +122,7 @@ export function CheckoutDialog({
               spellCheck={false}
               aria-invalid={coupon ? !coupon.ok : undefined}
               aria-describedby={coupon ? "coupon-msg" : undefined}
-              className="h-11 min-w-0 flex-1 rounded-input border border-border-subtle bg-surface px-3 uppercase text-ink placeholder:normal-case aria-[invalid=true]:border-danger"
+              className="h-11 min-w-0 flex-1 rounded-input border border-control bg-surface px-3 uppercase text-ink placeholder:normal-case aria-[invalid=true]:border-danger"
               placeholder="e.g. EARLYACCESS"
             />
             <button type="submit" className={btn("secondary", "md")}>
@@ -353,7 +353,7 @@ export function RefundRequest({ lastDay }: { lastDay: string }) {
         <label htmlFor="reason" className="mt-4 block text-sm font-semibold text-ink">
           Reason (optional)
         </label>
-        <textarea id="reason" rows={3} className="mt-1.5 w-full rounded-input border border-border-subtle bg-surface p-3 text-ink" />
+        <textarea id="reason" rows={3} className="mt-1.5 w-full rounded-input border border-control bg-surface p-3 text-ink" />
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" autoFocus className={btn("secondary")} onClick={() => setOpen(false)}>
             Keep my plan

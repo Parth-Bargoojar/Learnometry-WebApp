@@ -29,6 +29,7 @@ export function Dialog({
   labelledById?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const drag = useRef<{ y: number; dy: number } | null>(null);
   const titleId = labelledById ?? `dlg-${title.replace(/\W+/g, "-").toLowerCase()}`;
 
   useEffect(() => {
@@ -58,8 +59,39 @@ export function Dialog({
       }}
     >
       <div className={`flex max-h-[inherit] flex-col ${variant === "sheet" ? "lg:h-full" : ""}`}>
-        {variant === "sheet" ? (
-          <span aria-hidden="true" className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-border-subtle lg:hidden" />
+        {variant === "sheet" && dismissible ? (
+          /* Grabber: drag down to dismiss (a quarter of the sheet's height, or a Close tap). */
+          <div
+            aria-hidden="true"
+            className="flex h-6 shrink-0 cursor-grab touch-none items-center justify-center lg:hidden"
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              drag.current = { y: e.clientY, dy: 0 };
+            }}
+            onPointerMove={(e) => {
+              const d = drag.current;
+              const el = ref.current;
+              if (!d || !el) return;
+              d.dy = Math.max(0, e.clientY - d.y);
+              el.style.transition = "none";
+              el.style.transform = `translateY(${d.dy}px)`;
+            }}
+            onPointerUp={() => {
+              const d = drag.current;
+              const el = ref.current;
+              drag.current = null;
+              if (!d || !el) return;
+              el.style.transition = "";
+              el.style.transform = "";
+              if (dismissible && d.dy > el.offsetHeight / 4) onClose();
+            }}
+            onPointerCancel={() => {
+              drag.current = null;
+              if (ref.current) ref.current.style.transform = "";
+            }}
+          >
+            <span className="h-1.5 w-10 rounded-full bg-control" />
+          </div>
         ) : null}
         <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-6">
           <div className="min-w-0">

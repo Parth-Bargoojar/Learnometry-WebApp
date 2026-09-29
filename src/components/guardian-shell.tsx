@@ -52,7 +52,7 @@ function Frame({ children }: { children: ReactNode }) {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-btn focus:border-2 focus:border-line focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-btn focus:border-2 focus:border-ink focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold"
       >
         Skip to content
       </a>

@@ -12,7 +12,7 @@ export function Mascot({ size = "md", className = "" }: { size?: keyof typeof ma
   const px = mascotSize[size];
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white ring-4 ring-primary/25 animate-fade-in ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white dark:bg-elevated ring-4 ring-primary/25 animate-fade-in ${className}`}
       style={{ width: px, height: px }}
     >
       <Image src="/mascot.jpeg" alt="" width={px * 2} height={px * 2} sizes={`${px}px`} className="size-full scale-110 object-contain" />

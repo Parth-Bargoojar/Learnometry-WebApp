@@ -52,7 +52,7 @@ export function useBreaker() {
   return { ...breakerState(aiCostTodayInr, revenueAvgInr, budget, override), budget, override, costInr: aiCostTodayInr, revenueAvgInr };
 }
 
-export const field = "mt-1.5 w-full rounded-input border border-border-subtle bg-surface px-3 text-sm text-ink focus:border-line aria-[invalid=true]:border-danger";
+export const field = "mt-1.5 w-full rounded-input border border-control bg-surface px-3 text-sm text-ink focus:border-ink aria-[invalid=true]:border-danger";
 export const labelCls = "text-sm font-semibold text-ink";
 
 /**

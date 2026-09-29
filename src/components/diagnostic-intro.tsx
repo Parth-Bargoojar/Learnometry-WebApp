@@ -54,7 +54,7 @@ export function DiagnosticIntro() {
               id="chapter"
               value={chapter}
               onChange={(e) => setChapter(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-input border border-border-subtle bg-surface px-3 text-ink sm:w-80"
+              className="mt-1.5 h-11 w-full rounded-input border border-control bg-surface px-3 text-ink sm:w-80"
             >
               {available.map((c) => (
                 <option key={c.id} value={c.id}>

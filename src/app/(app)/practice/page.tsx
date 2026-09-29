@@ -31,7 +31,7 @@ export default function PracticePage() {
                 <div className="flex items-center justify-between gap-2">
                   <Target aria-hidden="true" className="size-5 text-primary-text" />
                   {i === 0 ? (
-                    <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-text">Priority Focus</span>
+                    <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-text">Priority focus</span>
                   ) : null}
                 </div>
                 <h3 className="mt-3 font-semibold leading-snug text-ink">{c.name}</h3>

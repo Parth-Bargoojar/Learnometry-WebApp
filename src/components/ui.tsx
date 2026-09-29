@@ -26,7 +26,7 @@ const press = "active:scale-[0.98]";
 
 const variants: Record<Variant, string> = {
   primary: `bg-primary text-on-primary border border-transparent shadow-brutal-sm hover:brightness-105 ${press}`,
-  secondary: `bg-surface text-ink border border-border-subtle hover:bg-sunken hover:border-line ${press}`,
+  secondary: `bg-surface text-ink border border-control hover:bg-sunken hover:border-ink ${press}`,
   ghost: "text-ink border border-transparent hover:bg-sunken",
   destructive: `bg-danger text-white border border-transparent shadow-brutal-sm hover:brightness-110 ${press}`,
 };
@@ -164,7 +164,7 @@ export function SeverityBadge({ value, size = "md" }: { value: Severity; size?: 
 }
 
 const priority: Record<Priority, { label: string; cls: string }> = {
-  1: { label: "Critical", cls: "bg-ink text-on-ink border-transparent" },
+  1: { label: "Urgent", cls: "bg-ink text-on-ink border-transparent" },
   2: { label: "High", cls: "bg-surface text-ink border border-line" },
   3: { label: "Medium", cls: "bg-sunken text-muted border border-border-subtle" },
   4: { label: "Low", cls: "bg-transparent text-muted border border-border-subtle" },

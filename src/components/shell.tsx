@@ -81,7 +81,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-btn focus:border-2 focus:border-line focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-btn focus:border-2 focus:border-ink focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold"
       >
         Skip to content
       </a>
@@ -183,6 +183,10 @@ function Sidebar({ section, onShortcuts }: { section: string; onShortcuts: () =>
         <Keyboard aria-hidden="true" className="size-4 shrink-0" />
         Keyboard shortcuts
       </button>
+      <Link href="/help" className="mx-3 mb-2 flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm font-medium text-muted hover:bg-sunken hover:text-ink">
+        <LifeBuoy aria-hidden="true" className="size-4 shrink-0" />
+        Help
+      </Link>
       <UserBlock />
     </aside>
   );
@@ -216,18 +220,20 @@ function BottomTabs({ section }: { section: string }) {
   );
 }
 
-/** One-click light/dark switch; "System" stays available in the account menu and Settings. */
+/** Cycles System → Light → Dark, so following the device setting stays one click away. */
 function ThemeToggle() {
-  const { setPref } = useTheme();
+  const { pref, setPref } = useTheme();
+  const next: ThemePref = pref === "system" ? "light" : pref === "light" ? "dark" : "system";
+  const Icon = pref === "system" ? Monitor : pref === "light" ? Sun : Moon;
+  const label = pref === "system" ? "System" : pref === "light" ? "Light" : "Dark";
   return (
     <button
       type="button"
-      onClick={() => setPref(document.documentElement.dataset.theme === "dark" ? "light" : "dark")}
-      aria-label="Toggle light or dark theme"
+      onClick={() => setPref(next)}
+      aria-label={`Theme: ${label}. Switch to ${next}`}
       className="hidden size-9 items-center justify-center rounded-btn text-muted transition-colors duration-150 hover:bg-sunken hover:text-ink lg:flex"
     >
-      <Sun aria-hidden="true" className="hidden size-5 dark:block" />
-      <Moon aria-hidden="true" className="size-5 dark:hidden" />
+      <Icon aria-hidden="true" className="size-5" />
     </button>
   );
 }

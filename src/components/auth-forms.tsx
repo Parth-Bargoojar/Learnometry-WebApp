@@ -14,7 +14,7 @@ import { SIGNUP_KEY, type SignupDraft } from "@/lib/guardian";
 */
 
 export const input =
-  "mt-1.5 h-12 w-full rounded-input border bg-surface px-3.5 text-base text-ink outline-none transition-colors focus:border-line aria-[invalid=true]:border-danger";
+  "mt-1.5 h-12 w-full rounded-input border border-control bg-surface px-3.5 text-base text-ink transition-colors focus:border-ink aria-[invalid=true]:border-danger";
 
 export function Field({
   id,

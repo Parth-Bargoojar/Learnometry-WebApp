@@ -52,7 +52,7 @@ export const SETTINGS_PAGES: { slug: string; label: string; desc: string; icon: 
   { slug: "account", label: "Account", desc: "Sign out, delete account", icon: UserCog },
 ];
 
-const field = "mt-1.5 h-11 w-full rounded-input border border-border-subtle bg-surface px-3 text-ink focus:border-line aria-[invalid=true]:border-danger";
+const field = "mt-1.5 h-11 w-full rounded-input border border-control bg-surface px-3 text-ink focus:border-ink aria-[invalid=true]:border-danger";
 const label = "text-sm font-semibold text-ink";
 
 /* ---------- Navigation ---------- */

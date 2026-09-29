@@ -27,7 +27,7 @@ export function PairedBar({
       <div className="grid grid-cols-[4.5rem_1fr_3rem] items-center gap-x-3 gap-y-1.5 text-xs">
         <span className="text-muted">{beforeLabel}</span>
         <div className="h-3 rounded-full" aria-hidden="true">
-          <div className="h-full rounded-full bg-faint/40" style={{ width: `${Math.max(before, 4)}%` }} />
+          <div className="h-full rounded-full bg-faint/70" style={{ width: `${Math.max(before, 4)}%` }} />
         </div>
         <span className="text-right font-semibold tabular-nums text-muted">{showNumbers ? `${before}%` : ""}</span>
         <span className="font-semibold text-ink">{afterLabel}</span>

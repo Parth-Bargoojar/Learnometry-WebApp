@@ -167,7 +167,7 @@ export function PushSection({
               disabled={!enabled || !prefs.daily}
               value={prefs.time}
               onChange={(e) => set({ time: e.target.value })}
-              className="h-11 rounded-input border border-border-subtle bg-surface px-2 text-sm text-ink"
+              className="h-11 rounded-input border border-control bg-surface px-2 text-sm text-ink"
             >
               {REMINDER_TIMES.map((t) => (
                 <option key={t}>{t}</option>

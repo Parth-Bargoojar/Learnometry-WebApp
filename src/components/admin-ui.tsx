@@ -140,7 +140,7 @@ export function TabLinks({ tabs, active, label }: { tabs: { key: string; label: 
 
 /* ---------- Filter bar: a plain GET form, works without JS ---------- */
 
-export const control = "h-10 rounded-input border border-border-subtle bg-surface px-3 text-sm text-ink focus:border-line";
+export const control = "h-10 rounded-input border border-control bg-surface px-3 text-sm text-ink focus:border-ink";
 
 export function FilterSelect({ name, label, value, options }: { name: string; label: string; value?: string; options: { value: string; label: string }[] }) {
   return (

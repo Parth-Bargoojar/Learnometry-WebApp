@@ -37,6 +37,8 @@
     structural lines, which a single `ink` token cannot express.
   */
   --color-line: #cbd5e1;
+  /* Borders of controls (inputs, secondary buttons): 3:1 against surface (WCAG 1.4.11). */
+  --color-control: #8391a7;
   --color-muted: #475569;
   --color-faint: #5b6b81;
   --color-sunken: #f1f5f9;
@@ -72,6 +74,7 @@
   --color-muted: #94a3b8;
   --color-faint: #7b8aa0; /* spec #64748b is 3.7:1 on surface; AA needs 4.5 */
   --color-line: rgba(255, 255, 255, 0.12);
+  --color-control: #6b7a90;
   --color-border-subtle: rgba(255, 255, 255, 0.07);
   --color-primary: #00c2e8;
   --color-primary-text: #38bdf8;
@@ -80,6 +83,14 @@
   --color-success-text: #4ade80;
   --color-danger-text: #fca5a5;
   --color-warning-text: #fbbf24;
+}
+
+/* Reduced transparency: the blurred bars become opaque. */
+@media (prefers-reduced-transparency: reduce) {
+  [class*="backdrop-blur"] {
+    backdrop-filter: none;
+    background-color: var(--color-surface);
+  }
 }
 
 /* Dark elevation: a specular rim plus a soft drop, instead of a hard offset block. */
@@ -117,7 +128,7 @@
 
   /* One focus treatment for every interactive element (DS §26). */
   :focus-visible {
-    outline: 3px solid var(--color-primary);
+    outline: 3px solid var(--color-primary-text);
     outline-offset: 2px;
     border-radius: 2px;
   }
