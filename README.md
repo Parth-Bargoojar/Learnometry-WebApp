@@ -46,6 +46,19 @@ src/
     ├── format.ts, routes.ts, site.ts, theme-script.ts, types.ts
 ```
 
+## Database (Supabase + Drizzle)
+
+```bash
+npm run db:start        # Supabase in Docker (first run downloads images); prints the local keys
+cp .env.example .env.local   # then fill DIRECT_DATABASE_URL / NEXT_PUBLIC_SUPABASE_* from `db:start`
+npm run db:reset        # apply supabase/migrations from zero
+npm run db:seed         # reference data, sample questions, seed accounts (password Seed-Password-1!)
+npm run test:int        # integration tests: RLS denial matrix, constraints, guardian summaries, seed
+npm run db:generate     # after editing src/lib/db/schema/*: creates a migration (see WORKFLOW §5)
+```
+
+Emails from local Supabase Auth land in Mailpit at http://127.0.0.1:54324.
+
 ## Current state
 
 **Phase 2 (Backend & Logic) is in progress.** Plan, decisions and live state: `../.claude/framework/` (`STATE.md`, `STAGES.md`, `DECISIONS.md`). Pure business rules move to `src/domains/*/rules.ts`; the sample data below is replaced stage by stage (`SEAM-MAP.md`).

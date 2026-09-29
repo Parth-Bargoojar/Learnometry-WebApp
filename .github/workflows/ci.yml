@@ -42,7 +42,7 @@ jobs:
       - name: Start local Supabase and run integration tests
         if: steps.supabase.outputs.present == 'true'
         run: |
-          supabase start -x studio,imgproxy,edge-runtime,logflare,vector,mailpit
+          supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,realtime
           eval "$(supabase status -o env | sed 's/^/export /')"
           export DIRECT_DATABASE_URL="$DB_URL" NEXT_PUBLIC_SUPABASE_URL="$API_URL" NEXT_PUBLIC_SUPABASE_ANON_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
           npm run db:seed
