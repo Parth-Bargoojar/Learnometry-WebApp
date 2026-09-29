@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ChevronDown, Target } from "lucide-react";
 import { COST, severityFor, confidenceFor } from "@/lib/config";
 import { chapters, conceptById, concepts, hasQuestions, planMeta, stateFor } from "@/lib/data";
 import { ago } from "@/lib/format";
-import { Cost, ProgressBar, SeverityBadge, btn } from "@/components/ui";
+import { ProgressBar, SeverityBadge } from "@/components/ui";
+import { SpendLink } from "@/components/credit-gate";
 
 export const metadata: Metadata = { title: "Practice" };
 
@@ -32,9 +32,9 @@ export default function PracticePage() {
                 <h3 className="mt-3 font-semibold leading-snug text-ink">{c.name}</h3>
                 <p className="mt-1 text-sm text-muted">{REASON[id]}</p>
                 <p className="mt-3 text-xs text-muted">5 questions · about 8 min · instant feedback</p>
-                <Link href={`/attempt/prac-${id}-5`} className={btn(i === 0 ? "primary" : "secondary", "md", "mt-4 self-start")}>
-                  Start practice <Cost credits={COST.practiceSet5} />
-                </Link>
+                <SpendLink href={`/attempt/prac-${id}-5`} cost={COST.practiceSet5} what="A practice set" variant={i === 0 ? "primary" : "secondary"} className="mt-4 self-start">
+                  Start practice
+                </SpendLink>
               </li>
             );
           })}
@@ -74,9 +74,9 @@ export default function PracticePage() {
                           ) : null}
                         </div>
                         {hasQuestions(c.id) ? (
-                          <Link href={`/attempt/prac-${c.id}-5`} className={btn("secondary", "sm")}>
-                            Practice <Cost credits={COST.practiceSet5} />
-                          </Link>
+                          <SpendLink href={`/attempt/prac-${c.id}-5`} cost={COST.practiceSet5} what="A practice set" variant="secondary" size="sm">
+                            Practice
+                          </SpendLink>
                         ) : (
                           <span className="text-xs text-muted">Questions coming soon</span>
                         )}

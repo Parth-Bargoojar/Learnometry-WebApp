@@ -40,6 +40,7 @@ const rules: [RegExp, (m: RegExpExecArray) => RouteInfo][] = [
   [/^\/credits\/buy$/, () => ({ title: "Get credits", section: "/credits", parent: { href: "/credits", label: "Credits" } })],
   [/^\/billing$/, () => ({ title: "Billing", section: "/billing" })],
   [/^\/billing\/plans$/, () => ({ title: "Plans", section: "/billing", parent: { href: "/billing", label: "Billing" } })],
+  [/^\/billing\/confirm$/, () => ({ title: "Payment", section: "/billing", parent: { href: "/billing", label: "Billing" } })],
   [/^\/settings$/, () => ({ title: "Settings", section: "/settings" })],
   [/^\/notifications$/, () => ({ title: "Notifications", section: "/notifications" })],
 ];

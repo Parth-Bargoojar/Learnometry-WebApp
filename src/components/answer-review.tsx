@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CircleCheck, CircleX, MinusCircle } from "lucide-react";
 import type { AttemptConfig, Response } from "@/lib/types";
@@ -9,8 +8,8 @@ import { conceptById, questionById } from "@/lib/data";
 import { CATEGORY_LABEL, isCorrect } from "@/lib/diagnosis";
 import { duration } from "@/lib/format";
 import { MathText } from "./math";
-import { Cost, btn } from "./ui";
 import { useAttemptResponses } from "./use-result";
+import { SpendLink } from "./credit-gate";
 
 type Filter = "all" | "incorrect" | "unanswered" | "marked" | "correct";
 
@@ -116,9 +115,9 @@ export function AnswerReview({ config, fallback }: { config: AttemptConfig; fall
                 </MathText>
               </details>
               {!ok ? (
-                <Link href={`/attempt/prac-${q.conceptId}-5`} className={btn("secondary", "sm", "mt-4")}>
-                  Practice this concept <Cost credits={COST.practiceSet5} />
-                </Link>
+                <SpendLink href={`/attempt/prac-${q.conceptId}-5`} cost={COST.practiceSet5} what="A practice set" variant="secondary" size="sm" className="mt-4">
+                  Practice this concept
+                </SpendLink>
               ) : null}
             </article>
           </li>

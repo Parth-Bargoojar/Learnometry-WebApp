@@ -12,7 +12,9 @@ import type {
   ConceptState,
   CreditTxn,
   Learner,
+  Payment,
   PlanTask,
+  PurchaseRequest,
   Question,
   ReportSummary,
   Response,
@@ -22,10 +24,30 @@ import { COST } from "./config";
 /** The sample story is anchored to this date so every relative label stays coherent. */
 export const TODAY = "2026-09-27";
 
+/**
+ * The sample learner is 17: the typical Class 11 JEE aspirant is a minor, so the
+ * default story exercises consent, guardian-paid passes and purchase approvals (D4, D5).
+ */
 export const learner: Learner = {
+  id: "lrn_rohan",
   firstName: "Rohan",
   lastName: "Mehta",
   email: "rohan.mehta@example.com",
+  dateOfBirth: "2009-03-14",
+  className: "Class 11",
+  guardian: {
+    id: "gr_rohan_sunita",
+    guardianName: "Sunita Mehta",
+    guardianFirstName: "Sunita",
+    relationship: "Mother",
+    contact: "sunita.mehta@example.com",
+    contactType: "email",
+    consentStatus: "verified",
+    consentMethod: "otp_email",
+    consentVerifiedAt: "2026-09-12",
+    policyVersion: "Guardian Consent Policy v1.1",
+    hasAccount: true,
+  },
   exam: "JEE Main",
   subject: "Physics",
   unit: "Class 11 Mechanics",
@@ -584,12 +606,87 @@ export const creditHistory: CreditTxn[] = [
   { id: "c8", date: "2026-09-19", description: "EARLYACCESS bonus", amount: 100, bucket: "Promotional" },
 ];
 
-export const payments = [
-  { id: "pay1", date: "2026-09-19", item: "Starter · 30-day pass (EARLYACCESS −20%)", amount: 159, status: "Paid" },
+export const payments: Payment[] = [
+  { id: "pay1", date: "2026-09-19", item: "Starter · 30-day pass (EARLYACCESS −20%)", amount: 159, status: "Paid", paidBy: "Sunita Mehta (guardian)" },
+];
+
+/** Campaign codes this learner has already redeemed (one per user, §1.9). */
+export const redeemedCoupons = ["EARLYACCESS"];
+
+/** Pass start (the refund window is anchored to the first payment, D6). */
+export const passStarted = "2026-09-19";
+
+/** Plan credits this cycle, from the ledger: the refund rule compares used vs issued (D6). */
+export const cycleUsage = { issued: 1800, used: 770 };
+
+export const purchaseRequests: PurchaseRequest[] = [
+  {
+    id: "pr_250",
+    learnerId: "lrn_rohan",
+    itemType: "credit_pack",
+    itemCode: "pack_250",
+    label: "250 credits",
+    amountInr: 99,
+    status: "requested",
+    requestedOn: "2026-09-26",
+    expiresOn: "2026-10-03",
+  },
+  {
+    id: "pr_starter",
+    learnerId: "lrn_rohan",
+    itemType: "plan_pass",
+    itemCode: "starter",
+    label: "Starter · 30-day pass",
+    amountInr: 159,
+    status: "paid",
+    requestedOn: "2026-09-18",
+    expiresOn: "2026-09-25",
+    decidedOn: "2026-09-19",
+  },
 ];
 
 export const notifications = [
   { id: "n1", date: "2026-09-27", title: "Your study plan is ready", body: "Start with Resolution of forces on an incline.", href: "/plan", unread: true },
   { id: "n2", date: "2026-09-27", title: "Diagnosis ready", body: "3 concepts to fix, 2 you can skip for now.", href: `/assess/results/${DIAGNOSTIC_ID}`, unread: true },
+  { id: "n4", date: "2026-09-26", title: "Sent to Sunita for approval", body: "250 credits · ₹99. The request lasts until 3 Oct.", href: "/billing", unread: false },
   { id: "n3", date: "2026-09-20", title: "Retest result", body: "Vectors improved by 50 pts.", href: "/progress", unread: false },
+  { id: "n5", date: "2026-09-19", title: "Sunita approved your Starter pass", body: "200 credits a day until 19 Oct.", href: "/billing", unread: false },
+];
+
+/* ------------------------------------------------------------------ */
+/* Guardian portal (D5) — the guardian's view of the same story        */
+/* ------------------------------------------------------------------ */
+
+export const guardianAccount = {
+  id: "usr_sunita",
+  name: "Sunita Mehta",
+  firstName: "Sunita",
+  email: "sunita.mehta@example.com",
+};
+
+/**
+ * Learners linked to the guardian. Rohan consented via his own sign-up (learner-
+ * initiated); Anaya was set up by Sunita and hasn't accepted the invite yet
+ * (guardian-initiated), so the portal shows both paths.
+ */
+export const guardianLearners = [
+  { id: "lrn_rohan", firstName: "Rohan", lastName: "Mehta", status: "active" as const, exam: "JEE Main", className: "Class 11", dateOfBirth: "2009-03-14" },
+  {
+    id: "lrn_anaya",
+    firstName: "Anaya",
+    lastName: "Mehta",
+    status: "invited" as const,
+    exam: "NEET",
+    className: "Class 11",
+    dateOfBirth: "2010-06-02",
+    inviteSentTo: "anaya.mehta@example.com",
+    inviteSentOn: "2026-09-25",
+    inviteExpires: "2026-10-02",
+  },
+];
+
+/** The consent record the guardian holds for each learner (§8.18 settings). */
+export const consentRecords = [
+  { learnerId: "lrn_rohan", givenOn: "2026-09-12", method: "One-time code to your email", policyVersion: "Guardian Consent Policy v1.1", initiatedBy: "Rohan's sign-up" },
+  { learnerId: "lrn_anaya", givenOn: "2026-09-25", method: "Given while setting up the account", policyVersion: "Guardian Consent Policy v1.1", initiatedBy: "Your guardian account" },
 ];

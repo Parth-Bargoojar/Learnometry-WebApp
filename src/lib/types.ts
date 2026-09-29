@@ -116,10 +116,54 @@ export interface PlanTask {
   practiceQuestions?: number;
 }
 
+/** `guardian_relationships` (CONTEXT §6.1), as the learner and guardian UIs need it. */
+export interface GuardianLink {
+  id: string;
+  guardianName: string;
+  guardianFirstName: string;
+  relationship: string;
+  contact: string;
+  contactType: "email" | "phone";
+  consentStatus: "pending" | "verified" | "declined" | "withdrawn" | "expired";
+  consentMethod: "otp_email" | "otp_sms" | "inline_guardian_signup" | "digilocker";
+  consentVerifiedAt: string | null;
+  policyVersion: string;
+  /** Guardian has created an account (consent itself never requires one, D5). */
+  hasAccount: boolean;
+}
+
+/** `purchase_approvals` (CONTEXT §6.1): every purchase by a minor goes through one. */
+export interface PurchaseRequest {
+  id: string;
+  learnerId: string;
+  itemType: "plan_pass" | "credit_pack";
+  itemCode: string;
+  label: string;
+  amountInr: number;
+  status: "requested" | "approved" | "declined" | "expired" | "paid" | "cancelled";
+  requestedOn: string;
+  expiresOn: string;
+  decidedOn?: string;
+}
+
+export interface Payment {
+  id: string;
+  date: string;
+  item: string;
+  amount: number;
+  status: "Paid" | "Refunded" | "Failed";
+  /** Set when someone other than the learner paid (guardian for minors, D5). */
+  paidBy?: string;
+}
+
 export interface Learner {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
+  dateOfBirth: string;
+  className: string;
+  guardian: GuardianLink | null;
   exam: string;
   subject: string;
   unit: string;

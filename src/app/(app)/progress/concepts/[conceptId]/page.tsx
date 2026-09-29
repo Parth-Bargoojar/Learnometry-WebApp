@@ -7,8 +7,9 @@ import { chapterById, conceptById, concepts, hasQuestions, stateFor } from "@/li
 import { CATEGORY_LABEL } from "@/lib/diagnosis";
 import { ago, duration } from "@/lib/format";
 import type { ErrorCategory } from "@/lib/types";
-import { ConfidenceMeter, Cost, PriorityBadge, SeverityBadge, btn } from "@/components/ui";
+import { ConfidenceMeter, PriorityBadge, SeverityBadge } from "@/components/ui";
 import { EmptyState } from "@/components/feedback";
+import { SpendLink } from "@/components/credit-gate";
 
 export const metadata: Metadata = { title: "Concept" };
 
@@ -39,9 +40,9 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
           body="Your next full diagnostic or a practice set will give this concept its first evidence."
           action={
             hasQuestions(c.id) ? (
-              <Link href={`/attempt/prac-${c.id}-5`} className={btn("primary")}>
-                Practice this concept <Cost credits={COST.practiceSet5} />
-              </Link>
+              <SpendLink href={`/attempt/prac-${c.id}-5`} cost={COST.practiceSet5} what="A practice set">
+                Practice this concept
+              </SpendLink>
             ) : undefined
           }
         />
@@ -141,9 +142,9 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
 
           <div className="flex flex-wrap items-center gap-3">
             {hasQuestions(c.id) ? (
-              <Link href={`/attempt/prac-${c.id}-5`} className={btn("primary")}>
-                Practice this concept <Cost credits={COST.practiceSet5} />
-              </Link>
+              <SpendLink href={`/attempt/prac-${c.id}-5`} cost={COST.practiceSet5} what="A practice set">
+                Practice this concept
+              </SpendLink>
             ) : null}
             <Link href="/progress/concepts" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary-text underline underline-offset-4">
               All concepts <ArrowRight aria-hidden="true" className="size-4" />

@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, CircleCheck } from "lucide-react";
+import { CircleCheck } from "lucide-react";
 import { COST } from "@/lib/config";
 import { CHAPTER_DIAGNOSTICS, DIAGNOSTIC_ID, chapters, credits, learner } from "@/lib/data";
-import { Cost, btn } from "./ui";
+import { SpendLink } from "./credit-gate";
 
 /** Diagnostic introduction — Web App Structure §8.5: remove every surprise before the timer starts. */
 export function DiagnosticIntro() {
@@ -103,18 +102,10 @@ export function DiagnosticIntro() {
       </p>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-        {enough ? (
-          <Link href={full ? `/attempt/${DIAGNOSTIC_ID}` : `/attempt/diag-${chapter}`} className={btn("primary", "lg")}>
-            Start diagnostic <Cost credits={cost} />
-          </Link>
-        ) : (
-          <Link href="/credits/buy" className={btn("primary", "lg")}>
-            Get credits <ArrowRight aria-hidden="true" className="size-5" />
-          </Link>
-        )}
-        <p className="text-sm text-muted">
-          {enough ? `You have ${credits.balance} credits.` : `Starting a diagnostic needs ${cost} credits. You have ${credits.balance}.`}
-        </p>
+        <SpendLink href={full ? `/attempt/${DIAGNOSTIC_ID}` : `/attempt/diag-${chapter}`} cost={cost} what="Starting a diagnostic" size="lg">
+          Start diagnostic
+        </SpendLink>
+        {enough ? <p className="text-sm text-muted">You have {credits.balance} credits.</p> : null}
       </div>
     </div>
   );

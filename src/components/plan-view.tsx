@@ -9,7 +9,8 @@ import { RETEST_ID, TODAY, conceptById, learner, planMeta, planTasks, upcomingWe
 import { daysFromToday, relativeDay, shortDate, weekday } from "@/lib/format";
 import { TaskList } from "./tasks";
 import { Dialog } from "./dialog";
-import { Cost, ProgressBar, btn } from "./ui";
+import { ProgressBar, btn } from "./ui";
+import { SpendLink } from "./credit-gate";
 
 type View = "today" | "week" | "upcoming" | "retest";
 const VIEWS: { key: View; label: string }[] = [
@@ -239,9 +240,9 @@ function RetestPanel({ done, total }: { done: number; total: number }) {
       </ul>
       <div className="mt-5 flex flex-wrap items-center gap-3">
         {unlocked ? (
-          <Link href={`/assess/retests/${RETEST_ID}`} className={btn("primary")}>
-            Start retest <Cost credits={COST.retest} />
-          </Link>
+          <SpendLink href={`/assess/retests/${RETEST_ID}`} cost={COST.retest} what="A retest">
+            Start retest
+          </SpendLink>
         ) : (
           <>
             <span className="inline-flex items-center gap-2 text-sm text-muted">

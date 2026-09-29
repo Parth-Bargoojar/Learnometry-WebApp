@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Check, ChevronDown, Info, Minus, X as XIcon } from "lucide-react";
 import type { AttemptConfig, Response, WeaknessFinding } from "@/lib/types";
 import { COST, showsMasteryNumber } from "@/lib/config";
-import { chapterById, conceptById, learner, questionById } from "@/lib/data";
+import { chapterById, conceptById, credits, learner, questionById } from "@/lib/data";
 import { CATEGORY_LABEL, diagnose, isCorrect, scoreAttempt } from "@/lib/diagnosis";
 import { clock, duration } from "@/lib/format";
 import { AIStatus } from "./ai-status";
@@ -14,6 +14,7 @@ import { Dialog } from "./dialog";
 import { MathText } from "./math";
 import { ConfidenceMeter, Cost, FieldLabel, PriorityBadge, SeverityBadge, btn } from "./ui";
 import { useAttemptResponses } from "./use-result";
+import { GetCreditsButton, SpendLink } from "./credit-gate";
 
 const DIAGNOSIS_STEPS = ["Analyzing responses", "Checking evidence", "Building diagnosis", "Preparing recommendations"];
 const PLAN_STEPS = ["Ordering your weak concepts", `Fitting them to ${learner.dailyMinutes} min a day`, "Scheduling your retest", "Writing task notes"];
@@ -194,9 +195,13 @@ function Diagnosis({ findings, config, responses }: { findings: WeaknessFinding[
               <span className="font-semibold">{weak.length} concepts to fix.</span> Your plan fits them into {learner.dailyMinutes} min a day
               <span className="hidden sm:inline"> (about {Math.round(minutes / 5) * 5} min of work)</span>.
             </p>
-            <button type="button" onClick={() => setPlanOpen(true)} className={btn("primary", "md", "w-full sm:w-auto")}>
-              Build my plan <Cost credits={COST.studyPlan} />
-            </button>
+            {credits.balance >= COST.studyPlan ? (
+              <button type="button" onClick={() => setPlanOpen(true)} className={btn("primary", "md", "w-full sm:w-auto")}>
+                Build my plan <Cost credits={COST.studyPlan} />
+              </button>
+            ) : (
+              <GetCreditsButton cost={COST.studyPlan} balance={credits.balance} what="A study plan" />
+            )}
           </div>
         </div>
       ) : null}
@@ -318,9 +323,9 @@ function WeaknessCard({ f, emphasis, onEvidence }: { f: WeaknessFinding; emphasi
         <button type="button" onClick={onEvidence} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary-text underline underline-offset-4 hover:text-ink">
           See the {f.total} questions
         </button>
-        <Link href={`/attempt/prac-${f.conceptId}-5`} className={btn("secondary", "sm")}>
-          Practice this <Cost credits={COST.practiceSet5} />
-        </Link>
+        <SpendLink href={`/attempt/prac-${f.conceptId}-5`} cost={COST.practiceSet5} what="A practice set" variant="secondary" size="sm">
+          Practice this
+        </SpendLink>
       </div>
     </article>
   );
@@ -409,9 +414,9 @@ function EvidenceSheet({
           );
         })}
       </ol>
-      <Link href={`/attempt/prac-${conceptId}-5`} className={btn("primary", "md", "mt-5 w-full")}>
-        Practice this <Cost credits={COST.practiceSet5} />
-      </Link>
+      <SpendLink href={`/attempt/prac-${conceptId}-5`} cost={COST.practiceSet5} what="A practice set" className="mt-5 w-full">
+        Practice this
+      </SpendLink>
     </Dialog>
   );
 }

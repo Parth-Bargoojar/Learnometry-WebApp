@@ -47,4 +47,16 @@ src/
 
 ## Current state
 
-Front end complete for build phases A–G (plus credits, billing, settings) on sample data (JEE Main, Physics, Class 11 Mechanics). Not yet built: Supabase auth and data, Razorpay, the AI gateway, guardian portal, admin console, PWA. Replacing `lib/data.ts` with API calls is the next step; screens do not need to change.
+Front end complete for build phases **A–I** on sample data (JEE Main, Physics, Class 11 Mechanics):
+learner app, money (packs, plans, checkout, payment confirmation, credit gating), guardian flows
+(both sign-up paths, `/consent/[token]`, guardian portal at `/guardian`), and the auth screens.
+
+The sample learner, Rohan, is 17, so the default story runs through guardian approvals. Sunita is
+the guardian account (`/guardian`). Requests and consent made in one tab show up in the other through
+`lib/local-store.ts`, which stands in for the API and realtime channel.
+
+Useful previews: `/dashboard?state=new` (S0), `/dashboard?state=out` (S7), `/consent/preview` (OTP
+`246810`), `/billing/confirm?item=plus&sim=failed|slow`.
+
+Not yet built: Supabase auth and data, Razorpay, the AI gateway, phase J (plan/progress history,
+settings sub-routes, help), the admin console (K) and the PWA (L).

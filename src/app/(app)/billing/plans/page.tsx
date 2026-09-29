@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { PLANS, type PlanCode } from "@/lib/config";
 import { learner } from "@/lib/data";
-import { PlanChoice } from "@/components/billing";
+import { passItem, prorate } from "@/lib/billing";
+import { PurchaseButton, SwitchButton, needsApproval } from "@/components/billing";
 
 export const metadata: Metadata = { title: "Plans" };
 
-/** Plans — same three-card layout as the public pricing page (continuity). */
+/** Plans — same three-card layout as the public pricing page (continuity, §7.8 PlanCard). */
 export default function PlansPage() {
   const paid: PlanCode[] = ["starter", "plus", "pro"];
+  const current = PLANS[learner.plan];
+  const guardianName = learner.guardian?.guardianFirstName;
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1 rounded-card border border-border-subtle bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -17,20 +21,31 @@ export default function PlansPage() {
         </p>
         <p className="text-sm text-muted">Every plan includes the root-cause report.</p>
       </div>
+
+      {needsApproval && guardianName ? (
+        <p className="rounded-card-sm border border-info/40 bg-info/5 px-4 py-3 text-sm text-ink">
+          Until you turn 18, {guardianName} approves and pays for passes. Choosing a plan sends {guardianName} a request; nothing is charged to you.
+        </p>
+      ) : null}
+
       <ul className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
         {paid.map((code) => {
           const p = PLANS[code];
-          const current = code === learner.plan;
+          const isCurrent = code === learner.plan;
+          const upgrade = p.priceInr > current.priceInr;
+          const { due } = prorate(learner.plan, code, learner.passEnds);
           return (
             <li
               key={code}
-              className={`flex flex-col overflow-hidden bg-surface ${p.recommended ? "rounded-card-lg border-2 border-line shadow-brutal-lg lg:-translate-y-2" : "rounded-card-lg border-2 border-line shadow-brutal"}`}
+              className={`flex flex-col overflow-hidden rounded-card-lg border-2 border-line bg-surface ${p.recommended ? "shadow-brutal-lg lg:-translate-y-2" : "shadow-brutal"}`}
             >
-              {p.recommended ? <p className="border-b-2 border-line bg-primary py-2 text-center text-xs font-bold uppercase tracking-wide text-on-primary">Recommended for most students</p> : null}
+              {p.recommended ? (
+                <p className="border-b-2 border-line bg-primary py-2 text-center text-xs font-bold uppercase tracking-wide text-on-primary">Recommended for most students</p>
+              ) : null}
               <div className="flex flex-1 flex-col p-5 sm:p-6">
                 <div className="flex items-center justify-between">
                   <h2 className="font-display text-2xl text-ink">{p.name}</h2>
-                  {current ? <span className="rounded-full border border-line px-2.5 py-0.5 text-xs font-semibold text-ink">Your plan</span> : null}
+                  {isCurrent ? <span className="rounded-full border border-line px-2.5 py-0.5 text-xs font-semibold text-ink">Your plan</span> : null}
                 </div>
                 <p className="mt-3">
                   <span className="font-display text-4xl tabular-nums text-ink">₹{p.priceInr}</span>
@@ -46,14 +61,25 @@ export default function PlansPage() {
                   ))}
                 </ul>
                 <div className="mt-auto">
-                  <PlanChoice code={code} />
+                  {isCurrent ? (
+                    <span className="mt-5 flex h-11 w-full items-center justify-center rounded-btn border-2 border-border-subtle text-[15px] font-semibold text-muted">
+                      Current plan
+                    </span>
+                  ) : upgrade ? (
+                    <>
+                      <PurchaseButton item={passItem(code, learner.plan, learner.passEnds)} label="Upgrade" variant={p.recommended ? "primary" : "secondary"} className="mt-5 w-full" />
+                      <p className="mt-2 text-center text-xs text-muted">₹{due} today after your unused days. New 30-day pass starts now.</p>
+                    </>
+                  ) : (
+                    <SwitchButton planName={p.name} startsOn={learner.passEnds} />
+                  )}
                 </div>
               </div>
             </li>
           );
         })}
       </ul>
-      <p className="text-sm text-muted">Passes don&apos;t renew unless you turn on auto-renew at checkout. Prices in INR.</p>
+      <p className="text-sm text-muted">Passes don&apos;t renew unless auto-renew is turned on at checkout. Prices in INR.</p>
     </div>
   );
 }

@@ -7,6 +7,10 @@ import { learner } from "@/lib/data";
 import { useTheme, type ThemePref } from "./theme";
 import { Dialog } from "./dialog";
 import { btn } from "./ui";
+import { siteUrl } from "@/lib/site";
+import { GUARDIAN_CANNOT_SEE, GUARDIAN_CAN_SEE, adultOn, isMinor } from "@/lib/guardian";
+import { fullDate } from "@/lib/format";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 const field = "mt-1.5 h-11 w-full rounded-input border border-border-subtle bg-surface px-3 text-ink focus:border-line";
 
@@ -30,6 +34,7 @@ export function Settings() {
   const [saved, setSaved] = useState(false);
   const [del, setDel] = useState(false);
   const [confirm, setConfirm] = useState("");
+  const [exported, setExported] = useState(false);
 
   const nav = [
     ["profile", "Profile"],
@@ -164,11 +169,16 @@ export function Settings() {
         </Section>
 
         <Section id="privacy" title="Privacy & data">
-          <p className="text-sm text-ink">You are 18 or older, so no guardian consent is needed on this account.</p>
-          <button type="button" className={btn("secondary", "md", "mt-4")}>
-            Download my data
+          <GuardianPrivacy />
+          <button type="button" onClick={() => setExported(true)} disabled={exported} className={btn("secondary", "md", "mt-6")}>
+            {exported ? "Requested" : "Download my data"}
           </button>
-          <p className="mt-2 text-xs text-muted">We email a copy within 7 business days.</p>
+          <p role="status" className="mt-2 text-xs text-muted">
+            {exported ? "We'll email a copy (JSON and a PDF summary) within 7 business days." : "We email a copy within 7 business days."}
+          </p>
+          <a href={siteUrl("/privacy")} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-primary-text underline underline-offset-4">
+            What we collect and why
+          </a>
         </Section>
 
         <Section id="account" title="Account">
@@ -202,5 +212,56 @@ export function Settings() {
         </div>
       </Dialog>
     </div>
+  );
+}
+
+/** Settings › Privacy for learners with a guardian (D5): consent record + exactly what the guardian sees. */
+function GuardianPrivacy() {
+  const g = learner.guardian;
+  if (!g) return <p className="text-sm text-ink">You are 18 or older, so no guardian consent is needed on this account.</p>;
+  const minor = isMinor(learner.dateOfBirth);
+  const eighteen = adultOn(learner.dateOfBirth);
+  return (
+    <>
+      <div className="flex items-start gap-3 rounded-card-sm border border-border-subtle bg-sunken p-4">
+        <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-success-text" />
+        <div className="text-sm">
+          <p className="font-semibold text-ink">
+            {g.guardianName} ({g.relationship.toLowerCase()}) gave consent{g.consentVerifiedAt ? ` on ${fullDate(g.consentVerifiedAt)}` : ""}
+          </p>
+          <p className="mt-0.5 text-muted">Confirmed with a one-time code to their {g.contactType === "email" ? "email" : "phone"} · {g.policyVersion}</p>
+        </div>
+      </div>
+      <h3 className="mt-5 text-sm font-semibold text-ink">What {g.guardianFirstName} can see</h3>
+      <ul className="mt-2 flex flex-col gap-1.5">
+        {GUARDIAN_CAN_SEE.map((t) => (
+          <li key={t} className="flex gap-2 text-sm text-ink">
+            <Eye aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted" />
+            {t}
+          </li>
+        ))}
+      </ul>
+      <h3 className="mt-4 text-sm font-semibold text-ink">Private to you</h3>
+      <ul className="mt-2 flex flex-col gap-1.5">
+        {GUARDIAN_CANNOT_SEE.map((t) => (
+          <li key={t} className="flex gap-2 text-sm text-ink">
+            <EyeOff aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted" />
+            {t}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-5 border-t border-border-subtle pt-4">
+        <p className="text-sm font-semibold text-ink">Remove guardian access</p>
+        {minor ? (
+          <p className="mt-1 text-sm text-muted">
+            Available from {fullDate(eighteen)}, when you turn 18. Until then {g.guardianFirstName} also approves purchases.
+          </p>
+        ) : (
+          <button type="button" className={btn("secondary", "sm", "mt-2")}>
+            Remove {g.guardianFirstName}&apos;s access
+          </button>
+        )}
+      </div>
+    </>
   );
 }

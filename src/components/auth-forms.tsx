@@ -6,16 +6,17 @@ import { useRef, useState, type FormEvent } from "react";
 import { CircleAlert, Eye, EyeOff, GraduationCap, Users } from "lucide-react";
 import { btn } from "./ui";
 import { siteUrl } from "@/lib/site";
+import { SIGNUP_KEY, type SignupDraft } from "@/lib/guardian";
 
 /*
   Auth forms (Web App Structure §8.1). Supabase Auth replaces the simulated submit;
   validation, error summary and field semantics are the production behaviour.
 */
 
-const input =
+export const input =
   "mt-1.5 h-12 w-full rounded-input border bg-surface px-3.5 text-base text-ink outline-none transition-colors focus:border-line aria-[invalid=true]:border-danger";
 
-function Field({
+export function Field({
   id,
   label,
   error,
@@ -48,7 +49,19 @@ function Field({
   );
 }
 
-function PasswordInput({ id, autoComplete, invalid, describedBy }: { id: string; autoComplete: string; invalid: boolean; describedBy?: string }) {
+export function PasswordInput({
+  id,
+  autoComplete,
+  invalid,
+  describedBy,
+  onChange,
+}: {
+  id: string;
+  autoComplete: string;
+  invalid: boolean;
+  describedBy?: string;
+  onChange?: (value: string) => void;
+}) {
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
@@ -59,6 +72,7 @@ function PasswordInput({ id, autoComplete, invalid, describedBy }: { id: string;
         autoComplete={autoComplete}
         aria-invalid={invalid}
         aria-describedby={describedBy}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className={`${input} pr-12 ${invalid ? "border-danger" : "border-border-subtle"}`}
       />
       <button
@@ -139,7 +153,7 @@ export function LoginForm() {
         <Field id="password" label="Password" error={errors.password}>
           <PasswordInput id="password" autoComplete="current-password" invalid={!!errors.password} describedBy={errors.password ? "password-err" : undefined} />
         </Field>
-        <Link href="/login" className="-mt-1 self-end text-sm font-semibold text-primary-text underline underline-offset-4">
+        <Link href="/forgot-password" className="-mt-1 inline-flex min-h-11 items-center self-end text-sm font-semibold text-primary-text underline underline-offset-4">
           Forgot password?
         </Link>
         <button type="submit" disabled={pending} className={btn("primary", "md", "w-full")}>
@@ -158,9 +172,9 @@ export function LoginForm() {
   );
 }
 
-export function SignupForm() {
+export function SignupForm({ defaultRole = "student" }: { defaultRole?: "student" | "guardian" }) {
   const router = useRouter();
-  const [role, setRole] = useState<"student" | "guardian">("student");
+  const [role, setRole] = useState<"student" | "guardian">(defaultRole);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const summary = useRef<HTMLDivElement>(null);
@@ -179,12 +193,16 @@ export function SignupForm() {
       return;
     }
     setPending(true);
-    window.setTimeout(() => router.push("/onboarding/about-you"), 600);
+    const draft: SignupDraft = { role, name: String(d.get("name")).trim(), email: String(d.get("email")).trim() };
+    try {
+      sessionStorage.setItem(SIGNUP_KEY, JSON.stringify(draft));
+    } catch {}
+    window.setTimeout(() => router.push("/verify-email"), 600);
   };
 
   const roles = [
     { v: "student" as const, t: "I'm a student", d: "Take a diagnostic and get a study plan.", i: GraduationCap },
-    { v: "guardian" as const, t: "I'm a parent or guardian", d: "Set up an account for your child.", i: Users },
+    { v: "guardian" as const, t: "I'm a parent or guardian", d: "Set up an account for your child and approve their access.", i: Users },
   ];
 
   return (
@@ -251,7 +269,7 @@ export function SignupForm() {
 }
 
 /** Focusable error summary with links to each field (ui-ux-pro-max "focusable error summary"). */
-function ErrorSummary({ errors, refEl }: { errors: Record<string, string>; refEl: React.RefObject<HTMLDivElement | null> }) {
+export function ErrorSummary({ errors, refEl }: { errors: Record<string, string>; refEl: React.RefObject<HTMLDivElement | null> }) {
   const list = Object.entries(errors);
   if (!list.length) return null;
   return (

@@ -11,9 +11,10 @@ import { signed } from "@/lib/format";
 import { AIStatus } from "./ai-status";
 import { PairedBar } from "./charts";
 import { Mascot } from "./feedback";
-import { Cost, btn } from "./ui";
+import { btn } from "./ui";
 import { EvidenceDots } from "./report";
 import { useAttemptResponses } from "./use-result";
+import { SpendLink } from "./credit-gate";
 
 const EMPTY: Response[] = [];
 
@@ -35,9 +36,9 @@ export function PracticeResults({ config }: { config: AttemptConfig }) {
     return (
       <div className="mx-auto max-w-[560px] rounded-card border border-border-subtle bg-surface p-6 text-center">
         <p className="font-semibold text-ink">No practice saved here yet.</p>
-        <Link href={`/attempt/${config.id}`} className={btn("primary", "md", "mt-4")}>
-          Start practice <Cost credits={COST.practiceSet5} />
-        </Link>
+        <SpendLink href={`/attempt/${config.id}`} cost={COST.practiceSet5} what="A practice set" className="mt-4">
+          Start practice
+        </SpendLink>
       </div>
     );
   }
@@ -67,9 +68,9 @@ export function PracticeResults({ config }: { config: AttemptConfig }) {
         <Link href="/plan" className={btn("primary")}>
           Back to your plan <ArrowRight aria-hidden="true" className="size-5" />
         </Link>
-        <Link href={`/attempt/${config.id}`} className={btn("secondary")}>
-          Practice again <Cost credits={COST.practiceSet5} />
-        </Link>
+        <SpendLink href={`/attempt/${config.id}`} cost={COST.practiceSet5} what="A practice set" variant="secondary">
+          Practice again
+        </SpendLink>
       </div>
     </div>
   );

@@ -21,6 +21,12 @@ export const dayMonth = (iso: string) => {
   return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
 };
 
+/** "14 Mar 2027" */
+export const fullDate = (iso: string) => {
+  const d = ist(iso);
+  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+};
+
 export const weekday = (iso: string) => DAYS[ist(iso).getUTCDay()];
 
 export const daysBetween = (fromIso: string, toIso: string) => Math.round((parse(toIso).getTime() - parse(fromIso).getTime()) / DAY);

@@ -6,6 +6,7 @@ import { COST, severityFor, confidenceFor } from "@/lib/config";
 import { TODAY, credits, conceptById, getAttemptConfig, planMeta, planTasks, reports, stateFor } from "@/lib/data";
 import { daysBetween, relativeDay, shortDate } from "@/lib/format";
 import { Cost, SeverityBadge, btn } from "@/components/ui";
+import { SpendLink } from "@/components/credit-gate";
 
 export const metadata: Metadata = { title: "Retest" };
 
@@ -74,9 +75,9 @@ export default async function RetestPage(props: PageProps<"/assess/retests/[rete
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         {unlocked || canForce ? (
-          <Link href={`/attempt/${config.id}`} className={btn(unlocked ? "primary" : "secondary", "lg")}>
-            {unlocked ? "Start retest" : "Start retest anyway"} <Cost credits={COST.retest} />
-          </Link>
+          <SpendLink href={`/attempt/${config.id}`} cost={COST.retest} what="A retest" variant={unlocked ? "primary" : "secondary"} size="lg">
+            {unlocked ? "Start retest" : "Start retest anyway"}
+          </SpendLink>
         ) : (
           <span className={btn("secondary", "lg")} aria-disabled="true">
             Start retest <Cost credits={COST.retest} />

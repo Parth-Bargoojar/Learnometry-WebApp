@@ -6,8 +6,9 @@ import { COST, practiceCost } from "@/lib/config";
 import { DIAGNOSTIC_ID, chapterById, conceptById, getAttemptConfig, planTasks, practicePoolSize, sampleDiagnosticResponses } from "@/lib/data";
 import { diagnose } from "@/lib/diagnosis";
 import { relativeDay } from "@/lib/format";
-import { Card, Cost, FieldLabel, PriorityBadge, btn } from "@/components/ui";
+import { Card, FieldLabel, PriorityBadge } from "@/components/ui";
 import { ExplainButton, StepDone } from "@/components/task-steps";
+import { SpendLink } from "@/components/credit-gate";
 
 export const metadata: Metadata = { title: "Task" };
 
@@ -123,9 +124,9 @@ export default async function TaskPage(props: PageProps<"/plan/tasks/[taskId]">)
                 <div className="min-w-0 flex-1">
                   <h3 className="font-semibold text-ink">Practice · {practiceN} questions</h3>
                   <p className="mt-1 text-sm text-muted">Targeted at this concept, matched to your level. Instant feedback after each answer.</p>
-                  <Link href={`/attempt/prac-${task.conceptId}-${practiceSize}`} className={btn("primary", "md", "mt-4")}>
-                    Start practice <Cost credits={practiceCost(practiceN)} />
-                  </Link>
+                  <SpendLink href={`/attempt/prac-${task.conceptId}-${practiceSize}`} cost={practiceCost(practiceN)} what="A practice set" className="mt-4">
+                    Start practice
+                  </SpendLink>
                 </div>
               </div>
             </li>

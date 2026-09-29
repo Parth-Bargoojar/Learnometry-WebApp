@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CalendarClock, ClipboardCheck, Route, Target } from "lucide-react";
+import { ArrowRight, CalendarClock, ClipboardCheck, Route, Target, Zap } from "lucide-react";
 import { COST, PLANS } from "@/lib/config";
 import {
   DIAGNOSTIC_ID,
@@ -17,7 +17,8 @@ import {
 } from "@/lib/data";
 import { diagnose } from "@/lib/diagnosis";
 import { daysFromToday, relativeDay, shortDate } from "@/lib/format";
-import { ButtonLink, Card, CardHeader, Cost, PriorityBadge, ProgressBar, SeverityBadge, TextLink } from "@/components/ui";
+import { Alert, ButtonLink, Card, CardHeader, Cost, PriorityBadge, ProgressBar, SeverityBadge, TextLink } from "@/components/ui";
+import { GetCreditsButton } from "@/components/credit-gate";
 import { Mascot } from "@/components/feedback";
 import { PairedBar } from "@/components/charts";
 import { TaskList } from "@/components/tasks";
@@ -26,11 +27,27 @@ export const metadata: Metadata = { title: "Home" };
 
 /**
  * Home — a state machine, not a widget grid (Web App Structure §8.3).
- * `?state=new` previews S0; the sample learner is in S4 (active plan).
+ * `?state=new` previews S0 and `?state=out` previews S7 (credits exhausted);
+ * the sample learner is in S4 (active plan).
  */
 export default async function DashboardPage(props: PageProps<"/dashboard">) {
   const { state } = await props.searchParams;
-  return state === "new" ? <NewLearner /> : <ActivePlan />;
+  if (state === "new") return <NewLearner />;
+  return <ActivePlan balance={state === "out" ? 0 : credits.balance} />;
+}
+
+/** Turns a balance into decisions (DS §14): what can I still do today? */
+function enoughFor(balance: number) {
+  if (balance >= COST.retest + COST.practiceSet5) {
+    const sets = Math.floor((balance - COST.retest) / COST.practiceSet5);
+    return `Enough for 1 retest and ${sets} practice ${sets === 1 ? "set" : "sets"}.`;
+  }
+  if (balance >= COST.practiceSet5) {
+    const sets = Math.floor(balance / COST.practiceSet5);
+    return `Enough for ${sets} practice ${sets === 1 ? "set" : "sets"}.`;
+  }
+  if (balance >= COST.hint) return "Enough for hints and explanations only.";
+  return "Your plan and revision tasks don't need credits.";
 }
 
 function ContextLine() {
@@ -102,7 +119,7 @@ function NewLearner() {
 
 /* ---------------- S4: active plan ---------------- */
 
-function ActivePlan() {
+function ActivePlan({ balance }: { balance: number }) {
   const today = planTasks.filter((t) => t.date === TODAY);
   const priority = today.find((t) => t.status === "pending")!;
   const pConcept = conceptById(priority.conceptId);
@@ -125,6 +142,19 @@ function ActivePlan() {
   return (
     <>
       <ContextLine />
+      {balance <= 0 ? (
+        /* S7: above everything; non-credit work (the plan, revision tasks) stays usable. */
+        <div className="mb-5">
+          <Alert
+            tone="warning"
+            icon={Zap}
+            title="You're out of credits."
+            action={<GetCreditsButton balance={0} variant="secondary" size="sm" />}
+          >
+            {plan.period === "daily" ? "They refill at 00:00 IST." : "Your free credits refill on the 1st."} Revision tasks and your plan still work.
+          </Alert>
+        </div>
+      ) : null}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         {/* Today's priority — the one dominant action (DS §14) */}
         <Card level="primary" className="flex flex-col p-5 sm:p-7 lg:col-span-8" aria-labelledby="today-priority">
@@ -159,14 +189,12 @@ function ActivePlan() {
         {/* Credits — turned into decisions ("Enough for…") */}
         <Card level="structural" className="flex flex-col p-5 sm:p-6 lg:col-span-4" aria-labelledby="credits-h">
           <CardHeader id="credits-h" title="Credits" meta={`${plan.name} plan`} />
-          <p className="mt-4 font-display text-4xl leading-none tabular-nums text-ink">{credits.balance}</p>
+          <p className="mt-4 font-display text-4xl leading-none tabular-nums text-ink">{balance}</p>
           <p className="mt-1.5 text-sm text-muted">of {plan.periodCredits} today · refills 00:00 IST</p>
           <div className="mt-3">
-            <ProgressBar value={credits.balance} max={plan.periodCredits} label="Credits left today" />
+            <ProgressBar value={balance} max={plan.periodCredits} label="Credits left today" />
           </div>
-          <p className="mt-4 text-sm text-ink">
-            Enough for 1 retest and {Math.floor((credits.balance - COST.retest) / COST.practiceSet5)} practice sets.
-          </p>
+          <p className="mt-4 text-sm text-ink">{enoughFor(balance)}</p>
           <TextLink href="/credits" className="mt-auto pt-3">
             Details
           </TextLink>
