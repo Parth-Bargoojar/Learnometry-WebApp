@@ -45,7 +45,7 @@ export function PracticeResults({ config }: { config: AttemptConfig }) {
 
   return (
     <div className="mx-auto flex max-w-[760px] flex-col gap-5">
-      <section className="rounded-card-lg border-2 border-line bg-surface p-5 sm:p-6">
+      <section className="rounded-card-lg border border-line bg-surface p-5 sm:p-6">
         <p className="text-sm text-muted">{concept.name} · practice</p>
         <p className="mt-2 font-display text-4xl tabular-nums text-ink">
           {s.correct} <span className="text-xl text-muted">of {s.total} correct</span>
@@ -108,7 +108,7 @@ export function RetestResult({ config, fallback }: { config: AttemptConfig; fall
 
   return (
     <div className="mx-auto flex max-w-[860px] flex-col gap-5">
-      <section className="rounded-card-lg border-2 border-line bg-surface p-5 shadow-brutal-lg sm:p-7" aria-labelledby="headline">
+      <section className="rounded-card-lg border border-line bg-surface p-5 shadow-brutal-lg sm:p-7" aria-labelledby="headline">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm text-muted">Laws of Motion · {config.questionIds.length} new questions</p>

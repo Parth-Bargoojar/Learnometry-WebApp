@@ -14,7 +14,7 @@ export default function AssessPage() {
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
       <Card level="primary" className="p-5 sm:p-7 lg:col-span-7" aria-labelledby="new-diag">
         <div className="flex items-start gap-4">
-          <span className="hidden size-12 shrink-0 items-center justify-center rounded-card-sm border-2 border-line bg-primary/15 sm:flex">
+          <span className="hidden size-12 shrink-0 items-center justify-center rounded-card-sm border border-line bg-primary/15 sm:flex">
             <ClipboardCheck aria-hidden="true" className="size-6 text-ink" />
           </span>
           <div className="min-w-0 flex-1">

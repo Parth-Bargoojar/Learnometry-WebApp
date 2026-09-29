@@ -67,7 +67,7 @@ export function OfflineView({ today }: { today: string }) {
     <main id="main" className="flex flex-1 justify-center px-4 py-10 sm:pt-20">
       <div className="w-full max-w-[520px]">
         <div className="flex flex-col items-center gap-3 text-center">
-          <span className="inline-flex size-24 items-center justify-center overflow-hidden rounded-full border-2 border-line bg-white ring-4 ring-primary/25">
+          <span className="inline-flex size-24 items-center justify-center overflow-hidden rounded-full border border-line bg-white ring-4 ring-primary/25">
             <Image src="/mascot.jpeg" alt="" width={192} height={192} unoptimized className="size-full scale-110 object-contain" />
           </span>
           <h1 className="mt-2 flex items-center gap-2 font-display text-3xl text-ink">

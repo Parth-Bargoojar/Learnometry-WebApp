@@ -43,7 +43,7 @@ export function VerifyEmail() {
 
   return (
     <>
-      <span className="flex size-12 items-center justify-center rounded-card-sm border-2 border-line bg-primary/15">
+      <span className="flex size-12 items-center justify-center rounded-card-sm border border-line bg-primary/15">
         <MailCheck aria-hidden="true" className="size-6 text-ink" />
       </span>
       <h1 className="mt-5 font-display text-2xl text-ink sm:text-[28px]">Check your inbox</h1>
@@ -162,7 +162,7 @@ export function ResetPasswordForm() {
   if (done) {
     return (
       <div role="status">
-        <span className="flex size-12 items-center justify-center rounded-full border-2 border-line bg-success text-white">
+        <span className="flex size-12 items-center justify-center rounded-full border border-line bg-success text-white">
           <Check aria-hidden="true" className="size-6" strokeWidth={3} />
         </span>
         <h1 className="mt-5 font-display text-2xl text-ink sm:text-[28px]">Password changed</h1>

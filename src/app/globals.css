@@ -16,7 +16,7 @@
   --color-primary: #00b4d8;
   --color-primary-deep: #168b9e;
   --color-ink: #0f172a;
-  --color-background: #f1f5f9;
+  --color-background: #f8fafc;
   --color-surface: #ffffff;
 
   --color-success: #16a34a;
@@ -24,7 +24,7 @@
   --color-danger: #dc2626;
   --color-info: #2563eb;
 
-  --color-border-subtle: #cbd5e1;
+  --color-border-subtle: #e2e8f0;
 
   /* AA text variants (DS §3.2a): the accents are fills; small text uses these. */
   --color-primary-text: #0e6e7d;
@@ -36,7 +36,7 @@
     Semantic tokens. The dark theme needs different colours for text and for
     structural lines, which a single `ink` token cannot express.
   */
-  --color-line: #0f172a;
+  --color-line: #cbd5e1;
   --color-muted: #475569;
   --color-faint: #5b6b81;
   --color-sunken: #f1f5f9;
@@ -50,9 +50,9 @@
   --radius-card: 16px;
   --radius-card-lg: 20px;
 
-  --shadow-brutal-sm: 0 2px 0 #0f172a;
-  --shadow-brutal: 0 4px 0 #0f172a;
-  --shadow-brutal-lg: 0 6px 0 #0f172a;
+  --shadow-brutal-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.08);
+  --shadow-brutal: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+  --shadow-brutal-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
 }
 
 /* next/font injects these on <html>, so they must resolve at point of use. */
@@ -64,26 +64,27 @@
 /* DS §27 / §49 — dark tokens. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-elevated: #334155;
-  --color-sunken: #0f172a;
+  --color-background: #0b0f19;
+  --color-surface: #111827;
+  --color-elevated: #1f293d;
+  --color-sunken: #070a12;
   --color-ink: #f8fafc;
-  --color-line: #475569;
-  --color-muted: #cbd5e1;
-  --color-faint: #94a3b8;
-  --color-border-subtle: #334155;
+  --color-muted: #94a3b8;
+  --color-faint: #7b8aa0; /* spec #64748b is 3.7:1 on surface; AA needs 4.5 */
+  --color-line: rgba(255, 255, 255, 0.12);
+  --color-border-subtle: rgba(255, 255, 255, 0.07);
+  --color-primary: #00c2e8;
+  --color-primary-text: #38bdf8;
+  --color-on-primary: #070a12;
   --color-on-ink: #0f172a;
-  --color-primary-text: #22d3ee;
   --color-success-text: #4ade80;
   --color-danger-text: #fca5a5;
   --color-warning-text: #fbbf24;
 }
 
-/* Tailwind inlines shadow values and reads the colour from a non-inherited
-   property, so it has to be set on each shadowed element. */
+/* Dark elevation: a specular rim plus a soft drop, instead of a hard offset block. */
 [data-theme="dark"] [class*="shadow-brutal"] {
-  --tw-shadow-color: #020617;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Layout tokens — DS §49.1. */
@@ -138,6 +139,8 @@
 /* KaTeX inherits the surrounding text colour and size in both themes. */
 .katex {
   font-size: 1.05em;
+  color: var(--color-ink);
+  line-height: 1.6;
 }
 
 .katex-display {

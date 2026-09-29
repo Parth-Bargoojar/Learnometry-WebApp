@@ -22,14 +22,13 @@ import type { Confidence, Priority, Severity } from "@/lib/config";
 type Variant = "primary" | "secondary" | "ghost" | "destructive";
 type Size = "sm" | "md" | "lg";
 
-const lift =
-  "shadow-brutal-sm hover:-translate-y-0.5 hover:shadow-brutal active:translate-y-0.5 active:shadow-none";
+const press = "active:scale-[0.98]";
 
 const variants: Record<Variant, string> = {
-  primary: `bg-primary text-on-primary border-2 border-line ${lift}`,
-  secondary: `bg-surface text-ink border-2 border-line ${lift}`,
-  ghost: "text-ink border-2 border-transparent hover:bg-sunken",
-  destructive: `bg-danger text-white border-2 border-line ${lift}`,
+  primary: `bg-primary text-on-primary border border-transparent shadow-brutal-sm hover:brightness-105 ${press}`,
+  secondary: `bg-surface text-ink border border-border-subtle hover:bg-sunken hover:border-line ${press}`,
+  ghost: "text-ink border border-transparent hover:bg-sunken",
+  destructive: `bg-danger text-white border border-transparent shadow-brutal-sm hover:brightness-110 ${press}`,
 };
 
 const sizes: Record<Size, string> = {
@@ -41,7 +40,7 @@ const sizes: Record<Size, string> = {
 export function btn(variant: Variant = "primary", size: Size = "md", extra = "") {
   return [
     "inline-flex items-center justify-center whitespace-nowrap rounded-btn font-semibold cursor-pointer select-none",
-    "transition-[transform,box-shadow,background-color,border-color] duration-150 ease-out",
+    "transition-all duration-150 ease-out",
     "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
     variants[variant],
     sizes[size],
@@ -94,8 +93,8 @@ export function TextLink({ href, children, className = "" }: { href: string; chi
 type Level = "primary" | "structural" | "supporting";
 
 const levels: Record<Level, string> = {
-  primary: "rounded-card-lg border-2 border-line bg-surface shadow-brutal-lg",
-  structural: "rounded-card-lg border-2 border-line bg-surface",
+  primary: "relative overflow-hidden rounded-card-lg border border-line bg-surface shadow-sm",
+  structural: "rounded-card-lg border border-border-subtle bg-surface",
   supporting: "rounded-card border border-border-subtle bg-surface",
 };
 
@@ -140,11 +139,11 @@ export function CardHeader({
 /* ---------- Status: severity, priority, confidence (DS §49.5) ---------- */
 
 const severity: Record<Severity, { label: string; icon: LucideIcon; cls: string }> = {
-  strong: { label: "Strong", icon: CircleCheck, cls: "bg-success/10 text-success-text border-success/35" },
+  strong: { label: "Strong", icon: CircleCheck, cls: "bg-success/10 text-success-text border-success/20" },
   stable: { label: "Stable", icon: CircleDot, cls: "bg-sunken text-muted border-border-subtle" },
-  needs_work: { label: "Needs work", icon: CircleAlert, cls: "bg-warning/15 text-warning-text border-warning/45" },
-  weak: { label: "Weak", icon: TrendingDown, cls: "bg-danger/10 text-danger-text border-danger/35" },
-  critical: { label: "Critical", icon: OctagonAlert, cls: "bg-danger text-white border-line" },
+  needs_work: { label: "Needs work", icon: CircleAlert, cls: "bg-warning/10 text-warning-text border-warning/20" },
+  weak: { label: "Weak", icon: TrendingDown, cls: "bg-danger/10 text-danger-text border-danger/20" },
+  critical: { label: "Critical", icon: OctagonAlert, cls: "bg-danger text-white border-transparent" },
   insufficient: { label: "Not enough evidence", icon: CircleHelp, cls: "bg-surface text-muted border-faint border-dashed" },
 };
 
@@ -165,8 +164,8 @@ export function SeverityBadge({ value, size = "md" }: { value: Severity; size?: 
 }
 
 const priority: Record<Priority, { label: string; cls: string }> = {
-  1: { label: "Critical", cls: "bg-ink text-on-ink border-line" },
-  2: { label: "High", cls: "bg-surface text-ink border-2 border-line" },
+  1: { label: "Critical", cls: "bg-ink text-on-ink border-transparent" },
+  2: { label: "High", cls: "bg-surface text-ink border border-line" },
   3: { label: "Medium", cls: "bg-sunken text-muted border border-border-subtle" },
   4: { label: "Low", cls: "bg-transparent text-muted border border-border-subtle" },
 };
@@ -196,7 +195,7 @@ export function ConfidenceMeter({ value }: { value: Confidence }) {
         {[1, 2, 3].map((i) => (
           <span
             key={i}
-            className={`w-1.5 rounded-sm ${i <= n ? "bg-ink" : "bg-border-subtle"}`}
+            className={`w-1.5 rounded-sm ${i <= n ? "bg-primary" : "bg-border-subtle"}`}
             style={{ height: `${6 + i * 4}px` }}
           />
         ))}

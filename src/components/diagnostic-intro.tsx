@@ -35,7 +35,7 @@ export function DiagnosticIntro() {
           ].map((o) => (
             <label
               key={o.v}
-              className={`flex cursor-pointer items-start gap-3 rounded-card border-2 bg-surface p-4 ${scope === o.v ? "border-line bg-primary/10 shadow-brutal-sm" : "border-border-subtle hover:border-faint"}`}
+              className={`flex cursor-pointer items-start gap-3 rounded-card border-2 bg-surface p-4 ${scope === o.v ? "border-primary bg-primary/10" : "border-border-subtle hover:border-faint"}`}
             >
               <input type="radio" name="scope" value={o.v} checked={scope === o.v} onChange={() => setScope(o.v)} className="mt-1 size-4 accent-[var(--color-primary-deep)]" />
               <span>
@@ -67,7 +67,7 @@ export function DiagnosticIntro() {
         ) : null}
       </fieldset>
 
-      <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-card border-2 border-line bg-surface sm:grid-cols-4">
+      <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-card border border-line bg-surface sm:grid-cols-4">
         {facts.map(([v, l], i) => (
           <div key={l} className={`p-4 ${i % 2 ? "" : "border-r border-border-subtle"} ${i < 2 ? "border-b sm:border-b-0" : ""} border-border-subtle sm:border-r sm:last:border-r-0`}>
             <dt className="sr-only">{l}</dt>

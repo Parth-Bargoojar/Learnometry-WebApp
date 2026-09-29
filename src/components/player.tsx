@@ -343,7 +343,7 @@ export function Player({ config }: { config: AttemptConfig }) {
             id="question"
             tabIndex={-1}
             aria-labelledby="q-stem"
-            className="rounded-card-lg border-2 border-line bg-surface p-5 shadow-brutal outline-none sm:p-8"
+            className="rounded-card-lg border border-border-subtle bg-surface p-6 outline-none sm:p-8"
           >
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border-subtle pb-3 text-[13px] text-muted">
               <span className="font-bold text-ink">Q{index + 1}</span>
@@ -354,7 +354,7 @@ export function Player({ config }: { config: AttemptConfig }) {
               </span>
             </div>
 
-            <MathText as="div" className="mt-4 text-[17px] leading-[1.65] text-ink sm:text-lg">
+            <MathText as="div" className="mt-4 text-[17px] leading-relaxed text-ink sm:text-lg">
               {q.stem}
             </MathText>
             <span id="q-stem" className="sr-only">
@@ -439,7 +439,7 @@ export function Player({ config }: { config: AttemptConfig }) {
       </div>
 
       {/* Action bar */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-surface pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-surface/90 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex h-[72px] max-w-[760px] items-center gap-3 px-3 sm:px-5 xl:max-w-[1080px] xl:pr-[312px]">
           <button type="button" onClick={() => go(index - 1)} disabled={index === 0} className={btn("secondary", "md", "px-3 sm:px-5")} aria-label="Previous question">
             <ArrowLeft aria-hidden="true" className="size-5" />
@@ -463,7 +463,7 @@ export function Player({ config }: { config: AttemptConfig }) {
           <ol className="flex flex-wrap gap-2">
             {qs.map((x, i) => (
               <li key={`${x.id}-${i}`}>
-                <button type="button" onClick={() => go(i)} className={`size-11 rounded-card-sm border text-sm font-semibold ${i === index ? "border-2 border-line" : "border-border-subtle"}`}>
+                <button type="button" onClick={() => go(i)} className={`size-11 rounded-card-sm border text-sm font-semibold ${i === index ? "border-2 border-primary" : "border-border-subtle"}`}>
                   {i + 1}
                 </button>
               </li>
@@ -593,21 +593,21 @@ function Options({ q, value, onChange, reveal }: { q: Question; value: string | 
       {opts.map((o, i) => {
         const selected = value === o.key;
         const isAnswer = o.key === q.answer;
-        let cls = "border border-border-subtle bg-surface hover:border-line hover:ring-1 hover:ring-line";
+        let cls = "border border-border-subtle bg-surface hover:border-line hover:bg-sunken/40";
         let badge = "bg-sunken text-ink";
         let trailing = null;
         if (reveal) {
           if (isAnswer) {
-            cls = "border-2 border-success bg-success/10";
+            cls = "border border-success bg-success/10 ring-1 ring-success";
             badge = "bg-success text-white";
             trailing = <span className="flex items-center gap-1 text-xs font-bold text-success-text"><CircleCheck aria-hidden="true" className="size-4" />Correct answer</span>;
           } else if (selected) {
-            cls = "border-2 border-danger bg-danger/10";
+            cls = "border border-danger bg-danger/10 ring-1 ring-danger";
             badge = "bg-danger text-white";
             trailing = <span className="flex items-center gap-1 text-xs font-bold text-danger-text"><CircleX aria-hidden="true" className="size-4" />Your answer</span>;
           } else cls = "border border-border-subtle bg-surface opacity-70";
         } else if (selected) {
-          cls = "border-2 border-line bg-primary/15 shadow-brutal-sm";
+          cls = "border border-primary bg-primary/10 text-ink ring-1 ring-primary";
           badge = "bg-ink text-on-ink";
           trailing = <Check aria-hidden="true" className="size-5 text-ink" strokeWidth={2.5} />;
         }
@@ -644,7 +644,7 @@ function Options({ q, value, onChange, reveal }: { q: Question; value: string | 
               {o.key}
             </span>
             <span className="sr-only">Option {o.key}: </span>
-            <MathText className="min-w-0 flex-1 text-base font-medium text-ink">{o.text}</MathText>
+            <MathText className="min-w-0 flex-1 text-base font-medium leading-relaxed text-ink">{o.text}</MathText>
             {trailing}
           </button>
         );
@@ -766,7 +766,7 @@ function PracticeFeedback({
               aria-pressed={confidence === v}
               onClick={() => onConfidence(v as number)}
               className={`h-10 touch:h-11 rounded-full border px-4 text-sm font-semibold ${
-                confidence === v ? "border-2 border-line bg-surface text-ink shadow-brutal-sm" : "border-border-subtle text-muted hover:text-ink"
+                confidence === v ? "border border-primary bg-primary/10 text-ink" : "border-border-subtle text-muted hover:text-ink"
               }`}
             >
               {label}
@@ -812,7 +812,7 @@ function QuestionMap({
                 aria-current={current ? "step" : undefined}
                 className={`relative flex size-11 items-center justify-center rounded-card-sm text-sm font-semibold tabular-nums xl:size-10 ${
                   answered ? "bg-primary/20 text-ink" : "bg-surface text-muted"
-                } ${marked ? "border-2 border-warning" : current ? "border-2 border-line shadow-brutal-sm" : answered ? "border border-line" : "border border-border-subtle"} ${
+                } ${marked ? "border-2 border-warning" : current ? "border-2 border-primary" : answered ? "border border-line" : "border border-border-subtle"} ${
                   current && marked ? "ring-2 ring-line ring-offset-1" : ""
                 }`}
               >

@@ -67,7 +67,7 @@ function Frame({ children }: { children: ReactNode }) {
           <div className="ml-auto flex items-center gap-1.5">
             {guardianLearners.length > 1 ? <LearnerSwitcher current={learnerId} /> : null}
             <button type="button" onClick={() => setMenu(true)} aria-haspopup="dialog" aria-label="Account menu" className="flex size-11 items-center justify-center">
-              <span className="flex size-9 items-center justify-center rounded-full border-2 border-line bg-primary/20 text-xs font-bold text-ink">{initials}</span>
+              <span className="flex size-9 items-center justify-center rounded-full border border-line bg-primary/20 text-xs font-bold text-ink">{initials}</span>
             </button>
           </div>
         </div>
@@ -183,7 +183,7 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
               aria-pressed={pref === t.value}
               onClick={() => setPref(t.value)}
               className={`flex h-10 touch:h-11 items-center justify-center gap-1.5 rounded-full border-2 text-sm font-semibold ${
-                pref === t.value ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:text-ink"
+                pref === t.value ? "border-border-subtle bg-surface text-ink shadow-sm" : "border-transparent text-muted hover:text-ink"
               }`}
             >
               <t.icon aria-hidden="true" className="size-4" />

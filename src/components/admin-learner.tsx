@@ -259,7 +259,7 @@ export function CreditLedger({ learner, rows }: { learner: AdminLearner; rows: L
           <legend className={labelCls}>Direction</legend>
           <div className="mt-1.5 grid grid-cols-2 gap-2">
             {(["grant", "deduct"] as const).map((d) => (
-              <label key={d} className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-btn border text-sm font-semibold ${dir === d ? "border-2 border-line bg-surface text-ink" : "border-border-subtle text-muted"}`}>
+              <label key={d} className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-btn border text-sm font-semibold ${dir === d ? "border-2 border-primary bg-primary/10 text-ink" : "border-border-subtle text-muted"}`}>
                 <input type="radio" name={`${id}-dir`} value={d} checked={dir === d} onChange={() => setDir(d)} className="sr-only" />
                 {d === "grant" ? <Plus aria-hidden="true" className="size-4" /> : <Minus aria-hidden="true" className="size-4" />}
                 {d === "grant" ? "Grant" : "Deduct"}

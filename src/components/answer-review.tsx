@@ -50,7 +50,7 @@ export function AnswerReview({ config, fallback }: { config: AttemptConfig; fall
             aria-pressed={filter === k}
             onClick={() => router.replace(k === "all" ? "?" : `?show=${k}`, { scroll: false })}
             className={`h-10 touch:h-11 shrink-0 rounded-full border px-4 text-sm font-semibold tabular-nums ${
-              filter === k ? "border-2 border-line bg-surface text-ink shadow-brutal-sm" : "border-border-subtle text-muted hover:text-ink"
+              filter === k ? "border border-primary bg-primary/10 text-ink" : "border-border-subtle text-muted hover:text-ink"
             }`}
           >
             {labels[k]} ({counts[k]})

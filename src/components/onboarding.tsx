@@ -257,7 +257,7 @@ function OptionCard({ selected, onSelect, title, desc, type = "radio", name }: {
   return (
     <label
       className={`flex min-h-16 cursor-pointer items-center gap-3 rounded-card border-2 bg-surface p-4 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary ${
-        selected ? "border-line bg-primary/10 shadow-brutal-sm" : "border-border-subtle hover:border-faint"
+        selected ? "border-primary bg-primary/10" : "border-border-subtle hover:border-faint"
       }`}
     >
       <input type={type} name={name} checked={selected} onChange={onSelect} className="sr-only" />
@@ -437,7 +437,7 @@ function Waiting({ a, learnerName, onApproved }: { a: Answers; learnerName: stri
   if (status === "verified") {
     return (
       <div role="status" className="mx-auto w-full max-w-[560px] px-4 pb-10 pt-10">
-        <span className="flex size-12 items-center justify-center rounded-full border-2 border-line bg-success text-white">
+        <span className="flex size-12 items-center justify-center rounded-full border border-line bg-success text-white">
           <Check aria-hidden="true" className="size-6" strokeWidth={3} />
         </span>
         <div className="mt-5">
@@ -472,7 +472,7 @@ function Waiting({ a, learnerName, onApproved }: { a: Answers; learnerName: stri
 
   return (
     <div className="mx-auto w-full max-w-[560px] px-4 pb-10 pt-10">
-      <span className="flex size-12 items-center justify-center rounded-card-sm border-2 border-line bg-primary/15">
+      <span className="flex size-12 items-center justify-center rounded-card-sm border border-line bg-primary/15">
         <MailCheck aria-hidden="true" className="size-6 text-ink" />
       </span>
       <div className="mt-5">
@@ -606,7 +606,7 @@ function InlineConsent({ a, update, child }: { a: Answers; update: (p: Partial<A
           .
         </p>
       </div>
-      <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-card-sm border-2 border-line bg-primary/10 p-4 text-[15px] font-medium text-ink">
+      <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-card-sm border border-line bg-primary/10 p-4 text-[15px] font-medium text-ink">
         <input type="checkbox" checked={!!a.declaration} onChange={(e) => update({ declaration: e.target.checked })} className="mt-0.5 size-5 shrink-0 accent-[var(--color-primary-deep)]" />
         I am {child}&apos;s parent or legal guardian and I am 18 or older.
       </label>
@@ -641,7 +641,7 @@ function Subjects({ child }: { child: string | null }) {
     <>
       <Heading title="Which subjects should we cover?" help={child ? `${child}'s diagnostic will cover these chapters.` : "Your diagnostic will cover these chapters."} />
       <div className="mt-7 flex flex-col gap-3">
-        <div className="rounded-card border-2 border-line bg-primary/10 p-4 shadow-brutal-sm">
+        <div className="rounded-card border border-primary/40 bg-primary/10 p-4">
           <div className="flex items-center justify-between">
             <p className="font-semibold text-ink">Physics · Class 11 Mechanics</p>
             <span className="flex size-6 items-center justify-center rounded-full bg-ink text-on-ink"><Check aria-hidden="true" className="size-3.5" strokeWidth={3} /></span>
@@ -705,7 +705,7 @@ function StudyTime({ a, update, child }: { a: Answers; update: (p: Partial<Answe
             <label
               key={m}
               className={`flex h-16 cursor-pointer flex-col items-center justify-center rounded-card border-2 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary ${
-                a.minutes === m ? "border-line bg-primary/10 shadow-brutal-sm" : "border-border-subtle bg-surface"
+                a.minutes === m ? "border-primary bg-primary/10" : "border-border-subtle bg-surface"
               }`}
             >
               <input type="radio" name="minutes" checked={a.minutes === m} onChange={() => update({ minutes: m })} className="sr-only" />

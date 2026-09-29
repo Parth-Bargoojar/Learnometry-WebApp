@@ -72,7 +72,7 @@ export function SettingsNav() {
                 href={`/settings/${p.slug}`}
                 aria-current={on ? "page" : undefined}
                 className={`flex min-h-11 items-center gap-2.5 rounded-btn border-2 px-3 text-sm font-semibold ${
-                  on ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:bg-sunken hover:text-ink"
+                  on ? "border-border-subtle bg-surface text-ink shadow-sm" : "border-transparent text-muted hover:bg-sunken hover:text-ink"
                 }`}
               >
                 <p.icon aria-hidden="true" className="size-4 shrink-0" />
@@ -294,7 +294,7 @@ export function StudySettings() {
                   aria-pressed={v.minutes === m}
                   onClick={() => setV({ ...v, minutes: m })}
                   className={`h-11 rounded-full border px-4 text-sm font-semibold tabular-nums ${
-                    v.minutes === m ? "border-2 border-line bg-primary/15 text-ink shadow-brutal-sm" : "border-border-subtle text-muted hover:text-ink"
+                    v.minutes === m ? "border border-primary bg-primary/15 text-ink" : "border-border-subtle text-muted hover:text-ink"
                   }`}
                 >
                   {m} min
@@ -450,7 +450,7 @@ export function AppearanceSettings() {
             <label
               key={o.v}
               className={`flex cursor-pointer flex-col gap-2 rounded-card-sm border-2 p-2 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary ${
-                pref === o.v ? "border-line shadow-brutal-sm" : "border-border-subtle"
+                pref === o.v ? "border-primary bg-primary/5" : "border-border-subtle"
               }`}
             >
               <input type="radio" name="theme" checked={pref === o.v} onChange={() => setPref(o.v)} className="sr-only" />

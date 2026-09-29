@@ -20,7 +20,7 @@ export default function ProgressPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <section aria-labelledby="answer" className="rounded-card-lg border-2 border-line bg-surface p-5 shadow-brutal sm:p-7">
+      <section aria-labelledby="answer" className="rounded-card-lg border border-line bg-surface p-5 shadow-brutal sm:p-7">
         <h2 id="answer" className="font-display text-2xl leading-tight text-ink sm:text-3xl">
           Your targeted concepts are up {now - base} points since your first diagnostic.
         </h2>

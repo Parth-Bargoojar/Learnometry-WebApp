@@ -1,8 +1,7 @@
 /**
  * The app's only chart forms — Web App Structure §13, DS §49.7.
- * Baseline is a dashed outline and "now" a solid cyan bar with an ink edge: the
- * brand grey/teal pair fails colour-vision separation when measured, fill vs
- * outline does not. Server-rendered SVG/HTML, no chart library.
+ * Baseline is a muted translucent bar and "now" a solid cyan bar: they differ in
+ * lightness and saturation, so they stay apart under colour-vision deficiency. Server-rendered SVG/HTML, no chart library.
  */
 import { signed } from "@/lib/format";
 
@@ -28,13 +27,13 @@ export function PairedBar({
       <div className="grid grid-cols-[4.5rem_1fr_3rem] items-center gap-x-3 gap-y-1.5 text-xs">
         <span className="text-muted">{beforeLabel}</span>
         <div className="h-3 rounded-full" aria-hidden="true">
-          <div className="h-full rounded-full border-2 border-dashed border-line" style={{ width: `${Math.max(before, 4)}%` }} />
+          <div className="h-full rounded-full bg-faint/40" style={{ width: `${Math.max(before, 4)}%` }} />
         </div>
         <span className="text-right font-semibold tabular-nums text-muted">{showNumbers ? `${before}%` : ""}</span>
         <span className="font-semibold text-ink">{afterLabel}</span>
         <div className="h-3 rounded-full" aria-hidden="true">
           <div
-            className="h-full rounded-full border border-line bg-primary transition-[width] duration-500"
+            className="h-full rounded-full bg-primary transition-[width] duration-500"
             style={{ width: `${Math.max(after, 4)}%` }}
           />
         </div>
@@ -68,20 +67,20 @@ export function TrendLine({
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={title} className="h-auto w-full overflow-visible">
         {[0, 50, 100].map((v) => (
           <g key={v}>
-            <line x1={pad.l} x2={w - pad.r} y1={y(v)} y2={y(v)} className="stroke-border-subtle" strokeWidth={1} />
+            <line x1={pad.l} x2={w - pad.r} y1={y(v)} y2={y(v)} className="stroke-border-subtle dark:stroke-line" strokeWidth={1} />
             <text x={pad.l - 8} y={y(v) + 4} textAnchor="end" className="fill-muted text-[11px]">
               {v}%
             </text>
           </g>
         ))}
-        <path d={path} fill="none" className="stroke-primary-deep" strokeWidth={2} strokeLinejoin="round" />
+        <path d={path} fill="none" className="stroke-primary-deep dark:stroke-primary" strokeWidth={2} strokeLinejoin="round" />
         {points.map((p, i) => (
           <g key={p.date}>
             <title>{`${p.label}: ${p.pct}% (${p.kind})`}</title>
             {p.kind === "diagnostic" ? (
-              <circle cx={x(i)} cy={y(p.pct)} r={6} className="fill-surface stroke-line" strokeWidth={2} />
+              <circle cx={x(i)} cy={y(p.pct)} r={6} className="fill-surface stroke-ink" strokeWidth={2} />
             ) : (
-              <rect x={x(i) - 6} y={y(p.pct) - 6} width={12} height={12} rx={2} className="fill-primary stroke-line" strokeWidth={2} />
+              <rect x={x(i) - 6} y={y(p.pct) - 6} width={12} height={12} rx={2} className="fill-primary stroke-ink" strokeWidth={2} />
             )}
             <text x={x(i)} y={h - 8} textAnchor="middle" className="fill-muted text-[11px]">
               {p.label}
@@ -94,10 +93,10 @@ export function TrendLine({
       </svg>
       <figcaption className="mt-2 flex flex-wrap gap-4 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className="size-2.5 rounded-full border-2 border-line bg-surface" /> Diagnostic
+          <span aria-hidden="true" className="size-2.5 rounded-full border-2 border-ink bg-surface" /> Diagnostic
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className="size-2.5 rounded-[2px] border-2 border-line bg-primary" /> Retest
+          <span aria-hidden="true" className="size-2.5 rounded-[2px] border-2 border-ink bg-primary" /> Retest
         </span>
       </figcaption>
       <details className="mt-2 text-sm">

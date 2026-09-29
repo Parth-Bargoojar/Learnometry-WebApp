@@ -222,7 +222,7 @@ export function SignupForm({ defaultRole = "student" }: { defaultRole?: "student
                   <span className="block text-[15px] font-semibold text-ink">{r.t}</span>
                   <span className="block text-sm text-muted">{r.d}</span>
                 </span>
-                <span aria-hidden="true" className={`size-5 shrink-0 rounded-full border-2 border-line ${role === r.v ? "bg-primary shadow-[inset_0_0_0_3px_var(--color-surface)]" : ""}`} />
+                <span aria-hidden="true" className={`size-5 shrink-0 rounded-full border-2 border-faint ${role === r.v ? "bg-primary shadow-[inset_0_0_0_3px_var(--color-surface)]" : ""}`} />
               </label>
             ))}
           </div>

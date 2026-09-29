@@ -64,7 +64,7 @@ function ReportSkeleton() {
 
 function ScoreSummary({ score, durationSeconds }: { score: ReturnType<typeof scoreAttempt>; durationSeconds: number | null }) {
   return (
-    <section aria-labelledby="score-h" className="rounded-card-lg border-2 border-line bg-surface p-5 sm:p-6">
+    <section aria-labelledby="score-h" className="rounded-card-lg border border-line bg-surface p-5 sm:p-6">
       <h2 id="score-h" className="sr-only">
         Your score
       </h2>
@@ -190,7 +190,7 @@ function Diagnosis({ findings, config, responses }: { findings: WeaknessFinding[
 
       {weak.length ? (
         <div className="sticky bottom-[calc(var(--bottomnav-h)+12px)] z-10 lg:bottom-4">
-          <div className="flex flex-col gap-3 rounded-card-lg border-2 border-line bg-surface px-4 py-3 shadow-brutal sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex flex-col gap-3 rounded-card-lg border border-line bg-surface px-4 py-3 shadow-brutal sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <p className="text-sm text-ink">
               <span className="font-semibold">{weak.length} concepts to fix.</span> Your plan fits them into {learner.dailyMinutes} min a day
               <span className="hidden sm:inline"> (about {Math.round(minutes / 5) * 5} min of work)</span>.
@@ -273,7 +273,7 @@ export function EvidenceDots({ marks }: { marks: WeaknessFinding["marks"] }) {
 function WeaknessCard({ f, emphasis, onEvidence }: { f: WeaknessFinding; emphasis: boolean; onEvidence: () => void }) {
   const c = conceptById(f.conceptId);
   return (
-    <article className={`flex flex-col bg-surface ${emphasis ? "rounded-card-lg border-2 border-line" : "rounded-card border border-border-subtle"}`}>
+    <article className={`flex flex-col bg-surface ${emphasis ? "rounded-card-lg border border-line" : "rounded-card border border-border-subtle"}`}>
       <div className="p-5 pb-4">
         <div className="flex flex-wrap items-center gap-2">
           <SeverityBadge value={f.severity} />

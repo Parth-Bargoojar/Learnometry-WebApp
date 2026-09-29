@@ -94,7 +94,7 @@ export function InstallSteps({ open, onClose }: { open: boolean; onClose: () => 
       <ol className="flex flex-col gap-3">
         {steps.map((s, i) => (
           <li key={s.text} className="flex items-center gap-3 rounded-card-sm border border-border-subtle bg-sunken px-3 py-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-card-sm border-2 border-line bg-surface">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-card-sm border border-line bg-surface">
               <s.icon aria-hidden="true" className="size-5 text-ink" />
             </span>
             <p className="text-[15px] text-ink">
@@ -134,7 +134,7 @@ export function InstallCard() {
   return (
     <section aria-labelledby="install-h" className="mt-5 flex flex-col gap-4 rounded-card border border-border-subtle bg-surface p-4 sm:flex-row sm:items-center sm:p-5 print:hidden">
       <div className="flex min-w-0 flex-1 items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-card-sm border-2 border-line bg-primary/15">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-card-sm border border-line bg-primary/15">
           <Smartphone aria-hidden="true" className="size-5 text-ink" />
         </span>
         <div className="min-w-0">

@@ -193,7 +193,7 @@ function AccountMenu() {
       label="Account menu"
       triggerClassName="flex size-11 items-center justify-center"
       panelClassName="w-72"
-      trigger={<span className="flex size-9 items-center justify-center rounded-full border-2 border-line bg-primary/20 text-xs font-bold text-ink">{initials}</span>}
+      trigger={<span className="flex size-9 items-center justify-center rounded-full border border-line bg-primary/20 text-xs font-bold text-ink">{initials}</span>}
     >
       {() => (
         <div>

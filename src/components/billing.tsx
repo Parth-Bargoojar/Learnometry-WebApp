@@ -434,7 +434,7 @@ export function PaymentStatus({
   if (phase === "confirmed") {
     return (
       <div className="flex flex-col items-start gap-3">
-        <span className="flex size-12 items-center justify-center rounded-full border-2 border-line bg-success text-white">
+        <span className="flex size-12 items-center justify-center rounded-full border border-line bg-success text-white">
           <Check aria-hidden="true" className="size-6" strokeWidth={3} />
         </span>
         <h2 ref={heading} tabIndex={-1} className="font-display text-2xl text-ink outline-none">

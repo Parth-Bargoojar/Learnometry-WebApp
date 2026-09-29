@@ -37,10 +37,10 @@ export function PendingApprovalsBanner() {
   if (!waiting.length) return null;
   const r = waiting[0];
   return (
-    <section aria-labelledby="pending-h" className="rounded-card-lg border-2 border-line bg-surface p-5 shadow-brutal-lg sm:p-6">
+    <section aria-labelledby="pending-h" className="rounded-card-lg border border-line bg-surface p-5 shadow-brutal-lg sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-card-sm border-2 border-line bg-warning/20">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-card-sm border border-line bg-warning/20">
             <UserCheck aria-hidden="true" className="size-5 text-ink" />
           </span>
           <div>

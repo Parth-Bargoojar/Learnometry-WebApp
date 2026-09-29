@@ -41,7 +41,7 @@ export function Dialog({
   const shape =
     variant === "sheet"
       ? "app-dialog m-0 mt-auto w-full max-w-none rounded-t-card border-t-2 border-line max-h-[90vh] lg:ml-auto lg:mt-0 lg:h-full lg:max-h-none lg:w-[480px] lg:rounded-none lg:border-t-0 lg:border-l-2"
-      : "app-dialog m-auto w-[calc(100%-2rem)] max-w-[520px] rounded-card border-2 border-line shadow-brutal-lg";
+      : "app-dialog m-auto w-[calc(100%-2rem)] max-w-[520px] rounded-card border border-line shadow-brutal-lg";
 
   return (
     <dialog

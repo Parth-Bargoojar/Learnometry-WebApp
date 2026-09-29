@@ -48,7 +48,7 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
         />
       ) : (
         <>
-          <dl className="grid grid-cols-2 gap-5 rounded-card-lg border-2 border-line bg-surface p-5 sm:grid-cols-5 sm:p-6">
+          <dl className="grid grid-cols-2 gap-5 rounded-card-lg border border-line bg-surface p-5 sm:grid-cols-5 sm:p-6">
             <div>
               <dt className="text-xs font-semibold text-muted">Mastery</dt>
               <dd className="mt-1 font-display text-3xl leading-none tabular-nums text-ink">{showsMasteryNumber(conf) ? `${s.mastery}%` : "—"}</dd>

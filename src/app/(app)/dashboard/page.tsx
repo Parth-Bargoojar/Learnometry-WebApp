@@ -101,7 +101,7 @@ function NewLearner() {
         <ol className="mt-4 grid gap-4 md:grid-cols-3">
           {steps.map((s, i) => (
             <li key={s.title} className="flex gap-4 rounded-card border border-border-subtle bg-surface p-5">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-card-sm border-2 border-line bg-primary/15">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-card-sm border border-line bg-primary/15">
                 <s.icon aria-hidden="true" className="size-5 text-ink" />
               </span>
               <div>
@@ -164,7 +164,7 @@ function ActivePlan({ balance }: { balance: number }) {
             <span className="text-sm text-muted">Today&apos;s priority</span>
             <span className="ml-auto text-sm font-semibold tabular-nums text-ink">{priority.minutes} min</span>
           </div>
-          <h2 id="today-priority" className="mt-4 font-display text-2xl leading-tight text-ink sm:text-[28px]">
+          <h2 id="today-priority" className="mt-4 font-display text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl">
             {pConcept.name}
           </h2>
           <p className="mt-2 text-[15px] text-ink">
@@ -188,14 +188,15 @@ function ActivePlan({ balance }: { balance: number }) {
         </Card>
 
         {/* Credits — turned into decisions ("Enough for…") */}
-        <Card level="structural" className="flex flex-col p-5 sm:p-6 lg:col-span-4" aria-labelledby="credits-h">
+        <Card level="structural" className="relative flex flex-col overflow-hidden p-5 sm:p-6 lg:col-span-4" aria-labelledby="credits-h">
+          <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-primary-deep" />
           <CardHeader id="credits-h" title="Credits" meta={`${plan.name} plan`} />
           <p className="mt-4 font-display text-4xl leading-none tabular-nums text-ink">{balance}</p>
           <p className="mt-1.5 text-sm text-muted">of {plan.periodCredits} today · refills 00:00 IST</p>
           <div className="mt-3">
             <ProgressBar value={balance} max={plan.periodCredits} label="Credits left today" />
           </div>
-          <p className="mt-4 text-sm text-ink">{enoughFor(balance)}</p>
+          <p className="mt-4 rounded-btn bg-primary/10 px-3 py-2 text-sm font-medium text-ink">{enoughFor(balance)}</p>
           <TextLink href="/credits" className="mt-auto pt-3">
             Details
           </TextLink>
@@ -222,7 +223,7 @@ function ActivePlan({ balance }: { balance: number }) {
               <li key={f.conceptId}>
                 <Link
                   href={`/assess/results/${DIAGNOSTIC_ID}?concept=${f.conceptId}`}
-                  className="-mx-2 flex min-h-14 items-center gap-3 rounded-btn px-2 py-2 hover:bg-sunken"
+                  className="-mx-2 flex min-h-14 items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-sunken/50"
                 >
                   <SeverityBadge value={f.severity} size="sm" />
                   <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">{conceptById(f.conceptId).name}</span>
@@ -270,10 +271,10 @@ function ActivePlan({ balance }: { balance: number }) {
             meta={`+${nowAvg - baseAvg} pts since your first diagnostic, measured by 1 retest`}
             action={<TextLink href="/progress">Progress <ArrowRight aria-hidden="true" className="size-4" /></TextLink>}
           />
-          <div className="mt-5 grid gap-6 md:grid-cols-2">
+          <div className="mt-6 grid gap-8 md:grid-cols-2">
             {targeted.map((s) => (
               <div key={s.conceptId}>
-                <p className="mb-2 text-sm font-semibold text-ink">{conceptById(s.conceptId).name}</p>
+                <p className="mb-3 text-sm font-semibold text-ink">{conceptById(s.conceptId).name}</p>
                 <PairedBar before={s.baselineMastery ?? 0} after={s.mastery} label={conceptById(s.conceptId).name} />
               </div>
             ))}

@@ -728,9 +728,9 @@ export function FlagList() {
                     aria-checked={f.enabled}
                     aria-label={f.key}
                     onClick={() => setToggling(f)}
-                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 border-line transition-colors ${f.enabled ? "bg-primary" : "bg-sunken"}`}
+                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 border-faint transition-colors ${f.enabled ? "bg-primary" : "bg-sunken"}`}
                   >
-                    <span className={`inline-block size-5 rounded-full border-2 border-line bg-surface transition-transform ${f.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
+                    <span className={`inline-block size-5 rounded-full border-2 border-faint bg-surface transition-transform ${f.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
                   </button>
                 </td>
               </tr>

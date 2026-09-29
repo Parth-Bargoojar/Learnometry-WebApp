@@ -45,7 +45,7 @@ export function PlanView() {
         </span>
       </p>
       <PlanChangeBanner />
-      <div className="flex items-start gap-3 rounded-card-lg border-2 border-line bg-surface p-5 sm:p-6">
+      <div className="flex items-start gap-3 rounded-card-lg border border-line bg-surface p-5 sm:p-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-muted">
@@ -69,7 +69,7 @@ export function PlanView() {
         <PlanMenu />
       </div>
 
-      <div role="tablist" aria-label="Plan views" className="print:hidden flex gap-1 overflow-x-auto rounded-full border border-border-subtle bg-sunken p-1 sm:self-start">
+      <div role="tablist" aria-label="Plan views" className="print:hidden inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-border-subtle bg-sunken p-1 sm:self-start">
         {VIEWS.map((v) => (
           <button
             key={v.key}
@@ -77,8 +77,8 @@ export function PlanView() {
             type="button"
             aria-selected={view === v.key}
             onClick={() => router.replace(v.key === "today" ? "/plan" : `/plan?view=${v.key}`, { scroll: false })}
-            className={`h-10 touch:h-11 shrink-0 rounded-full border-2 px-4 text-sm font-semibold transition-colors duration-150 ${
-              view === v.key ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:text-ink"
+            className={`h-10 touch:h-11 shrink-0 rounded-full px-4 text-sm transition-colors duration-150 ${
+              view === v.key ? "bg-surface font-medium text-ink shadow-sm" : "font-medium text-muted hover:text-ink"
             }`}
           >
             {v.label}
@@ -190,7 +190,7 @@ function WeekView() {
             <li key={d}>
               <a
                 href={`#day-${d}`}
-                className={`flex h-full flex-col items-center gap-2 rounded-card-sm bg-surface px-2 py-3 text-center ${isToday ? "border-2 border-line shadow-brutal-sm" : "border border-border-subtle"}`}
+                className={`flex h-full flex-col items-center gap-2 rounded-card-sm bg-surface px-2 py-3 text-center ${isToday ? "border-2 border-primary" : "border border-border-subtle"}`}
               >
                 <span className="text-xs font-semibold text-muted">{weekday(d)}</span>
                 <span className="font-display text-lg leading-none text-ink">{Number(d.slice(8))}</span>
@@ -234,7 +234,7 @@ function WeekView() {
 function RetestPanel({ done, total }: { done: number; total: number }) {
   const unlocked = done === total;
   return (
-    <section className="rounded-card-lg border-2 border-line bg-surface p-5 sm:p-6">
+    <section className="rounded-card-lg border border-line bg-surface p-5 sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-sunken px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-muted">
           <CalendarClock aria-hidden="true" className="size-3.5" /> Scheduled

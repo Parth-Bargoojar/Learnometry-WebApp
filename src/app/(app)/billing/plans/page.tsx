@@ -38,7 +38,7 @@ export default function PlansPage() {
           return (
             <li
               key={code}
-              className={`flex flex-col overflow-hidden rounded-card-lg border-2 border-line bg-surface ${p.recommended ? "shadow-brutal-lg lg:-translate-y-2" : "shadow-brutal"}`}
+              className={`flex flex-col overflow-hidden rounded-card-lg border border-line bg-surface ${p.recommended ? "shadow-brutal-lg lg:-translate-y-2" : "shadow-brutal"}`}
             >
               {p.recommended ? (
                 <p className="border-b-2 border-line bg-primary py-2 text-center text-xs font-bold uppercase tracking-wide text-on-primary">Recommended for most students</p>

@@ -23,7 +23,7 @@ export default function BuyCreditsPage() {
         {CREDIT_PACKS.map((p) => {
           const best = "bestValue" in p && p.bestValue;
           return (
-            <li key={p.id} className={`flex flex-col bg-surface p-5 ${best ? "rounded-card-lg border-2 border-line shadow-brutal" : "rounded-card border border-border-subtle"}`}>
+            <li key={p.id} className={`flex flex-col bg-surface p-5 ${best ? "rounded-card-lg border border-line shadow-brutal" : "rounded-card border border-border-subtle"}`}>
               {best ? (
                 <span className="self-start rounded-full border border-line bg-primary/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-ink">Best value</span>
               ) : null}

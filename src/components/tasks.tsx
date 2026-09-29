@@ -67,7 +67,7 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
           return (
             <li
               key={task.id}
-              className={`${isPrimary ? "rounded-card-lg border-2 border-line shadow-brutal" : "rounded-card border border-border-subtle"} bg-surface p-4 sm:p-5`}
+              className={`${isPrimary ? "rounded-card-lg border border-line shadow-brutal" : "rounded-card border border-border-subtle"} bg-surface p-4 sm:p-5`}
             >
               <div className="flex gap-3 sm:gap-4">
                 <button
@@ -76,7 +76,7 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
                   className="group -m-2.5 flex size-11 shrink-0 items-center justify-center"
                   aria-label={`Mark ${concept.name}, ${TYPE_LABEL[task.type].toLowerCase()}, as done`}
                 >
-                  <span aria-hidden="true" className="size-6 rounded-full border-2 border-line group-hover:bg-success/15" />
+                  <span aria-hidden="true" className="size-6 rounded-full border-2 border-faint group-hover:bg-success/15" />
                 </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">

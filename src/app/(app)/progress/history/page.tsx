@@ -41,7 +41,7 @@ export default async function ProgressHistoryPage(props: PageProps<"/progress/hi
                   aria-current={on ? "page" : undefined}
                   scroll={false}
                   className={`inline-flex h-10 touch:h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold ${
-                    on ? "border-2 border-line bg-surface text-ink shadow-brutal-sm" : "border-border-subtle bg-surface text-muted hover:text-ink"
+                    on ? "border border-primary bg-primary/10 text-ink" : "border-border-subtle bg-surface text-muted hover:text-ink"
                   }`}
                 >
                   {f.label}

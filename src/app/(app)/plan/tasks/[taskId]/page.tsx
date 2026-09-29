@@ -83,7 +83,7 @@ export default async function TaskPage(props: PageProps<"/plan/tasks/[taskId]">)
           Steps
         </h2>
         <ol className="flex flex-col gap-3">
-          <li className="rounded-card-lg border-2 border-line bg-surface p-5 shadow-brutal sm:p-6">
+          <li className="rounded-card-lg border border-line bg-surface p-5 shadow-brutal sm:p-6">
             <div className="flex items-start gap-3">
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold text-on-ink">1</span>
               <div className="min-w-0 flex-1">

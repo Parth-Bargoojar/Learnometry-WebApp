@@ -27,7 +27,7 @@ export default async function RetestPage(props: PageProps<"/assess/retests/[rete
     <div className="mx-auto flex max-w-[760px] flex-col gap-5">
       <p className="text-lg text-ink">New questions on the same concepts, at the same difficulty. This measures whether the fix worked.</p>
 
-      <dl className="grid grid-cols-3 overflow-hidden rounded-card border-2 border-line bg-surface">
+      <dl className="grid grid-cols-3 overflow-hidden rounded-card border border-line bg-surface">
         {[
           ["20 min", "timed"],
           [`${config.questionIds.length} Qs`, "3 per concept"],

@@ -89,7 +89,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
       <Sidebar section={info.section} onShortcuts={keys.show} />
 
       <div className="flex min-h-screen flex-col lg:pl-[var(--sidebar-w)] print:pl-0">
-        <header className="print:hidden sticky top-0 z-20 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
+        <header className="print:hidden sticky top-0 z-20 border-b border-border-subtle bg-surface/80 backdrop-blur-md">
           <div className="mx-auto flex h-[var(--topbar-h)] max-w-[1264px] items-center gap-2 px-4 sm:px-6 lg:px-8">
             {info.parent ? (
               <Link
@@ -117,6 +117,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
               <CreditChip />
               <NotificationBell />
+              <ThemeToggle />
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
@@ -145,8 +146,10 @@ function ShellFrame({ children }: { children: ReactNode }) {
 }
 
 function navItemClass(active: boolean) {
-  return `flex min-h-11 items-center gap-3 rounded-btn border-2 px-3 text-[15px] font-semibold transition-colors duration-150 ${
-    active ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:bg-sunken hover:text-ink"
+  return `relative flex min-h-11 items-center gap-3 rounded-btn px-3 text-[15px] transition-colors duration-150 ${
+    active
+      ? "bg-primary/10 font-semibold text-primary-text after:absolute after:bottom-2 after:left-0 after:top-2 after:w-1 after:rounded-r after:bg-primary"
+      : "font-medium text-muted hover:bg-sunken hover:text-ink"
   }`;
 }
 
@@ -189,7 +192,7 @@ function BottomTabs({ section }: { section: string }) {
   return (
     <nav
       aria-label="Main"
-      className="print:hidden fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="print:hidden fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
     >
       <ul className="mx-auto flex h-16 max-w-xl">
         {PRIMARY.map((item) => {
@@ -199,9 +202,9 @@ function BottomTabs({ section }: { section: string }) {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex h-full flex-col items-center justify-center gap-1 text-xs font-medium ${active ? "text-ink" : "text-muted"}`}
+                className={`relative flex h-full flex-col items-center justify-center gap-1 text-xs font-medium transition-colors duration-150 ${active ? "text-ink" : "text-muted"}`}
               >
-                {active ? <span aria-hidden="true" className="absolute top-0 h-[3px] w-6 rounded-b-full bg-ink" /> : null}
+                {active ? <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-b-full bg-primary" /> : null}
                 <item.icon aria-hidden="true" className="size-6" strokeWidth={active ? 2.25 : 1.75} />
                 {item.label}
               </Link>
@@ -213,9 +216,25 @@ function BottomTabs({ section }: { section: string }) {
   );
 }
 
+/** One-click light/dark switch; "System" stays available in the account menu and Settings. */
+function ThemeToggle() {
+  const { setPref } = useTheme();
+  return (
+    <button
+      type="button"
+      onClick={() => setPref(document.documentElement.dataset.theme === "dark" ? "light" : "dark")}
+      aria-label="Toggle light or dark theme"
+      className="hidden size-9 items-center justify-center rounded-btn text-muted transition-colors duration-150 hover:bg-sunken hover:text-ink lg:flex"
+    >
+      <Sun aria-hidden="true" className="hidden size-5 dark:block" />
+      <Moon aria-hidden="true" className="size-5 dark:hidden" />
+    </button>
+  );
+}
+
 function Avatar() {
   return (
-    <span className="flex size-9 items-center justify-center rounded-full border-2 border-line bg-primary/20 text-xs font-bold text-ink">
+    <span className="flex size-9 items-center justify-center rounded-full border border-line bg-primary/20 text-xs font-bold text-ink">
       {initials}
     </span>
   );
@@ -277,8 +296,8 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
               type="button"
               aria-pressed={pref === t.value}
               onClick={() => setPref(t.value)}
-              className={`flex h-10 touch:h-11 items-center justify-center gap-1.5 rounded-full border-2 text-sm font-semibold ${
-                pref === t.value ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:text-ink"
+              className={`flex h-10 touch:h-11 items-center justify-center gap-1.5 rounded-full border text-sm font-semibold ${
+                pref === t.value ? "border-border-subtle bg-surface text-ink shadow-sm" : "border-transparent text-muted hover:text-ink"
               }`}
             >
               <t.icon aria-hidden="true" className="size-4" />

@@ -65,7 +65,7 @@ export function Popover({
       {open ? (
         <div
           id={id}
-          className={`absolute top-[calc(100%+8px)] z-30 rounded-card border-2 border-line bg-elevated p-1.5 shadow-brutal animate-fade-in ${
+          className={`absolute top-[calc(100%+8px)] z-30 rounded-card border border-line bg-elevated p-1.5 shadow-brutal animate-fade-in ${
             align === "right" ? "right-0" : align === "left" ? "left-0" : ""
           } ${panelClassName}`}
         >

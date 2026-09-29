@@ -46,7 +46,7 @@ export function AIStatus({
   }, []);
 
   return (
-    <div className="rounded-card-lg border-2 border-line bg-surface p-5 sm:p-6" aria-busy={current < steps.length}>
+    <div className="rounded-card-lg border border-line bg-surface p-5 sm:p-6" aria-busy={current < steps.length}>
       <h2 className="text-lg font-semibold text-ink">{title}</h2>
       <ol className="mt-4 flex flex-col gap-3" aria-live="polite">
         {steps.map((step, i) => {

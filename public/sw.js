@@ -36,13 +36,23 @@ const MAX_PAGES = 30;
 const MAX_STATIC = 400;
 
 self.addEventListener("install", (event) => {
+  const isDev = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";
+  if (isDev) {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
   event.waitUntil(precache().then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      for (const name of await caches.keys()) if (!KEEP.includes(name)) await caches.delete(name);
+      const isDev = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";
+      if (isDev) {
+        for (const name of await caches.keys()) await caches.delete(name);
+      } else {
+        for (const name of await caches.keys()) if (!KEEP.includes(name)) await caches.delete(name);
+      }
       await self.clients.claim();
     })(),
   );
@@ -90,6 +100,10 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+
+  // In development, never intercept or cache requests so Turbopack/Next.js HMR and SSR work cleanly
+  const isDev = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";
+  if (isDev) return;
 
   if (req.mode === "navigate") {
     event.respondWith(navigate(req, url));

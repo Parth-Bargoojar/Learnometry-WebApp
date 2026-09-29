@@ -11,7 +11,7 @@ export function Toast({ children }: { children: ReactNode }) {
   return (
     <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottomnav-h)+12px)] z-50 flex justify-center px-4 lg:bottom-6 lg:justify-end lg:pr-8 print:hidden">
       {children ? (
-        <div role="status" className="pointer-events-auto flex items-center gap-3 rounded-btn border-2 border-line bg-ink px-4 py-2.5 text-sm font-medium text-on-ink shadow-brutal animate-fade-in">
+        <div role="status" className="pointer-events-auto flex items-center gap-3 rounded-btn border border-line bg-ink px-4 py-2.5 text-sm font-medium text-on-ink shadow-brutal animate-fade-in">
           {children}
         </div>
       ) : null}

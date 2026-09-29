@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
-import { themeScript } from "@/lib/theme-script";
 import { PwaBoot } from "@/components/pwa-boot";
 import "katex/dist/katex.min.css";
 import "./globals.css";
@@ -55,9 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     /* data-theme is written before paint by the script below, hence the warning suppression. */
     <html lang="en-IN" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col bg-background text-ink" suppressHydrationWarning>
-        <Script id="theme" strategy="beforeInteractive">
-          {themeScript}
-        </Script>
+        <Script src="/theme.js" strategy="beforeInteractive" />
         <PwaBoot />
         {children}
       </body>
