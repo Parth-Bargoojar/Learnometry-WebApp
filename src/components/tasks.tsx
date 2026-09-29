@@ -8,6 +8,7 @@ import { conceptById } from "@/lib/data";
 import { relativeDay } from "@/lib/format";
 import { PriorityBadge, btn } from "./ui";
 import { Dialog } from "./dialog";
+import { Toast, toastAction } from "./toast";
 
 const TYPE_LABEL: Record<PlanTask["type"], string> = {
   learn: "Learn",
@@ -142,13 +143,13 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
         </div>
       </Dialog>
 
-      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottomnav-h)+12px)] z-50 flex justify-center px-4 lg:bottom-6 lg:justify-end lg:pr-8">
+      <Toast>
         {toast ? (
-          <div role="status" className="pointer-events-auto flex items-center gap-3 rounded-btn border-2 border-line bg-ink px-4 py-2.5 text-sm font-medium text-on-ink shadow-brutal animate-fade-in">
+          <>
             {toast.text}
             <button
               type="button"
-              className="font-bold text-on-ink underline decoration-2 underline-offset-4"
+              className={toastAction}
               onClick={() => {
                 setItems(toast.undo);
                 setToast(null);
@@ -156,9 +157,9 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
             >
               Undo
             </button>
-          </div>
+          </>
         ) : null}
-      </div>
+      </Toast>
     </>
   );
 }

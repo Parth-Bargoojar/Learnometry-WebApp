@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, CircleAlert, CircleCheck, Circle, Clock, LoaderCircle, RotateCcw, UserCheck } from "lucide-react";
 import { learner, payments, redeemedCoupons } from "@/lib/data";
 import { applyCoupon, CONFIRM_SLOW_AFTER_MS, renewalReminderOn, totalDue, type CheckoutItem, type CouponResult } from "@/lib/billing";
-import { adultOn, isMinor } from "@/lib/guardian";
+import { adultOn, needsApproval } from "@/lib/guardian";
 import { usePurchaseRequests } from "@/lib/requests";
 import { dayMonth, fullDate, shortDate } from "@/lib/format";
 import { siteUrl } from "@/lib/site";
@@ -21,8 +21,6 @@ import { btn } from "./ui";
 */
 
 const guardian = learner.guardian;
-/** A minor with a verified guardian: every purchase becomes an approval request (D5). */
-export const needsApproval = isMinor(learner.dateOfBirth) && guardian?.consentStatus === "verified";
 
 /* ---------- Checkout (review step before Razorpay opens) ---------- */
 
@@ -464,9 +462,9 @@ export function PaymentStatus({
           <Link href={retryHref} className={btn("primary")}>
             Try again
           </Link>
-          <a href={siteUrl("/contact")} className={btn("ghost")}>
+          <Link href={retryHref.startsWith("/guardian") ? siteUrl("/contact") : "/help?contact=billing"} className={btn("ghost")}>
             Contact support
-          </a>
+          </Link>
         </div>
       </div>
     );

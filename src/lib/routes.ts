@@ -1,5 +1,15 @@
 import { conceptById, concepts, planTasks } from "./data";
 
+const SETTINGS_TITLES: Record<string, string> = {
+  profile: "Profile",
+  study: "Study setup",
+  notifications: "Notifications",
+  appearance: "Appearance",
+  ai: "Explanation engine",
+  privacy: "Privacy & data",
+  account: "Account",
+};
+
 interface RouteInfo {
   title: string;
   /** Parent page for the mobile Back button; absent on top-level destinations. */
@@ -19,6 +29,7 @@ const rules: [RegExp, (m: RegExpExecArray) => RouteInfo][] = [
   [/^\/practice\/new$/, () => ({ title: "New practice set", section: "/practice", parent: { href: "/practice", label: "Practice" } })],
   [/^\/practice\/results\/([^/]+)$/, () => ({ title: "Practice results", section: "/practice", parent: { href: "/practice", label: "Practice" } })],
   [/^\/plan$/, () => ({ title: "Plan", section: "/plan" })],
+  [/^\/plan\/history$/, () => ({ title: "Previous plans", section: "/plan", parent: { href: "/plan", label: "Plan" } })],
   [
     /^\/plan\/tasks\/([^/]+)$/,
     (m) => {
@@ -27,6 +38,7 @@ const rules: [RegExp, (m: RegExpExecArray) => RouteInfo][] = [
     },
   ],
   [/^\/progress$/, () => ({ title: "Progress", section: "/progress" })],
+  [/^\/progress\/history$/, () => ({ title: "History", section: "/progress", parent: { href: "/progress", label: "Progress" } })],
   [/^\/progress\/concepts$/, () => ({ title: "All concepts", section: "/progress", parent: { href: "/progress", label: "Progress" } })],
   [
     /^\/progress\/concepts\/([^/]+)$/,
@@ -42,6 +54,11 @@ const rules: [RegExp, (m: RegExpExecArray) => RouteInfo][] = [
   [/^\/billing\/plans$/, () => ({ title: "Plans", section: "/billing", parent: { href: "/billing", label: "Billing" } })],
   [/^\/billing\/confirm$/, () => ({ title: "Payment", section: "/billing", parent: { href: "/billing", label: "Billing" } })],
   [/^\/settings$/, () => ({ title: "Settings", section: "/settings" })],
+  [
+    /^\/settings\/([a-z]+)$/,
+    (m) => ({ title: SETTINGS_TITLES[m[1]] ?? "Settings", section: "/settings", parent: { href: "/settings", label: "Settings" } }),
+  ],
+  [/^\/help$/, () => ({ title: "Help", section: "/help" })],
   [/^\/notifications$/, () => ({ title: "Notifications", section: "/notifications" })],
 ];
 

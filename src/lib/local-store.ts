@@ -95,4 +95,19 @@ export const SHARED = {
   consent: "consent-request",
   /** Consent state changes made in the guardian portal. */
   guardianConsent: "guardian-consent",
+  /** Highest plan version whose change banner was dismissed. */
+  planChangeSeen: "plan-change-seen",
+  /** Notification ids marked read. */
+  readNotifications: "read-notifications",
+  /* Admin console (phase K): overrides over the sample tables in admin-data.ts. */
+  adminAudit: "admin-audit",
+  adminQuestions: "admin-questions",
+  adminFlags: "admin-flags",
+  adminRefunds: "admin-refunds",
+  adminAbuse: "admin-abuse",
+  adminCredits: "admin-credits",
+  adminLearners: "admin-learners",
+  adminCurriculum: "admin-curriculum",
+  adminWebhooks: "admin-webhooks",
+  adminCoupons: "admin-coupons",
 } as const;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Minus, TrendingUp } from "lucide-react";
 import { retestOutcome } from "@/lib/config";
-import { conceptById, pastRetests, planMeta, planTasks, reports, scoreTrend, stateFor, targetedConcepts, UNIT_CONCEPT_COUNT, conceptStates } from "@/lib/data";
+import { attemptHistory, conceptById, pastRetests, planMeta, planTasks, scoreTrend, stateFor, targetedConcepts, UNIT_CONCEPT_COUNT, conceptStates } from "@/lib/data";
 import { dayMonth, relativeDay, signed } from "@/lib/format";
 import { Card, CardHeader, ProgressBar, TextLink } from "@/components/ui";
 import { PairedBar, TrendLine } from "@/components/charts";
@@ -98,9 +98,12 @@ export default function ProgressPage() {
               );
             })}
           </ul>
-          <p className="mt-2 text-xs text-muted">
-            {reports.length} assessments so far. Improvement counts only when a retest has at least 3 questions on the concept.
-          </p>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <p className="text-xs text-muted">Improvement counts only when a retest has at least 3 questions on the concept.</p>
+            <TextLink href="/progress/history">
+              All {attemptHistory.length} attempts <ArrowRight aria-hidden="true" className="size-4" />
+            </TextLink>
+          </div>
         </Card>
       </div>
     </div>

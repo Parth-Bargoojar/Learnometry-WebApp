@@ -2,7 +2,7 @@
 
 import { Mascot } from "@/components/feedback";
 import { btn } from "@/components/ui";
-import { siteUrl } from "@/lib/site";
+import Link from "next/link";
 
 /* DS §24: specific, calm, says what was not lost, offers the next step. */
 export default function AppError({ reset }: { error: Error; reset: () => void }) {
@@ -15,9 +15,9 @@ export default function AppError({ reset }: { error: Error; reset: () => void })
         <button type="button" onClick={reset} className={btn("primary")}>
           Try again
         </button>
-        <a href={siteUrl("/contact")} className={btn("secondary")}>
+        <Link href="/help?contact=problem" className={btn("secondary")}>
           Contact support
-        </a>
+        </Link>
       </div>
     </div>
   );

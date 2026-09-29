@@ -503,7 +503,7 @@ export const sampleRetestResponses: Response[] = [
  * diagnostic. `baselineMastery` is the first measured value.
  */
 export const conceptStates: ConceptState[] = [
-  { conceptId: "vectors", mastery: 88, scoredItems: 9, recentCorrect: 3, recentTotal: 3, avgSeconds: 43, expectedSeconds: 60, priorityScore: 0.1, lastPracticed: "2026-09-19", baselineMastery: 38, errors: { conceptual: 2 } },
+  { conceptId: "vectors", mastery: 88, scoredItems: 9, recentCorrect: 3, recentTotal: 3, avgSeconds: 43, expectedSeconds: 60, priorityScore: 0.1, lastPracticed: "2026-09-26", baselineMastery: 38, errors: { conceptual: 2 } },
   { conceptId: "fbd", mastery: 57, scoredItems: 6, recentCorrect: 2, recentTotal: 3, avgSeconds: 96, expectedSeconds: 90, priorityScore: 0.3, lastPracticed: "2026-09-18", baselineMastery: 50, errors: { conceptual: 2, misread: 1 } },
   { conceptId: "resolution", mastery: 38, scoredItems: 3, recentCorrect: 1, recentTotal: 3, avgSeconds: 138, expectedSeconds: 90, priorityScore: 1, lastPracticed: null, baselineMastery: 38, errors: { conceptual: 2 } },
   { conceptId: "friction", mastery: 63, scoredItems: 3, recentCorrect: 2, recentTotal: 3, avgSeconds: 97, expectedSeconds: 100, priorityScore: 0.43, lastPracticed: null, baselineMastery: 63, errors: { conceptual: 1 } },
@@ -645,12 +645,14 @@ export const purchaseRequests: PurchaseRequest[] = [
   },
 ];
 
-export const notifications = [
-  { id: "n1", date: "2026-09-27", title: "Your study plan is ready", body: "Start with Resolution of forces on an incline.", href: "/plan", unread: true },
-  { id: "n2", date: "2026-09-27", title: "Diagnosis ready", body: "3 concepts to fix, 2 you can skip for now.", href: `/assess/results/${DIAGNOSTIC_ID}`, unread: true },
-  { id: "n4", date: "2026-09-26", title: "Sent to Sunita for approval", body: "250 credits · ₹99. The request lasts until 3 Oct.", href: "/billing", unread: false },
-  { id: "n3", date: "2026-09-20", title: "Retest result", body: "Vectors improved by 50 pts.", href: "/progress", unread: false },
-  { id: "n5", date: "2026-09-19", title: "Sunita approved your Starter pass", body: "200 credits a day until 19 Oct.", href: "/billing", unread: false },
+export type NotificationKind = "plan" | "diagnosis" | "retest" | "credits" | "payment" | "guardian";
+
+export const notifications: { id: string; date: string; kind: NotificationKind; title: string; body: string; href: string; unread: boolean }[] = [
+  { id: "n1", date: "2026-09-27", kind: "plan", title: "Your study plan is ready", body: "Start with Resolution of forces on an incline.", href: "/plan", unread: true },
+  { id: "n2", date: "2026-09-27", kind: "diagnosis", title: "Diagnosis ready", body: "3 concepts to fix, 2 you can skip for now.", href: `/assess/results/${DIAGNOSTIC_ID}`, unread: true },
+  { id: "n4", date: "2026-09-26", kind: "guardian", title: "Sent to Sunita for approval", body: "250 credits · ₹99. The request lasts until 3 Oct.", href: "/billing", unread: false },
+  { id: "n3", date: "2026-09-20", kind: "retest", title: "Retest result", body: "Vectors improved by 50 pts.", href: "/progress", unread: false },
+  { id: "n5", date: "2026-09-19", kind: "guardian", title: "Sunita approved your Starter pass", body: "200 credits a day until 19 Oct.", href: "/billing", unread: false },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -689,4 +691,160 @@ export const guardianLearners = [
 export const consentRecords = [
   { learnerId: "lrn_rohan", givenOn: "2026-09-12", method: "One-time code to your email", policyVersion: "Guardian Consent Policy v1.1", initiatedBy: "Rohan's sign-up" },
   { learnerId: "lrn_anaya", givenOn: "2026-09-25", method: "Given while setting up the account", policyVersion: "Guardian Consent Policy v1.1", initiatedBy: "Your guardian account" },
+];
+
+/* ------------------------------------------------------------------ */
+/* Plan versions and attempt history (Phase J)                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `study_plans` rows for this learner, newest first (CONTEXT §6.6). A new version
+ * starts after a diagnostic, a retest or a paid rebuild; reschedules edit the
+ * current version and don't create one.
+ */
+export interface PlanVersion {
+  id: string;
+  version: number;
+  status: "active" | "superseded";
+  createdOn: string;
+  from: string;
+  to: string;
+  trigger: "diagnostic" | "retest" | "rebuild";
+  triggerLabel: string;
+  focus: string[];
+  dailyMinutes: number;
+  credits: number;
+  tasksDone: number;
+  tasksTotal: number;
+  outcome: string | null;
+}
+
+export const planVersions: PlanVersion[] = [
+  {
+    id: "plan-v3",
+    version: 3,
+    status: "active",
+    createdOn: "2026-09-27",
+    from: "2026-09-27",
+    to: "2026-10-17",
+    trigger: "diagnostic",
+    triggerLabel: "Built from your 27 Sep diagnostic",
+    focus: ["resolution", "friction", "circular"],
+    dailyMinutes: 60,
+    credits: COST.studyPlan,
+    tasksDone: 1,
+    tasksTotal: 14,
+    outcome: null,
+  },
+  {
+    id: "plan-v2",
+    version: 2,
+    status: "superseded",
+    createdOn: "2026-09-20",
+    from: "2026-09-20",
+    to: "2026-09-26",
+    trigger: "retest",
+    triggerLabel: "Updated after your 20 Sep retest",
+    focus: ["fbd", "pseudo"],
+    dailyMinutes: 60,
+    credits: 0,
+    tasksDone: 6,
+    tasksTotal: 9,
+    outcome: "Replaced by the plan from your 27 Sep diagnostic.",
+  },
+  {
+    id: "plan-v1",
+    version: 1,
+    status: "superseded",
+    createdOn: "2026-09-13",
+    from: "2026-09-13",
+    to: "2026-09-19",
+    trigger: "diagnostic",
+    triggerLabel: "Built from your 13 Sep diagnostic",
+    focus: ["vectors", "fbd"],
+    dailyMinutes: 45,
+    credits: COST.studyPlan,
+    tasksDone: 9,
+    tasksTotal: 10,
+    outcome: "Retest on 20 Sep: Resolving vectors improved +50 pts; Free-body diagrams stable (+7).",
+  },
+];
+
+/** What changed between the previous plan and the current one (PlanChangeBanner diff sheet, §7.5). */
+export const planChange = {
+  fromVersion: 2,
+  toVersion: 3,
+  reason: "your 27 Sep diagnostic",
+  added: [
+    { conceptId: "resolution", why: "2 of 3 wrong in the diagnostic, and friction problems depend on it." },
+    { conceptId: "friction", why: "Carries high exam weight; 1 of 3 wrong." },
+    { conceptId: "circular", why: "The missed question was skipped under time pressure." },
+  ],
+  moved: [{ conceptId: "pseudo", why: "Moved to week 2: it builds on free-body diagrams, which still need work." }],
+  kept: [{ conceptId: "fbd", why: "Kept as a 10-minute review today; the retest showed it stable, not fixed." }],
+};
+
+/** Every finished attempt, newest first (`GET /api/attempts`). `href` is null where the sample has no saved result page. */
+export interface AttemptHistoryItem {
+  id: string;
+  date: string;
+  kind: "diagnostic" | "retest" | "practice";
+  title: string;
+  result: string;
+  pct: number;
+  href: string | null;
+  summary: string;
+}
+
+export const attemptHistory: AttemptHistoryItem[] = [
+  {
+    id: DIAGNOSTIC_ID,
+    date: "2026-09-27",
+    kind: "diagnostic",
+    title: "Physics diagnostic",
+    result: "41 / 60",
+    pct: 68,
+    href: `/assess/results/${DIAGNOSTIC_ID}`,
+    summary: "15 questions across 5 concepts. Weakest: Resolution of forces on an incline.",
+  },
+  {
+    id: "prac-vectors-2609",
+    date: "2026-09-26",
+    kind: "practice",
+    title: "Practice · Resolving vectors into components",
+    result: "4 of 5 correct",
+    pct: 80,
+    href: null,
+    summary: "5 questions, matched to your level. Practice doesn't change mastery; retests do.",
+  },
+  {
+    id: "retest-2009",
+    date: "2026-09-20",
+    kind: "retest",
+    title: "Retest · Vectors, free-body diagrams",
+    result: "20 / 24",
+    pct: 83,
+    href: null,
+    summary: "Resolving vectors into components: improved, 38% → 88%. Free-body diagrams: stable, 50% → 57%.",
+  },
+  {
+    id: "prac-fbd-1809",
+    date: "2026-09-18",
+    kind: "practice",
+    title: "Practice · Free-body diagrams",
+    result: "3 of 5 correct",
+    pct: 60,
+    href: null,
+    summary: "5 questions, matched to your level.",
+  },
+  {
+    id: "diag-1309",
+    date: "2026-09-13",
+    kind: "diagnostic",
+    title: "Physics diagnostic",
+    result: "29 / 60",
+    pct: 48,
+    href: null,
+    summary: "Your first diagnostic. Weakest: Resolving vectors into components, then Free-body diagrams.",
+  },
 ];

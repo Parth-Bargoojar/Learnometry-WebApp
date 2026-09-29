@@ -3,7 +3,7 @@
  * One source for the age rules and for what a guardian can and cannot see, so the
  * learner's Settings, the guardian portal and the consent page never disagree.
  */
-import { TODAY } from "./data";
+import { TODAY, learner } from "./data";
 
 export const MIN_AGE = 13;
 export const ADULT_AGE = 18;
@@ -36,6 +36,13 @@ export function ageOn(dateOfBirth: string, onIso = TODAY) {
 }
 
 export const isMinor = (dateOfBirth: string, onIso = TODAY) => ageOn(dateOfBirth, onIso) < ADULT_AGE;
+
+/**
+ * The signed-in learner is a minor with verified guardian consent, so every purchase
+ * becomes an approval request (D5). Lives here, not in a client module, so server
+ * pages read the real boolean.
+ */
+export const needsApproval = isMinor(learner.dateOfBirth) && learner.guardian?.consentStatus === "verified";
 
 /** ISO date of the 18th birthday. */
 export function adultOn(dateOfBirth: string) {

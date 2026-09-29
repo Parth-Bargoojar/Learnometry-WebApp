@@ -5,7 +5,8 @@ import { cycleUsage, learner, passStarted, payments } from "@/lib/data";
 import { GSTIN, PASS_STATUS_LABEL, passItem, passStatus, refundWindow, type PassStatus } from "@/lib/billing";
 import { dayMonth, shortDate } from "@/lib/format";
 import { ButtonLink, Card, CardHeader } from "@/components/ui";
-import { GuardianRequests, PurchaseButton, RefundRequest, RenewalControl, needsApproval } from "@/components/billing";
+import { GuardianRequests, PurchaseButton, RefundRequest, RenewalControl } from "@/components/billing";
+import { needsApproval } from "@/lib/guardian";
 import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Billing" };

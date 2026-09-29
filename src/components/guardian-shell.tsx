@@ -8,6 +8,7 @@ import { Check, ChevronDown, ChevronLeft, LifeBuoy, LogOut, Monitor, Moon, Setti
 import { guardianAccount, guardianLearners } from "@/lib/data";
 import { siteUrl } from "@/lib/site";
 import { Dialog } from "./dialog";
+import { Popover } from "./popover";
 import { ThemeProvider, useTheme, type ThemePref } from "./theme";
 
 /*
@@ -88,46 +89,24 @@ function Frame({ children }: { children: ReactNode }) {
 }
 
 function LearnerSwitcher({ current }: { current: string | null }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const active = guardianLearners.find((l) => l.id === current);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        ref.current?.querySelector<HTMLButtonElement>("button")?.focus();
-      }
-    };
-    document.addEventListener("pointerdown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
   return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls="learner-list"
-        onClick={() => setOpen((o) => !o)}
-        className="flex h-11 items-center gap-1.5 rounded-btn border border-border-subtle bg-surface px-3 text-sm font-semibold text-ink hover:border-line"
-      >
-        <Users aria-hidden="true" className="size-4 text-muted" />
-        <span className="max-w-[8rem] truncate">{active ? active.firstName : "All children"}</span>
-        <ChevronDown aria-hidden="true" className={`size-4 text-muted transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-      {open ? (
-        <ul id="learner-list" className="absolute right-0 top-12 z-30 w-60 rounded-card border-2 border-line bg-elevated p-1.5 shadow-brutal">
+    <Popover
+      triggerClassName="flex h-11 items-center gap-1.5 rounded-btn border border-border-subtle bg-surface px-3 text-sm font-semibold text-ink hover:border-line"
+      panelClassName="w-60"
+      trigger={
+        <>
+          <Users aria-hidden="true" className="size-4 text-muted" />
+          <span className="max-w-[8rem] truncate">{active ? active.firstName : "All children"}</span>
+          <span className="sr-only">: switch child</span>
+          <ChevronDown aria-hidden="true" className="size-4 text-muted" />
+        </>
+      }
+    >
+      {(close) => (
+        <ul>
           <li>
-            <SwitchLink href="/guardian" label="All children" active={!current} onPick={() => setOpen(false)} />
+            <SwitchLink href="/guardian" label="All children" active={!current} onPick={close} />
           </li>
           {guardianLearners.map((l) => (
             <li key={l.id}>
@@ -136,13 +115,13 @@ function LearnerSwitcher({ current }: { current: string | null }) {
                 label={`${l.firstName} ${l.lastName}`}
                 note={l.status === "active" ? l.exam : "Invite sent"}
                 active={current === l.id}
-                onPick={() => setOpen(false)}
+                onPick={close}
               />
             </li>
           ))}
         </ul>
-      ) : null}
-    </div>
+      )}
+    </Popover>
   );
 }
 

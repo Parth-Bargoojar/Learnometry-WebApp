@@ -3,7 +3,8 @@ import { Check } from "lucide-react";
 import { PLANS, type PlanCode } from "@/lib/config";
 import { learner } from "@/lib/data";
 import { passItem, prorate } from "@/lib/billing";
-import { PurchaseButton, SwitchButton, needsApproval } from "@/components/billing";
+import { PurchaseButton, SwitchButton } from "@/components/billing";
+import { needsApproval } from "@/lib/guardian";
 
 export const metadata: Metadata = { title: "Plans" };
 

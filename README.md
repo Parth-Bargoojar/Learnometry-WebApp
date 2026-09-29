@@ -47,16 +47,26 @@ src/
 
 ## Current state
 
-Front end complete for build phases **A–I** on sample data (JEE Main, Physics, Class 11 Mechanics):
+Front end complete for build phases **A–K** on sample data (JEE Main, Physics, Class 11 Mechanics):
 learner app, money (packs, plans, checkout, payment confirmation, credit gating), guardian flows
-(both sign-up paths, `/consent/[token]`, guardian portal at `/guardian`), and the auth screens.
+(both sign-up paths, `/consent/[token]`, guardian portal at `/guardian`), auth screens, and depth
+(plan history, progress history, settings sub-pages, Help, notification popover).
 
 The sample learner, Rohan, is 17, so the default story runs through guardian approvals. Sunita is
-the guardian account (`/guardian`). Requests and consent made in one tab show up in the other through
-`lib/local-store.ts`, which stands in for the API and realtime channel.
+the guardian account (`/guardian`). Requests, consent, dismissed banners and read notifications are
+kept by `lib/local-store.ts`, which stands in for the API and realtime channel.
+
+The admin console (phase K, Shell F, desktop only) is at `/admin`: dashboard, learners, questions,
+curriculum, AI & cost, payments (with the refund queue), security, feature flags and the audit log.
+Sample operational data lives in `lib/admin-data.ts`, rules in `lib/admin.ts` (decisions K1–K16), and
+admin changes are kept by `lib/local-store.ts` like the other shared state. `lib/admin-auth.ts` is the
+server-side gate to replace with the Supabase role + 2FA check.
 
 Useful previews: `/dashboard?state=new` (S0), `/dashboard?state=out` (S7), `/consent/preview` (OTP
-`246810`), `/billing/confirm?item=plus&sim=failed|slow`.
+`246810`), `/billing/confirm?item=plus&sim=failed|slow`, `/help?contact=billing`.
 
-Not yet built: Supabase auth and data, Razorpay, the AI gateway, phase J (plan/progress history,
-settings sub-routes, help), the admin console (K) and the PWA (L).
+Rule: values that server pages read (flags, lists, config) live in `lib/`, never in a `"use client"`
+module — only components cross that boundary.
+
+Not yet built: Supabase auth and data, Razorpay, the AI gateway, the admin APIs behind the console, and the PWA,
+push and final accessibility/performance audits (L).

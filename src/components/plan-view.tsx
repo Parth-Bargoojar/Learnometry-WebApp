@@ -11,6 +11,7 @@ import { TaskList } from "./tasks";
 import { Dialog } from "./dialog";
 import { ProgressBar, btn } from "./ui";
 import { SpendLink } from "./credit-gate";
+import { PlanChangeBanner, PlanMenu } from "./plan-extras";
 
 type View = "today" | "week" | "upcoming" | "retest";
 const VIEWS: { key: View; label: string }[] = [
@@ -35,28 +36,40 @@ export function PlanView() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-4 rounded-card-lg border-2 border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div>
-          <p className="text-sm text-muted">
-            Week {planMeta.week} of {planMeta.weeks} · {planMeta.focus.length} concepts · {learner.dailyMinutes} min a day
-          </p>
-          <p className="mt-1 text-lg font-semibold text-ink">
-            This week: {conceptById(planMeta.focus[0]).name} first · retest {relativeDay(planMeta.retestOn)}
-          </p>
-        </div>
-        <div className="w-full sm:w-64">
-          <div className="mb-1.5 flex justify-between text-xs text-muted">
-            <span>Tasks done this week</span>
-            <span className="tabular-nums">
-              {done} of {week.length}
-            </span>
+      <p className="hidden print:block">
+        <span className="block font-display text-2xl text-ink">
+          Study plan · {learner.firstName} {learner.lastName}
+        </span>
+        <span className="text-sm text-muted">
+          {learner.exam} · {learner.subject} · printed {shortDate(TODAY)}
+        </span>
+      </p>
+      <PlanChangeBanner />
+      <div className="flex items-start gap-3 rounded-card-lg border-2 border-line bg-surface p-5 sm:p-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-muted">
+              Week {planMeta.week} of {planMeta.weeks} · {planMeta.focus.length} concepts · {learner.dailyMinutes} min a day
+            </p>
+            <p className="mt-1 text-lg font-semibold text-ink">
+              This week: {conceptById(planMeta.focus[0]).name} first · retest {relativeDay(planMeta.retestOn)}
+            </p>
           </div>
-          <ProgressBar value={done} max={week.length} label="Tasks done this week" tone="ink" />
-          <p className="mt-1.5 text-xs text-muted">Finishing tasks doesn&apos;t change mastery. The retest does.</p>
+          <div className="w-full sm:w-64 sm:shrink-0">
+            <div className="mb-1.5 flex justify-between text-xs text-muted">
+              <span>Tasks done this week</span>
+              <span className="tabular-nums">
+                {done} of {week.length}
+              </span>
+            </div>
+            <ProgressBar value={done} max={week.length} label="Tasks done this week" tone="ink" />
+            <p className="mt-1.5 text-xs text-muted">Finishing tasks doesn&apos;t change mastery. The retest does.</p>
+          </div>
         </div>
+        <PlanMenu />
       </div>
 
-      <div role="tablist" aria-label="Plan views" className="flex gap-1 overflow-x-auto rounded-full border border-border-subtle bg-sunken p-1 sm:self-start">
+      <div role="tablist" aria-label="Plan views" className="print:hidden flex gap-1 overflow-x-auto rounded-full border border-border-subtle bg-sunken p-1 sm:self-start">
         {VIEWS.map((v) => (
           <button
             key={v.key}
@@ -91,7 +104,7 @@ export function PlanView() {
                 <TaskList tasks={today} />
               )}
               {!moved ? (
-                <button type="button" onClick={() => setMoveOpen(true)} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-primary-text underline underline-offset-4 hover:text-ink">
+                <button type="button" onClick={() => setMoveOpen(true)} className="print:hidden mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-primary-text underline underline-offset-4 hover:text-ink">
                   Can&apos;t study today?
                 </button>
               ) : null}

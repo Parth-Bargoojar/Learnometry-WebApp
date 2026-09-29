@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { CREDIT_PACKS, PLANS } from "@/lib/config";
 import { learner } from "@/lib/data";
 import { packItem } from "@/lib/billing";
-import { PurchaseButton, needsApproval } from "@/components/billing";
+import { PurchaseButton } from "@/components/billing";
+import { needsApproval } from "@/lib/guardian";
 import { TextLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Get credits" };

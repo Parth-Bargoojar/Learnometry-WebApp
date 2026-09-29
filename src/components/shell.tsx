@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  Bell,
   ChevronLeft,
   ClipboardCheck,
   CreditCard,
@@ -23,11 +22,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PLANS, creditStateFor } from "@/lib/config";
-import { credits, learner, notifications } from "@/lib/data";
+import { credits, learner } from "@/lib/data";
 import { routeInfo } from "@/lib/routes";
 import { ThemeProvider, useTheme, type ThemePref } from "./theme";
 import { Dialog } from "./dialog";
-import { siteUrl } from "@/lib/site";
+import { NotificationBell } from "./notifications";
 
 /* DS §9 — order locked: Home, Assess, Practice, Plan, Progress. */
 const PRIMARY: { href: string; label: string; icon: LucideIcon }[] = [
@@ -82,8 +81,8 @@ function ShellFrame({ children }: { children: ReactNode }) {
 
       <Sidebar section={info.section} />
 
-      <div className="flex min-h-screen flex-col lg:pl-[var(--sidebar-w)]">
-        <header className="sticky top-0 z-20 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
+      <div className="flex min-h-screen flex-col lg:pl-[var(--sidebar-w)] print:pl-0">
+        <header className="print:hidden sticky top-0 z-20 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
           <div className="mx-auto flex h-[var(--topbar-h)] max-w-[1264px] items-center gap-2 px-4 sm:px-6 lg:px-8">
             {info.parent ? (
               <Link
@@ -142,7 +141,7 @@ function navItemClass(active: boolean) {
 
 function Sidebar({ section }: { section: string }) {
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 hidden w-[var(--sidebar-w)] flex-col border-r border-border-subtle bg-background lg:flex">
+    <aside className="print:hidden fixed inset-y-0 left-0 z-20 hidden w-[var(--sidebar-w)] flex-col border-r border-border-subtle bg-background lg:flex">
       <Link href="/dashboard" aria-label="Learnometry home" className="flex h-[var(--topbar-h)] items-center px-5">
         <Image src="/primary-logo.png" alt="Learnometry" width={611} height={133} sizes="180px" className="h-9 w-auto dark:hidden" priority />
         <Image src="/primary-logo-dark.png" alt="Learnometry" width={611} height={133} sizes="180px" className="hidden h-9 w-auto dark:block" />
@@ -171,7 +170,7 @@ function BottomTabs({ section }: { section: string }) {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="print:hidden fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul className="mx-auto flex h-16 max-w-xl">
         {PRIMARY.map((item) => {
@@ -245,10 +244,10 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
             {item.label}
           </Link>
         ))}
-        <a href={siteUrl("/faq")} onClick={onClose} className={link}>
+        <Link href="/help" onClick={onClose} className={link}>
           <LifeBuoy aria-hidden="true" className="size-5 text-muted" />
           Help
-        </a>
+        </Link>
       </nav>
       <fieldset className="mt-5">
         <legend className="mb-2 text-sm font-semibold text-ink">Theme</legend>
@@ -319,16 +318,5 @@ function CreditChip() {
         </Link>
       </Dialog>
     </>
-  );
-}
-
-function NotificationBell() {
-  const unread = notifications.filter((n) => n.unread).length;
-  return (
-    <Link href="/notifications" className="relative flex size-11 items-center justify-center rounded-btn text-muted hover:bg-sunken hover:text-ink">
-      <Bell aria-hidden="true" className="size-5" />
-      {unread ? <span aria-hidden="true" className="absolute right-2.5 top-2.5 size-2.5 rounded-full border-2 border-surface bg-danger" /> : null}
-      <span className="sr-only">Notifications{unread ? `, ${unread} unread` : ""}</span>
-    </Link>
   );
 }
