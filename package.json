@@ -8,25 +8,58 @@
     "start": "next start -p 3001",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "audit": "node scripts/audit.mjs"
+    "audit": "node scripts/audit.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "test:int": "vitest run --config vitest.int.config.mts",
+    "test:e2e": "playwright test",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "supabase migration up",
+    "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "content:validate": "tsx scripts/content-validate.ts",
+    "content:import": "tsx --env-file=.env.local scripts/content-import.ts",
+    "eval": "tsx --env-file=.env.local tests/ai-evals/run.ts"
   },
   "dependencies": {
+    "@sentry/nextjs": "^11.1.0",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
+    "drizzle-orm": "^0.45.3",
+    "inngest": "^4.21.0",
     "katex": "^0.16.47",
     "lucide-react": "^1.45.0",
     "next": "16.3.3",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/katex": "^0.16.8",
-    "@types/node": "^20",
+    "@types/node": "^24.19.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^5.0.2",
+    "dotenv": "^18.0.4",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "playwright": "^1.63.0",
+    "supabase": "^2.118.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.2"
+  },
+  "engines": {
+    "node": ">=24 <25"
   }
 }

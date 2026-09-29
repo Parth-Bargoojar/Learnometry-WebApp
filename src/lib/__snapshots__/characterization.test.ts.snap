@@ -1,0 +1,1769 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`admin rules > constants, breaker, reasons, adjustments 1`] = `
+{
+  "ADMIN": {
+    "adjustGrantExpiryDays": 30,
+    "adjustMax": 500,
+    "flagPropagationSeconds": 60,
+    "pageSize": 25,
+    "reasonMin": 10,
+    "refundDecisionHours": 48,
+    "sessionHours": 12,
+    "webhookBackoff": [
+      "1 min",
+      "5 min",
+      "30 min",
+      "2 h",
+      "12 h",
+    ],
+    "webhookRetries": 5,
+  },
+  "adj": [
+    "Enter a whole number of credits, other than 0.",
+    "Enter a whole number of credits, other than 0.",
+    "One adjustment can move at most 500 credits.",
+    "The balance is 10. A deduction can't take it below 0.",
+    null,
+    null,
+  ],
+  "breaker": [
+    [
+      0,
+      1000,
+      {
+        "computed": "normal",
+        "overridden": false,
+        "ratio": 0,
+        "state": "normal",
+        "warningAtInr": 200,
+      },
+    ],
+    [
+      199,
+      1000,
+      {
+        "computed": "normal",
+        "overridden": false,
+        "ratio": 0.199,
+        "state": "normal",
+        "warningAtInr": 200,
+      },
+    ],
+    [
+      200,
+      1000,
+      {
+        "computed": "warning",
+        "overridden": false,
+        "ratio": 0.2,
+        "state": "warning",
+        "warningAtInr": 200,
+      },
+    ],
+    [
+      299,
+      1000,
+      {
+        "computed": "warning",
+        "overridden": false,
+        "ratio": 0.299,
+        "state": "warning",
+        "warningAtInr": 200,
+      },
+    ],
+    [
+      300,
+      1000,
+      {
+        "computed": "restricted",
+        "overridden": false,
+        "ratio": 0.3,
+        "state": "restricted",
+        "warningAtInr": 200,
+      },
+    ],
+    [
+      5000,
+      100000,
+      {
+        "computed": "restricted",
+        "overridden": false,
+        "ratio": 0.05,
+        "state": "restricted",
+        "warningAtInr": 20000,
+      },
+    ],
+    [
+      10,
+      0,
+      {
+        "computed": "normal",
+        "overridden": false,
+        "ratio": 0,
+        "state": "normal",
+        "warningAtInr": 0,
+      },
+    ],
+  ],
+  "budget": {
+    "hardCapInr": 5000,
+    "restrictedRatio": 0.3,
+    "warningRatio": 0.2,
+  },
+  "copy": {
+    "normal": {
+      "effect": "Every operation runs on its planned tier.",
+      "label": "Normal",
+    },
+    "restricted": {
+      "effect": "Deep diagnostics and question-generation fallback are paused. Tests, scoring and plans still work, and learners see the “slower than usual” banner.",
+      "label": "Restricted",
+    },
+    "warning": {
+      "effect": "Alert sent. Eligible operations route to the Fast tier.",
+      "label": "Warning",
+    },
+  },
+  "overrides": [
+    {
+      "computed": "restricted",
+      "overridden": true,
+      "ratio": 0.5,
+      "state": "normal",
+      "warningAtInr": 200,
+    },
+    {
+      "computed": "restricted",
+      "overridden": false,
+      "ratio": 0.5,
+      "state": "restricted",
+      "warningAtInr": 200,
+    },
+  ],
+  "reasons": [
+    "Write at least 10 characters so the audit log explains this change.",
+    "Write at least 10 characters so the audit log explains this change.",
+    "Write at least 10 characters so the audit log explains this change.",
+    null,
+  ],
+}
+`;
+
+exports[`admin rules > cycle path, question lifecycle, refunds, formatting 1`] = `
+{
+  "blockers": [
+    [
+      "Still running: Schema, Math check, Answer matches solution, Difficulty estimate, Duplicate check, Exam style, Safety.",
+      "Needs a human review.",
+    ],
+    [
+      "Already published.",
+    ],
+    [
+      "Failed: Math check.",
+    ],
+    [],
+    [
+      "Still running: Answer matches solution.",
+      "Needs a human review.",
+    ],
+  ],
+  "canSuspend": [
+    true,
+    false,
+  ],
+  "cyc": [
+    [
+      "a",
+      "b",
+      "c",
+      "d",
+    ],
+    null,
+    [
+      "a",
+    ],
+    [
+      "a",
+      "b",
+      "c",
+    ],
+    null,
+  ],
+  "labels": [
+    {
+      "difficulty": "Difficulty estimate",
+      "duplicate": "Duplicate check",
+      "exam_style": "Exam style",
+      "human": "Human review",
+      "math": "Math check",
+      "safety": "Safety",
+      "schema": "Schema",
+      "semantic": "Answer matches solution",
+    },
+    {
+      "draft": "Draft",
+      "published": "Published",
+      "reviewed": "Reviewed",
+      "suspended": "Suspended",
+      "validated": "Validated",
+    },
+  ],
+  "refunds": [
+    {
+      "eligible": false,
+      "inTime": false,
+      "notes": [
+        "Outside the 7-day window (ended 26 Sep)",
+        "Used 10% of the allowance (under 20%)",
+      ],
+      "underUsage": true,
+      "until": "2026-09-26",
+    },
+    {
+      "eligible": false,
+      "inTime": false,
+      "notes": [
+        "Outside the 7-day window (ended 8 Sep)",
+        "Used 50% of the allowance (limit 20%)",
+      ],
+      "underUsage": false,
+      "until": "2026-09-08",
+    },
+  ],
+  "stamps": [
+    "27 Sep, 14:05",
+    "1 Jan, 01:30",
+    "2026-09-28",
+    "₹1,234.50",
+    "23.4%",
+  ],
+}
+`;
+
+exports[`billing rules > checkout items and coupons 1`] = `
+{
+  "coupons": [
+    {
+      "code": "",
+      "message": "Enter a code.",
+      "ok": false,
+    },
+    {
+      "code": "NOPE",
+      "message": "That code isn't valid. Check the spelling and try again.",
+      "ok": false,
+    },
+    {
+      "code": "EARLYACCESS",
+      "message": "EARLYACCESS works on passes, not credit packs.",
+      "ok": false,
+    },
+    {
+      "bonusCredits": 100,
+      "code": "EARLYACCESS",
+      "discountInr": 59,
+      "message": "EARLYACCESS applied: ₹59 off + 100 bonus credits.",
+      "ok": true,
+    },
+    {
+      "bonusCredits": 100,
+      "code": "EARLYACCESS",
+      "discountInr": 52,
+      "message": "EARLYACCESS applied: ₹52 off + 100 bonus credits.",
+      "ok": true,
+    },
+    {
+      "code": "EARLYACCESS",
+      "message": "EARLYACCESS has already been used on this account. It works once per student.",
+      "ok": false,
+    },
+    {
+      "code": "EARLYACCESS",
+      "message": "EARLYACCESS is for a first pass only.",
+      "ok": false,
+    },
+    {
+      "code": "EARLYACCESS",
+      "message": "EARLYACCESS has ended.",
+      "ok": false,
+    },
+  ],
+  "pass": [
+    {
+      "code": "plus",
+      "kind": "plan_pass",
+      "note": "350 credits a day for 30 days, refilled at 00:00 IST.",
+      "priceInr": 299,
+      "prorationInr": undefined,
+      "title": "Plus · 30-day pass",
+    },
+    {
+      "code": "pro",
+      "kind": "plan_pass",
+      "note": "New 30-day pass starts now. Today's balance tops up to 500.",
+      "priceInr": 349,
+      "prorationInr": 86,
+      "title": "Pro · 30-day pass",
+    },
+    {
+      "code": "starter",
+      "kind": "plan_pass",
+      "note": "200 credits a day for 30 days, refilled at 00:00 IST.",
+      "priceInr": 199,
+      "prorationInr": undefined,
+      "title": "Starter · 30-day pass",
+    },
+    {
+      "code": "pack_250",
+      "kind": "credit_pack",
+      "note": "Valid 90 days. Used after your daily and promotional credits.",
+      "priceInr": 99,
+      "title": "250 credits",
+    },
+  ],
+  "statusLabels": {
+    "active": "Active",
+    "ended": "Ended",
+    "ends_soon": "Ends soon",
+    "renewal_failed": "Renewal failed",
+  },
+  "totals": [
+    299,
+    263,
+    211,
+    299,
+  ],
+}
+`;
+
+exports[`billing rules > passStatus and proration 1`] = `
+{
+  "edge": [
+    {
+      "credit": 0,
+      "due": 349,
+      "remaining": 0,
+    },
+    {
+      "credit": 0,
+      "due": 349,
+      "remaining": 0,
+    },
+    {
+      "credit": 199,
+      "due": 150,
+      "remaining": 30,
+    },
+  ],
+  "pr": [
+    [
+      "free",
+      "free",
+      {
+        "credit": 0,
+        "due": 0,
+        "remaining": 13,
+      },
+    ],
+    [
+      "free",
+      "starter",
+      {
+        "credit": 0,
+        "due": 199,
+        "remaining": 13,
+      },
+    ],
+    [
+      "free",
+      "plus",
+      {
+        "credit": 0,
+        "due": 299,
+        "remaining": 13,
+      },
+    ],
+    [
+      "free",
+      "pro",
+      {
+        "credit": 0,
+        "due": 349,
+        "remaining": 13,
+      },
+    ],
+    [
+      "starter",
+      "free",
+      {
+        "credit": 86,
+        "due": 0,
+        "remaining": 13,
+      },
+    ],
+    [
+      "starter",
+      "starter",
+      {
+        "credit": 86,
+        "due": 113,
+        "remaining": 13,
+      },
+    ],
+    [
+      "starter",
+      "plus",
+      {
+        "credit": 86,
+        "due": 213,
+        "remaining": 13,
+      },
+    ],
+    [
+      "starter",
+      "pro",
+      {
+        "credit": 86,
+        "due": 263,
+        "remaining": 13,
+      },
+    ],
+    [
+      "plus",
+      "free",
+      {
+        "credit": 129,
+        "due": 0,
+        "remaining": 13,
+      },
+    ],
+    [
+      "plus",
+      "starter",
+      {
+        "credit": 129,
+        "due": 70,
+        "remaining": 13,
+      },
+    ],
+    [
+      "plus",
+      "plus",
+      {
+        "credit": 129,
+        "due": 170,
+        "remaining": 13,
+      },
+    ],
+    [
+      "plus",
+      "pro",
+      {
+        "credit": 129,
+        "due": 220,
+        "remaining": 13,
+      },
+    ],
+    [
+      "pro",
+      "free",
+      {
+        "credit": 151,
+        "due": 0,
+        "remaining": 13,
+      },
+    ],
+    [
+      "pro",
+      "starter",
+      {
+        "credit": 151,
+        "due": 48,
+        "remaining": 13,
+      },
+    ],
+    [
+      "pro",
+      "plus",
+      {
+        "credit": 151,
+        "due": 148,
+        "remaining": 13,
+      },
+    ],
+    [
+      "pro",
+      "pro",
+      {
+        "credit": 151,
+        "due": 198,
+        "remaining": 13,
+      },
+    ],
+  ],
+  "status": [
+    [
+      "2026-09-25",
+      false,
+      "ended",
+    ],
+    [
+      "2026-09-25",
+      true,
+      "ended",
+    ],
+    [
+      "2026-09-27",
+      false,
+      "ends_soon",
+    ],
+    [
+      "2026-09-27",
+      true,
+      "renewal_failed",
+    ],
+    [
+      "2026-09-30",
+      false,
+      "ends_soon",
+    ],
+    [
+      "2026-09-30",
+      true,
+      "renewal_failed",
+    ],
+    [
+      "2026-10-01",
+      false,
+      "active",
+    ],
+    [
+      "2026-10-01",
+      true,
+      "renewal_failed",
+    ],
+    [
+      "2026-10-20",
+      false,
+      "active",
+    ],
+    [
+      "2026-10-20",
+      true,
+      "renewal_failed",
+    ],
+  ],
+}
+`;
+
+exports[`billing rules > refund window and reminders 1`] = `
+{
+  "reminder": "2026-10-16",
+  "w": [
+    [
+      0,
+      "2026-09-19",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": true,
+        "until": "2026-09-26",
+      },
+    ],
+    [
+      0,
+      "2026-09-20",
+      {
+        "eligible": true,
+        "inTime": true,
+        "underUsage": true,
+        "until": "2026-09-27",
+      },
+    ],
+    [
+      0,
+      "2026-09-10",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": true,
+        "until": "2026-09-17",
+      },
+    ],
+    [
+      0.19,
+      "2026-09-19",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": true,
+        "until": "2026-09-26",
+      },
+    ],
+    [
+      0.19,
+      "2026-09-20",
+      {
+        "eligible": true,
+        "inTime": true,
+        "underUsage": true,
+        "until": "2026-09-27",
+      },
+    ],
+    [
+      0.19,
+      "2026-09-10",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": true,
+        "until": "2026-09-17",
+      },
+    ],
+    [
+      0.2,
+      "2026-09-19",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": false,
+        "until": "2026-09-26",
+      },
+    ],
+    [
+      0.2,
+      "2026-09-20",
+      {
+        "eligible": false,
+        "inTime": true,
+        "underUsage": false,
+        "until": "2026-09-27",
+      },
+    ],
+    [
+      0.2,
+      "2026-09-10",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": false,
+        "until": "2026-09-17",
+      },
+    ],
+    [
+      0.5,
+      "2026-09-19",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": false,
+        "until": "2026-09-26",
+      },
+    ],
+    [
+      0.5,
+      "2026-09-20",
+      {
+        "eligible": false,
+        "inTime": true,
+        "underUsage": false,
+        "until": "2026-09-27",
+      },
+    ],
+    [
+      0.5,
+      "2026-09-10",
+      {
+        "eligible": false,
+        "inTime": false,
+        "underUsage": false,
+        "until": "2026-09-17",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`config rules > confidence / severity / priority / retest outcome 1`] = `
+{
+  "pri": [
+    [
+      0,
+      4,
+    ],
+    [
+      0.24,
+      4,
+    ],
+    [
+      0.25,
+      3,
+    ],
+    [
+      0.49,
+      3,
+    ],
+    [
+      0.5,
+      2,
+    ],
+    [
+      0.74,
+      2,
+    ],
+    [
+      0.75,
+      1,
+    ],
+    [
+      1,
+      1,
+    ],
+  ],
+  "ret": [
+    [
+      -20,
+      3,
+      "declined",
+    ],
+    [
+      -10,
+      3,
+      "declined",
+    ],
+    [
+      -9,
+      3,
+      "stable",
+    ],
+    [
+      0,
+      3,
+      "stable",
+    ],
+    [
+      9,
+      3,
+      "stable",
+    ],
+    [
+      10,
+      3,
+      "improved",
+    ],
+    [
+      40,
+      3,
+      "improved",
+    ],
+    [
+      40,
+      2,
+      "insufficient",
+    ],
+    [
+      -40,
+      0,
+      "insufficient",
+    ],
+  ],
+  "rows": [
+    [
+      0,
+      "insufficient",
+    ],
+    [
+      1,
+      "insufficient",
+    ],
+    [
+      2,
+      "low",
+    ],
+    [
+      3,
+      "medium",
+    ],
+    [
+      4,
+      "medium",
+    ],
+    [
+      5,
+      "high",
+    ],
+    [
+      6,
+      "high",
+    ],
+    [
+      7,
+      "high",
+    ],
+  ],
+  "sev": [
+    [
+      "insufficient",
+      0,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      34,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      35,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      49,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      50,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      64,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      65,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      79,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      80,
+      "insufficient",
+      false,
+    ],
+    [
+      "insufficient",
+      100,
+      "insufficient",
+      false,
+    ],
+    [
+      "low",
+      0,
+      "critical",
+      false,
+    ],
+    [
+      "low",
+      34,
+      "critical",
+      false,
+    ],
+    [
+      "low",
+      35,
+      "weak",
+      false,
+    ],
+    [
+      "low",
+      49,
+      "weak",
+      false,
+    ],
+    [
+      "low",
+      50,
+      "needs_work",
+      false,
+    ],
+    [
+      "low",
+      64,
+      "needs_work",
+      false,
+    ],
+    [
+      "low",
+      65,
+      "stable",
+      false,
+    ],
+    [
+      "low",
+      79,
+      "stable",
+      false,
+    ],
+    [
+      "low",
+      80,
+      "strong",
+      false,
+    ],
+    [
+      "low",
+      100,
+      "strong",
+      false,
+    ],
+    [
+      "medium",
+      0,
+      "critical",
+      true,
+    ],
+    [
+      "medium",
+      34,
+      "critical",
+      true,
+    ],
+    [
+      "medium",
+      35,
+      "weak",
+      true,
+    ],
+    [
+      "medium",
+      49,
+      "weak",
+      true,
+    ],
+    [
+      "medium",
+      50,
+      "needs_work",
+      true,
+    ],
+    [
+      "medium",
+      64,
+      "needs_work",
+      true,
+    ],
+    [
+      "medium",
+      65,
+      "stable",
+      true,
+    ],
+    [
+      "medium",
+      79,
+      "stable",
+      true,
+    ],
+    [
+      "medium",
+      80,
+      "strong",
+      true,
+    ],
+    [
+      "medium",
+      100,
+      "strong",
+      true,
+    ],
+    [
+      "high",
+      0,
+      "critical",
+      true,
+    ],
+    [
+      "high",
+      34,
+      "critical",
+      true,
+    ],
+    [
+      "high",
+      35,
+      "weak",
+      true,
+    ],
+    [
+      "high",
+      49,
+      "weak",
+      true,
+    ],
+    [
+      "high",
+      50,
+      "needs_work",
+      true,
+    ],
+    [
+      "high",
+      64,
+      "needs_work",
+      true,
+    ],
+    [
+      "high",
+      65,
+      "stable",
+      true,
+    ],
+    [
+      "high",
+      79,
+      "stable",
+      true,
+    ],
+    [
+      "high",
+      80,
+      "strong",
+      true,
+    ],
+    [
+      "high",
+      100,
+      "strong",
+      true,
+    ],
+  ],
+}
+`;
+
+exports[`config rules > constants 1`] = `
+{
+  "COST": {
+    "breakdown": 10,
+    "chapterDiagnostic": 35,
+    "deepDiagnostic": 120,
+    "explanation": 10,
+    "fullDiagnostic": 70,
+    "hint": 5,
+    "practiceSet5": 20,
+    "retest": 50,
+    "studyPlan": 30,
+  },
+  "PACKS": [
+    {
+      "credits": 100,
+      "id": "pack_100",
+      "priceInr": 49,
+    },
+    {
+      "credits": 250,
+      "id": "pack_250",
+      "priceInr": 99,
+    },
+    {
+      "bestValue": true,
+      "credits": 600,
+      "id": "pack_600",
+      "priceInr": 199,
+    },
+  ],
+  "PLANS": {
+    "free": {
+      "code": "free",
+      "engine": "fast_only",
+      "features": [
+        "100 welcome credits once",
+        "30 credits every month",
+        "Root-cause report on every diagnostic",
+      ],
+      "name": "Free",
+      "period": "monthly",
+      "periodCredits": 30,
+      "priceInr": 0,
+      "summary": "Your first diagnostic and study plan, then light practice.",
+    },
+    "plus": {
+      "code": "plus",
+      "engine": "auto",
+      "features": [
+        "350 credits a day, refilled at 00:00 IST",
+        "Deep reasoning on hard problems",
+        "Plan adapts after every practice session",
+        "Priority queue",
+      ],
+      "name": "Plus",
+      "period": "daily",
+      "periodCredits": 350,
+      "priceInr": 299,
+      "recommended": true,
+      "summary": "More credits, engine chosen for every question.",
+    },
+    "pro": {
+      "code": "pro",
+      "engine": "auto_extended",
+      "features": [
+        "500 credits a day, refilled at 00:00 IST",
+        "Extra reasoning depth",
+        "Plan re-optimized every morning",
+        "60-minute Deep diagnostic",
+      ],
+      "name": "Pro",
+      "period": "daily",
+      "periodCredits": 500,
+      "priceInr": 349,
+      "summary": "For the final-months sprint.",
+    },
+    "starter": {
+      "code": "starter",
+      "engine": "learner_choice",
+      "features": [
+        "200 credits a day, refilled at 00:00 IST",
+        "Choose Fast or Standard explanations",
+        "Plan updates after each retest",
+      ],
+      "name": "Starter",
+      "period": "daily",
+      "periodCredits": 200,
+      "priceInr": 199,
+      "summary": "Daily practice with the explanation engine you choose.",
+    },
+  },
+  "presets": [
+    30,
+    45,
+    60,
+    90,
+    120,
+  ],
+}
+`;
+
+exports[`config rules > credit state and 'enough for' 1`] = `
+{
+  "cost": [
+    20,
+    40,
+    60,
+  ],
+  "enough": [
+    [
+      0,
+      "Your plan and revision tasks don't need credits.",
+    ],
+    [
+      4,
+      "Your plan and revision tasks don't need credits.",
+    ],
+    [
+      5,
+      "Enough for hints and explanations only.",
+    ],
+    [
+      19,
+      "Enough for hints and explanations only.",
+    ],
+    [
+      20,
+      "Enough for 1 practice set.",
+    ],
+    [
+      60,
+      "Enough for 3 practice sets.",
+    ],
+    [
+      69,
+      "Enough for 3 practice sets.",
+    ],
+    [
+      70,
+      "Enough for 1 retest and 1 practice set.",
+    ],
+    [
+      71,
+      "Enough for 1 retest and 1 practice set.",
+    ],
+    [
+      90,
+      "Enough for 1 retest and 2 practice sets.",
+    ],
+    [
+      91,
+      "Enough for 1 retest and 2 practice sets.",
+    ],
+    [
+      500,
+      "Enough for 1 retest and 22 practice sets.",
+    ],
+  ],
+  "states": [
+    [
+      0,
+      30,
+      "exhausted",
+    ],
+    [
+      0,
+      200,
+      "exhausted",
+    ],
+    [
+      0,
+      500,
+      "exhausted",
+    ],
+    [
+      1,
+      30,
+      "critical",
+    ],
+    [
+      1,
+      200,
+      "critical",
+    ],
+    [
+      1,
+      500,
+      "critical",
+    ],
+    [
+      19,
+      30,
+      "critical",
+    ],
+    [
+      19,
+      200,
+      "critical",
+    ],
+    [
+      19,
+      500,
+      "critical",
+    ],
+    [
+      20,
+      30,
+      "normal",
+    ],
+    [
+      20,
+      200,
+      "low",
+    ],
+    [
+      20,
+      500,
+      "low",
+    ],
+    [
+      40,
+      30,
+      "normal",
+    ],
+    [
+      40,
+      200,
+      "low",
+    ],
+    [
+      40,
+      500,
+      "low",
+    ],
+    [
+      41,
+      30,
+      "normal",
+    ],
+    [
+      41,
+      200,
+      "normal",
+    ],
+    [
+      41,
+      500,
+      "low",
+    ],
+    [
+      100,
+      30,
+      "normal",
+    ],
+    [
+      100,
+      200,
+      "normal",
+    ],
+    [
+      100,
+      500,
+      "low",
+    ],
+    [
+      350,
+      30,
+      "normal",
+    ],
+    [
+      350,
+      200,
+      "normal",
+    ],
+    [
+      350,
+      500,
+      "normal",
+    ],
+  ],
+}
+`;
+
+exports[`diagnosis rules > isCorrect on mcq and numerical questions 1`] = `
+[
+  true,
+  false,
+  false,
+  false,
+  true,
+  false,
+  false,
+  true,
+  false,
+]
+`;
+
+exports[`diagnosis rules > mastery smoothing and answer checking 1`] = `
+{
+  "labels": {
+    "calculation": "Calculation",
+    "careless": "Careless slip",
+    "conceptual": "Conceptual",
+    "misread": "Misread question",
+    "prerequisite": "Prerequisite gap",
+    "strategy": "Strategy",
+    "time_pressure": "Time pressure",
+  },
+  "m": [
+    [
+      0,
+      3,
+      13,
+    ],
+    [
+      1,
+      3,
+      38,
+    ],
+    [
+      2,
+      3,
+      63,
+    ],
+    [
+      3,
+      3,
+      88,
+    ],
+    [
+      0,
+      0,
+      50,
+    ],
+    [
+      5,
+      5,
+      92,
+    ],
+  ],
+}
+`;
+
+exports[`diagnosis rules > scoring and diagnosis on the sample attempts 1`] = `
+{
+  "compare": [
+    {
+      "after": 63,
+      "before": 63,
+      "conceptId": "friction",
+      "correct": 2,
+      "delta": 0,
+      "outcome": "stable",
+      "total": 3,
+    },
+    {
+      "after": 88,
+      "before": 38,
+      "conceptId": "resolution",
+      "correct": 3,
+      "delta": 50,
+      "outcome": "improved",
+      "total": 3,
+    },
+    {
+      "after": 88,
+      "before": 63,
+      "conceptId": "circular",
+      "correct": 3,
+      "delta": 25,
+      "outcome": "improved",
+      "total": 3,
+    },
+  ],
+  "findD": [
+    {
+      "avgSeconds": 138,
+      "cause": "conceptual",
+      "causeText": "Took mg cos θ along the incline, the component that belongs to the normal force.",
+      "conceptId": "resolution",
+      "confidence": "medium",
+      "correct": 1,
+      "expectedSeconds": 90,
+      "marks": [
+        "incorrect",
+        "correct",
+        "incorrect",
+      ],
+      "mastery": 38,
+      "minutes": 35,
+      "next": "Revise the incline components, then 10 targeted questions.",
+      "priority": 1,
+      "severity": "weak",
+      "total": 3,
+    },
+    {
+      "avgSeconds": 97,
+      "cause": "conceptual",
+      "causeText": "Used the limiting value μN when the block was not about to slip.",
+      "conceptId": "friction",
+      "confidence": "medium",
+      "correct": 2,
+      "expectedSeconds": 100,
+      "marks": [
+        "incorrect",
+        "correct",
+        "correct",
+      ],
+      "mastery": 63,
+      "minutes": 40,
+      "next": "Practise limiting vs actual friction: 10 questions.",
+      "priority": 3,
+      "severity": "needs_work",
+      "total": 3,
+    },
+    {
+      "avgSeconds": 88,
+      "cause": "time_pressure",
+      "causeText": "The method is right; one question was left unanswered near the end.",
+      "conceptId": "circular",
+      "confidence": "medium",
+      "correct": 2,
+      "expectedSeconds": 110,
+      "marks": [
+        "correct",
+        "unanswered",
+        "correct",
+      ],
+      "mastery": 63,
+      "minutes": 40,
+      "next": "A timed practice set. The method is already right.",
+      "priority": 3,
+      "severity": "needs_work",
+      "total": 3,
+    },
+    {
+      "avgSeconds": 43,
+      "cause": null,
+      "causeText": "No errors on this concept.",
+      "conceptId": "vectors",
+      "confidence": "medium",
+      "correct": 3,
+      "expectedSeconds": 60,
+      "marks": [
+        "correct",
+        "correct",
+        "correct",
+      ],
+      "mastery": 88,
+      "minutes": 25,
+      "next": "Nothing to do now. A later retest checks it again.",
+      "priority": 4,
+      "severity": "strong",
+      "total": 3,
+    },
+    {
+      "avgSeconds": 70,
+      "cause": null,
+      "causeText": "No errors on this concept.",
+      "conceptId": "work-energy",
+      "confidence": "medium",
+      "correct": 3,
+      "expectedSeconds": 80,
+      "marks": [
+        "correct",
+        "correct",
+        "correct",
+      ],
+      "mastery": 88,
+      "minutes": 35,
+      "next": "Nothing to do now. A later retest checks it again.",
+      "priority": 4,
+      "severity": "strong",
+      "total": 3,
+    },
+  ],
+  "findR": [
+    {
+      "avgSeconds": 75,
+      "cause": "conceptual",
+      "causeText": "Used the limiting value μN when the block was not about to slip.",
+      "conceptId": "friction",
+      "confidence": "medium",
+      "correct": 2,
+      "expectedSeconds": 90,
+      "marks": [
+        "incorrect",
+        "correct",
+        "correct",
+      ],
+      "mastery": 63,
+      "minutes": 40,
+      "next": "Practise limiting vs actual friction: 10 questions.",
+      "priority": 1,
+      "severity": "needs_work",
+      "total": 3,
+    },
+    {
+      "avgSeconds": 65,
+      "cause": null,
+      "causeText": "No errors on this concept.",
+      "conceptId": "resolution",
+      "confidence": "medium",
+      "correct": 3,
+      "expectedSeconds": 90,
+      "marks": [
+        "correct",
+        "correct",
+        "correct",
+      ],
+      "mastery": 88,
+      "minutes": 35,
+      "next": "Nothing to do now. A later retest checks it again.",
+      "priority": 3,
+      "severity": "strong",
+      "total": 3,
+    },
+    {
+      "avgSeconds": 88,
+      "cause": null,
+      "causeText": "No errors on this concept.",
+      "conceptId": "circular",
+      "confidence": "medium",
+      "correct": 3,
+      "expectedSeconds": 100,
+      "marks": [
+        "correct",
+        "correct",
+        "correct",
+      ],
+      "mastery": 88,
+      "minutes": 40,
+      "next": "Nothing to do now. A later retest checks it again.",
+      "priority": 3,
+      "severity": "strong",
+      "total": 3,
+    },
+  ],
+  "scoreD": {
+    "accuracy": 79,
+    "attempted": 14,
+    "correct": 11,
+    "incorrect": 3,
+    "max": 60,
+    "score": 41,
+    "seconds": 1310,
+    "total": 15,
+    "unanswered": 1,
+  },
+  "scoreR": {
+    "accuracy": 89,
+    "attempted": 9,
+    "correct": 8,
+    "incorrect": 1,
+    "max": 36,
+    "score": 31,
+    "seconds": 685,
+    "total": 9,
+    "unanswered": 0,
+  },
+}
+`;
+
+exports[`format helpers > dates and durations 1`] = `
+{
+  "ago": [
+    "Not yet",
+    "Today",
+    "Yesterday",
+    "7 days ago",
+  ],
+  "between": 30,
+  "clock": [
+    "0:00",
+    "0:59",
+    "27:10",
+  ],
+  "dm": "1 Dec",
+  "dur": [
+    "0s",
+    "45s",
+    "2m 40s",
+    "3m",
+  ],
+  "full": "14 Mar 2027",
+  "inr": "₹12,34,567",
+  "rel": [
+    "Today",
+    "Tomorrow",
+    "Yesterday",
+    "Mon 5 Oct",
+  ],
+  "short": "Sun 27 Sep",
+  "signed": [
+    "+5",
+    "−5",
+    "0",
+  ],
+  "wd": "Sun",
+}
+`;
+
+exports[`guardian rules > age and dates 1`] = `
+{
+  "TODAY": "2026-09-27",
+  "ages": [
+    [
+      "2008-09-27",
+      18,
+      false,
+      "2026-09-27",
+    ],
+    [
+      "2008-09-28",
+      17,
+      true,
+      "2026-09-28",
+    ],
+    [
+      "2009-01-01",
+      17,
+      true,
+      "2027-01-01",
+    ],
+    [
+      "2013-09-27",
+      13,
+      true,
+      "2031-09-27",
+    ],
+    [
+      "2010-02-29",
+      16,
+      true,
+      "2028-03-01",
+    ],
+  ],
+  "dates": [
+    "2026-10-04",
+    "2027-01-02",
+    "2026-10-05",
+    "2026-10-06",
+    "2026-09-30",
+  ],
+  "needsApproval": true,
+}
+`;
+
+exports[`guardian rules > contact helpers and constants 1`] = `
+{
+  "ADULT": 18,
+  "APPROVAL": 7,
+  "CONSENT": {
+    "deletionBusinessDays": 7,
+    "otpAttempts": 5,
+    "otpLength": 6,
+    "otpValidMinutes": 10,
+    "pendingDays": 7,
+    "reminderDays": [
+      3,
+      6,
+    ],
+    "resendSeconds": 60,
+    "sendsPerDay": 5,
+  },
+  "MIN": 13,
+  "cannot": [
+    "Test questions and answers",
+    "Notifications and settings",
+    "Hints, explanations and anything typed",
+  ],
+  "key": "lm-signup",
+  "mask": [
+    "s•••@example.com",
+    "a•••@b.c",
+    "••••••••10",
+    "+91 •••65 •••10",
+  ],
+  "mobiles": [
+    true,
+    true,
+    false,
+    false,
+    true,
+  ],
+  "see": [
+    "Latest diagnostic score and date",
+    "Weakest topics, by name and severity",
+    "This week's plan: how many tasks are done",
+    "Next retest date and retest outcomes",
+    "Purchases, and requests waiting for approval",
+  ],
+  "terms": {
+    "collect": [
+      "Name, email, date of birth and class",
+      "Test answers, scores and the study plan built from them",
+      "How much time is spent on each task",
+    ],
+    "never": [
+      "No advertising and no selling of data",
+      "Nothing is ever shared publicly",
+      "No contact with other students",
+    ],
+    "rights": [
+      "See their progress with a free guardian account",
+      "Approve and pay for every purchase",
+      "Withdraw consent or delete their data at any time",
+    ],
+  },
+  "token": "preview",
+  "valid": [
+    true,
+    false,
+    false,
+    true,
+  ],
+}
+`;

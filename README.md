@@ -48,6 +48,8 @@ src/
 
 ## Current state
 
+**Phase 2 (Backend & Logic) is in progress.** Plan, decisions and live state: `../.claude/framework/` (`STATE.md`, `STAGES.md`, `DECISIONS.md`). Pure business rules move to `src/domains/*/rules.ts`; the sample data below is replaced stage by stage (`SEAM-MAP.md`).
+
 Front end complete for build phases **A–L** on sample data (JEE Main, Physics, Class 11 Mechanics):
 learner app, money (packs, plans, checkout, payment confirmation, credit gating), guardian flows
 (both sign-up paths, `/consent/[token]`, guardian portal at `/guardian`), auth screens, and depth
