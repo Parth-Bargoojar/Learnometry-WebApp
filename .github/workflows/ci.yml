@@ -1,0 +1,63 @@
+# CI (BE-D6): typecheck, lint, unit, integration (real Postgres via the Supabase CLI), build.
+# E2E runs after merge to main and nightly; `npm run audit` (a11y/perf/PWA) is a release gate.
+name: ci
+
+on:
+  push:
+    branches: [main, "be/**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Safe defaults: the mock AI provider and no external services.
+      AI_PROVIDER_FAST: mock
+      AI_PROVIDER_STANDARD: mock
+      AI_PROVIDER_REASONING: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:cov
+
+      # Integration tests need the local Supabase stack; skipped until BE-1 adds supabase/config.toml.
+      - name: Detect Supabase project
+        id: supabase
+        run: echo "present=$([ -f supabase/config.toml ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - uses: supabase/setup-cli@v1
+        if: steps.supabase.outputs.present == 'true'
+        with:
+          version: latest
+      - name: Start local Supabase and run integration tests
+        if: steps.supabase.outputs.present == 'true'
+        run: |
+          supabase start -x studio,imgproxy,edge-runtime,logflare,vector,mailpit
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          export DIRECT_DATABASE_URL="$DB_URL" NEXT_PUBLIC_SUPABASE_URL="$API_URL" NEXT_PUBLIC_SUPABASE_ANON_KEY="$ANON_KEY" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          npm run db:seed
+          npm run test:int
+
+      - run: npm run build
+
+  audit-deps:
+    runs-on: ubuntu-latest
+    continue-on-error: true # a warning job, not a gate (BE-D6)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
