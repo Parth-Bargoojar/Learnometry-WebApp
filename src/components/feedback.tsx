@@ -25,16 +25,19 @@ export function EmptyState({
   body,
   action,
   mascot = true,
+  as: Heading = "h2",
 }: {
   title: string;
   body: string;
   action?: ReactNode;
   mascot?: boolean;
+  /** "h1" where the page has no top bar to carry the page title (the root 404). */
+  as?: "h1" | "h2";
 }) {
   return (
     <div role="status" className="mx-auto flex max-w-[420px] flex-col items-center gap-3 px-4 py-10 text-center">
       {mascot ? <Mascot /> : null}
-      <h2 className="mt-2 text-lg font-semibold text-ink">{title}</h2>
+      <Heading className="mt-2 text-lg font-semibold text-ink">{title}</Heading>
       <p className="text-[15px] leading-relaxed text-muted">{body}</p>
       {action ? <div className="mt-2">{action}</div> : null}
     </div>

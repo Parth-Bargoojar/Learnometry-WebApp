@@ -40,7 +40,7 @@ export default async function ProgressHistoryPage(props: PageProps<"/progress/hi
                   href={f.key === "all" ? "/progress/history" : `/progress/history?type=${f.key}`}
                   aria-current={on ? "page" : undefined}
                   scroll={false}
-                  className={`inline-flex h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold ${
+                  className={`inline-flex h-10 touch:h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold ${
                     on ? "border-2 border-line bg-surface text-ink shadow-brutal-sm" : "border-border-subtle bg-surface text-muted hover:text-ink"
                   }`}
                 >

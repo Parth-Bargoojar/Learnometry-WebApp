@@ -7,8 +7,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, ChevronLeft, LifeBuoy, LogOut, Monitor, Moon, Settings, Sun, UserCheck, Users, type LucideIcon } from "lucide-react";
 import { guardianAccount, guardianLearners } from "@/lib/data";
 import { siteUrl } from "@/lib/site";
+import { clearDeviceData } from "@/lib/pwa";
 import { Dialog } from "./dialog";
 import { Popover } from "./popover";
+import { OfflineBanner } from "./pwa";
 import { ThemeProvider, useTheme, type ThemePref } from "./theme";
 
 /*
@@ -56,7 +58,7 @@ function Frame({ children }: { children: ReactNode }) {
       </a>
       <header className="sticky top-0 z-20 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
         <div className="mx-auto flex h-[var(--topbar-h)] max-w-[1008px] items-center gap-2 px-4 sm:px-6">
-          <Link href="/guardian" aria-label="Guardian overview" className="flex h-11 shrink-0 items-center">
+          <Link href="/guardian" aria-label="Guardian overview" className="flex h-11 min-w-11 shrink-0 items-center">
             <Image src="/logo-mark.png" alt="" width={64} height={64} sizes="36px" className="size-9 sm:hidden" priority />
             <Image src="/primary-logo.png" alt="Learnometry" width={611} height={133} sizes="160px" className="hidden h-8 w-auto sm:block dark:sm:hidden" priority />
             <Image src="/primary-logo-dark.png" alt="Learnometry" width={611} height={133} sizes="160px" className="hidden h-8 w-auto dark:sm:block" />
@@ -73,6 +75,7 @@ function Frame({ children }: { children: ReactNode }) {
 
       <main id="main" className="flex-1 px-4 pb-16 pt-5 text-[17px] sm:px-6 sm:pt-8">
         <div className="mx-auto w-full max-w-[960px]">
+          <OfflineBanner />
           {!isOverview ? (
             <Link href="/guardian" className="-ml-2 mb-3 inline-flex h-11 items-center gap-0.5 rounded-btn pr-2 text-sm font-semibold text-muted hover:text-ink">
               <ChevronLeft aria-hidden="true" className="size-5" />
@@ -179,7 +182,7 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
               type="button"
               aria-pressed={pref === t.value}
               onClick={() => setPref(t.value)}
-              className={`flex h-10 items-center justify-center gap-1.5 rounded-full border-2 text-sm font-semibold ${
+              className={`flex h-10 touch:h-11 items-center justify-center gap-1.5 rounded-full border-2 text-sm font-semibold ${
                 pref === t.value ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:text-ink"
               }`}
             >
@@ -189,7 +192,7 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
           ))}
         </div>
       </fieldset>
-      <Link href="/login" className={`${link} mt-5 border-t border-border-subtle pt-2`}>
+      <Link href="/login" onClick={() => void clearDeviceData()} className={`${link} mt-5 border-t border-border-subtle pt-2`}>
         <LogOut aria-hidden="true" className="size-5 text-muted" />
         Sign out
       </Link>

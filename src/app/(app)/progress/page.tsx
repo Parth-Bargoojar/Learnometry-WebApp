@@ -35,7 +35,7 @@ export default function ProgressPage() {
           <div className="mt-5 flex flex-col gap-6">
             {targeted.map((s) => (
               <div key={s.conceptId}>
-                <Link href={`/progress/concepts/${s.conceptId}`} className="mb-2 inline-block text-sm font-semibold text-ink hover:underline hover:underline-offset-4">
+                <Link href={`/progress/concepts/${s.conceptId}`} className="mb-2 inline-flex min-h-6 touch:min-h-11 items-center text-sm font-semibold text-ink hover:underline hover:underline-offset-4">
                   {conceptById(s.conceptId).name}
                 </Link>
                 <PairedBar before={s.baselineMastery ?? 0} after={s.mastery} label={conceptById(s.conceptId).name} />

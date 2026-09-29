@@ -132,7 +132,7 @@ export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; sta
       </div>
 
       <div className="overflow-hidden rounded-card border border-border-subtle bg-surface">
-        <div className="overflow-x-auto">
+        <div tabIndex={0} className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <caption className="sr-only">Questions</caption>
             <thead>
@@ -143,7 +143,7 @@ export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; sta
                     aria-label="Select all shown questions"
                     checked={allOn}
                     onChange={() => setSelected(allOn ? new Set() : new Set(visible.map((r) => r.meta.id)))}
-                    className="size-4 accent-[var(--color-ink)]"
+                    className="size-6 accent-[var(--color-ink)]"
                   />
                 </th>
                 <th scope="col" className={th}>Question</th>
@@ -160,7 +160,7 @@ export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; sta
               {visible.map((r) => (
                 <tr key={r.meta.id} className={selected.has(r.meta.id) ? "bg-sunken" : undefined}>
                   <td className={td}>
-                    <input type="checkbox" aria-label={`Select ${r.meta.id}`} checked={selected.has(r.meta.id)} onChange={() => toggle(r.meta.id)} className="size-4 accent-[var(--color-ink)]" />
+                    <input type="checkbox" aria-label={`Select ${r.meta.id}`} checked={selected.has(r.meta.id)} onChange={() => toggle(r.meta.id)} className="size-6 accent-[var(--color-ink)]" />
                   </td>
                   <td className={`${td} max-w-md`}>
                     <Link href={`/admin/questions/${r.meta.id}`} className="font-mono text-[13px] font-semibold text-ink underline decoration-border-subtle underline-offset-4 hover:decoration-line">

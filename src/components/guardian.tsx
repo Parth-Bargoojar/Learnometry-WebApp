@@ -11,6 +11,7 @@ import { SHARED, useShared } from "@/lib/local-store";
 import { usePurchaseRequests } from "@/lib/requests";
 import { dayMonth, fullDate } from "@/lib/format";
 import type { PurchaseRequest } from "@/lib/types";
+import { clearDeviceData } from "@/lib/pwa";
 import { CheckoutDialog, PaymentStatus, RequestStatus } from "./billing";
 import { useCountdown } from "./auth-recovery";
 import { Dialog } from "./dialog";
@@ -327,7 +328,7 @@ export function GuardianSettings() {
         <p className="mt-4 text-sm text-muted">
           We email you about purchase requests, consent reminders and retest results. Payment receipts are always sent.
         </p>
-        <Link href="/login" className={btn("secondary", "md", "mt-4")}>
+        <Link href="/login" onClick={() => void clearDeviceData()} className={btn("secondary", "md", "mt-4")}>
           Sign out
         </Link>
       </Card>

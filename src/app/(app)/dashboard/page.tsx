@@ -22,6 +22,7 @@ import { GetCreditsButton } from "@/components/credit-gate";
 import { Mascot } from "@/components/feedback";
 import { PairedBar } from "@/components/charts";
 import { TaskList } from "@/components/tasks";
+import { InstallCard } from "@/components/pwa";
 
 export const metadata: Metadata = { title: "Home" };
 
@@ -279,6 +280,8 @@ function ActivePlan({ balance }: { balance: number }) {
           </div>
         </Card>
       </div>
+      {/* Only after a first diagnosis (§9.8). Last on the page so it can't shift anything above it. */}
+      <InstallCard />
     </>
   );
 }

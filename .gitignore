@@ -45,3 +45,5 @@ next-env.d.ts
 # audit artifacts
 m-*.png
 
+# phase L audit output
+/audit-report/

@@ -18,15 +18,19 @@ import {
   Target,
   TrendingUp,
   CalendarCheck,
+  Keyboard,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 import { PLANS, creditStateFor } from "@/lib/config";
 import { credits, learner } from "@/lib/data";
 import { routeInfo } from "@/lib/routes";
+import { clearDeviceData, useStandalone } from "@/lib/pwa";
 import { ThemeProvider, useTheme, type ThemePref } from "./theme";
 import { Dialog } from "./dialog";
 import { NotificationBell } from "./notifications";
+import { KeyboardSheet, useShortcutSheet } from "./keyboard-sheet";
+import { OfflineBanner } from "./pwa";
 
 /* DS §9 — order locked: Home, Assess, Practice, Plan, Progress. */
 const PRIMARY: { href: string; label: string; icon: LucideIcon }[] = [
@@ -60,6 +64,9 @@ function ShellFrame({ children }: { children: ReactNode }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const first = useRef(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const keys = useShortcutSheet();
+  // An installed app has no browser Back button, so the shell keeps its own at every width.
+  const standalone = useStandalone();
 
   // On client navigation, move focus to the new page's h1 (a11y §14) — not on first load.
   useEffect(() => {
@@ -79,7 +86,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <Sidebar section={info.section} />
+      <Sidebar section={info.section} onShortcuts={keys.show} />
 
       <div className="flex min-h-screen flex-col lg:pl-[var(--sidebar-w)] print:pl-0">
         <header className="print:hidden sticky top-0 z-20 border-b border-border-subtle bg-surface/95 backdrop-blur-md">
@@ -87,14 +94,14 @@ function ShellFrame({ children }: { children: ReactNode }) {
             {info.parent ? (
               <Link
                 href={info.parent.href}
-                className="-ml-2 flex h-11 items-center gap-0.5 rounded-btn pr-2 text-sm font-semibold text-muted hover:text-ink lg:hidden"
+                className={`-ml-2 flex h-11 items-center gap-0.5 rounded-btn pr-2 text-sm font-semibold text-muted hover:text-ink ${standalone ? "" : "lg:hidden"}`}
               >
                 <ChevronLeft aria-hidden="true" className="size-5" />
                 <span className="sr-only">Back to </span>
                 {info.parent.label}
               </Link>
             ) : (
-              <Link href="/dashboard" aria-label="Learnometry home" className="-ml-1 flex size-11 items-center justify-center lg:hidden">
+              <Link href="/dashboard" aria-label="Learnometry home" className="-ml-1 flex size-11 shrink-0 items-center justify-center lg:hidden">
                 <Image src="/logo-mark.png" alt="" width={64} height={64} sizes="36px" className="size-9" priority />
               </Link>
             )}
@@ -123,12 +130,16 @@ function ShellFrame({ children }: { children: ReactNode }) {
         </header>
 
         <main id="main" className="flex-1 px-4 pb-[calc(var(--bottomnav-h)+28px)] pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pb-12 lg:pt-8">
-          <div className="mx-auto w-full max-w-[1200px]">{children}</div>
+          <div className="mx-auto w-full max-w-[1200px]">
+            <OfflineBanner />
+            {children}
+          </div>
         </main>
       </div>
 
       <BottomTabs section={info.section} />
       <AccountSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <KeyboardSheet open={keys.open} onClose={keys.close} />
     </>
   );
 }
@@ -139,9 +150,9 @@ function navItemClass(active: boolean) {
   }`;
 }
 
-function Sidebar({ section }: { section: string }) {
+function Sidebar({ section, onShortcuts }: { section: string; onShortcuts: () => void }) {
   return (
-    <aside className="print:hidden fixed inset-y-0 left-0 z-20 hidden w-[var(--sidebar-w)] flex-col border-r border-border-subtle bg-background lg:flex">
+    <aside aria-label="Sidebar" className="print:hidden fixed inset-y-0 left-0 z-20 hidden w-[var(--sidebar-w)] flex-col border-r border-border-subtle bg-background lg:flex">
       <Link href="/dashboard" aria-label="Learnometry home" className="flex h-[var(--topbar-h)] items-center px-5">
         <Image src="/primary-logo.png" alt="Learnometry" width={611} height={133} sizes="180px" className="h-9 w-auto dark:hidden" priority />
         <Image src="/primary-logo-dark.png" alt="Learnometry" width={611} height={133} sizes="180px" className="hidden h-9 w-auto dark:block" />
@@ -161,6 +172,14 @@ function Sidebar({ section }: { section: string }) {
           </Link>
         ))}
       </nav>
+      <button
+        type="button"
+        onClick={onShortcuts}
+        className="mx-3 mb-2 flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm font-medium text-muted hover:bg-sunken hover:text-ink"
+      >
+        <Keyboard aria-hidden="true" className="size-4 shrink-0" />
+        Keyboard shortcuts
+      </button>
       <UserBlock />
     </aside>
   );
@@ -258,7 +277,7 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
               type="button"
               aria-pressed={pref === t.value}
               onClick={() => setPref(t.value)}
-              className={`flex h-10 items-center justify-center gap-1.5 rounded-full border-2 text-sm font-semibold ${
+              className={`flex h-10 touch:h-11 items-center justify-center gap-1.5 rounded-full border-2 text-sm font-semibold ${
                 pref === t.value ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:text-ink"
               }`}
             >
@@ -268,7 +287,7 @@ function AccountSheet({ open, onClose }: { open: boolean; onClose: () => void })
           ))}
         </div>
       </fieldset>
-      <Link href="/login" className={`${link} mt-5 border-t border-border-subtle pt-2`}>
+      <Link href="/login" onClick={() => void clearDeviceData()} className={`${link} mt-5 border-t border-border-subtle pt-2`}>
         <LogOut aria-hidden="true" className="size-5 text-muted" />
         Sign out
       </Link>
@@ -293,7 +312,7 @@ function CreditChip() {
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold tabular-nums ${tone}`}
+        className={`inline-flex h-9 touch:h-11 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold tabular-nums ${tone}`}
       >
         <Zap aria-hidden="true" className={`size-4 ${state === "normal" ? "text-primary-deep" : ""}`} />
         {credits.balance}

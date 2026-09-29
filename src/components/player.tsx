@@ -28,7 +28,9 @@ import { isCorrect } from "@/lib/diagnosis";
 import { clock } from "@/lib/format";
 import { CATEGORY_LABEL } from "@/lib/diagnosis";
 import { MathText } from "./math";
+import { useOnline } from "@/lib/pwa";
 import { Dialog } from "./dialog";
+import { ShortcutRows, playerShortcuts } from "./keyboard-sheet";
 import { Cost, btn } from "./ui";
 
 type Saved = { startedAt: number; current: number; responses: Record<string, Response>; submitted?: boolean };
@@ -61,7 +63,11 @@ export function Player({ config }: { config: AttemptConfig }) {
   const [startedAt, setStartedAt] = useState(0);
   const [index, setIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, Response>>({});
-  const [save, setSave] = useState<SaveState>("saved");
+  const [saveStep, setSave] = useState<SaveState>("saved");
+  // Offline is a fact about the connection, not about the last write: it shows from the moment
+  // the connection drops and clears the moment it returns (the queue then flushes, TRD §12.2).
+  const online = useOnline();
+  const save: SaveState = !online ? "offline" : saveStep === "offline" ? "saved" : saveStep;
   const [now, setNow] = useState(0);
   const [hideTimer, setHideTimer] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
@@ -93,10 +99,6 @@ export function Player({ config }: { config: AttemptConfig }) {
       try {
         localStorage.setItem(storageKey(config.id), JSON.stringify({ startedAt, current, responses: next } satisfies Saved));
       } catch {}
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        setSave("offline");
-        return;
-      }
       setSave("saving");
       window.setTimeout(() => setSave("saved"), 350);
     },
@@ -197,6 +199,30 @@ export function Player({ config }: { config: AttemptConfig }) {
     return { answered, marked, unanswered: qs.length - answered };
   }, [qs, responses]);
 
+  const onPrimary = useCallback(() => {
+    if (practice) {
+      if (!checked[q.id]) {
+        if (r?.answer == null || r.answer === "") return;
+        setChecked((c) => ({ ...c, [q.id]: true }));
+        return;
+      }
+      if (isLast) finish("submit");
+      else go(index + 1);
+      return;
+    }
+    if (isLast) setSubmitOpen(true);
+    else go(index + 1);
+  }, [practice, checked, q, r, isLast, finish, go, index]);
+
+  // Enter in the numeric field commits the answer first; the check runs on the render after
+  // that commit, when `r` holds the new value.
+  const enterAfterCommit = useRef(false);
+  useEffect(() => {
+    if (!enterAfterCommit.current) return;
+    enterAfterCommit.current = false;
+    onPrimary();
+  });
+
   // Keyboard shortcuts (optional, never required).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -205,6 +231,14 @@ export function Player({ config }: { config: AttemptConfig }) {
       if (t.tagName === "INPUT" || t.tagName === "TEXTAREA") return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const k = e.key.toLowerCase();
+      if (k === "enter") {
+        // Buttons, links and summaries keep their own Enter; a focused option is the exception,
+        // because "Enter = Check answer" is the point of practice (§9.9).
+        if (!practice || (["BUTTON", "A", "SUMMARY", "SELECT"].includes(t.tagName) && t.getAttribute("role") !== "radio")) return;
+        e.preventDefault();
+        onPrimary();
+        return;
+      }
       if (q.type === "mcq" && q.options) {
         const byLetter = q.options.find((o) => o.key.toLowerCase() === k);
         const byNum = q.options[Number(k) - 1];
@@ -218,11 +252,12 @@ export function Player({ config }: { config: AttemptConfig }) {
       if (k === "arrowright" || k === "n") go(index + 1);
       else if (k === "arrowleft" || k === "p") go(index - 1);
       else if (k === "m" && !practice) toggleMark();
+      else if (k === "backspace" || k === "delete") setAnswer(null);
       else if (k === "?") setKeysOpen(true);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [q, index, go, setAnswer, toggleMark, practice, submitOpen, exitOpen, mapOpen, keysOpen, finishing]);
+  }, [q, index, go, setAnswer, toggleMark, onPrimary, practice, submitOpen, exitOpen, mapOpen, keysOpen, finishing]);
 
   // Leave guard only while a save is in flight.
   useEffect(() => {
@@ -248,21 +283,6 @@ export function Player({ config }: { config: AttemptConfig }) {
       ? "Review & submit"
       : "Save & next";
 
-  const onPrimary = () => {
-    if (practice) {
-      if (!checked[q.id]) {
-        if (r?.answer == null || r.answer === "") return;
-        setChecked((c) => ({ ...c, [q.id]: true }));
-        return;
-      }
-      if (isLast) finish("submit");
-      else go(index + 1);
-      return;
-    }
-    if (isLast) setSubmitOpen(true);
-    else go(index + 1);
-  };
-
   return (
     <div className="flex min-h-screen flex-col">
       <p className="sr-only" aria-live="assertive">
@@ -272,7 +292,8 @@ export function Player({ config }: { config: AttemptConfig }) {
       {/* Focus bar */}
       <header className="sticky top-0 z-20 border-b border-border-subtle bg-surface">
         <div className="mx-auto flex h-14 max-w-[1280px] items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-5">
-          <button type="button" onClick={() => setExitOpen(true)} className="flex h-11 items-center gap-1.5 rounded-btn px-2 text-sm font-semibold text-muted hover:bg-sunken hover:text-ink">
+          <h1 className="sr-only">{config.title}</h1>
+          <button type="button" onClick={() => setExitOpen(true)} aria-label="Exit" className="flex h-11 min-w-11 justify-center items-center gap-1.5 rounded-btn px-2 text-sm font-semibold text-muted hover:bg-sunken hover:text-ink">
             <X aria-hidden="true" className="size-5" />
             <span className="hidden sm:inline">Exit</span>
           </button>
@@ -344,7 +365,14 @@ export function Player({ config }: { config: AttemptConfig }) {
               {q.type === "mcq" ? (
                 <Options q={q} value={r?.answer ?? null} onChange={setAnswer} reveal={practice && checked[q.id]} />
               ) : (
-                <NumericAnswer key={q.id} value={r?.answer ?? ""} onChange={setAnswer} reveal={practice && checked[q.id]} q={q} />
+                <NumericAnswer
+                  key={q.id}
+                  value={r?.answer ?? ""}
+                  onChange={setAnswer}
+                  onEnter={practice ? () => (enterAfterCommit.current = true) : undefined}
+                  reveal={practice && checked[q.id]}
+                  q={q}
+                />
               )}
             </div>
 
@@ -355,7 +383,7 @@ export function Player({ config }: { config: AttemptConfig }) {
                     type="button"
                     aria-pressed={!!r?.marked}
                     onClick={toggleMark}
-                    className={`flex h-10 items-center gap-1.5 rounded-btn border px-3 text-sm font-semibold ${
+                    className={`flex h-10 touch:h-11 items-center gap-1.5 rounded-btn border px-3 text-sm font-semibold ${
                       r?.marked ? "border-warning bg-warning/15 text-warning-text" : "border-border-subtle text-muted hover:text-ink"
                     }`}
                   >
@@ -364,14 +392,14 @@ export function Player({ config }: { config: AttemptConfig }) {
                   </button>
                 ) : null}
                 {r?.answer ? (
-                  <button type="button" onClick={() => setAnswer(null)} className="flex h-10 items-center gap-1.5 rounded-btn px-3 text-sm font-semibold text-muted hover:bg-sunken hover:text-ink">
+                  <button type="button" onClick={() => setAnswer(null)} className="flex h-10 touch:h-11 items-center gap-1.5 rounded-btn px-3 text-sm font-semibold text-muted hover:bg-sunken hover:text-ink">
                     <Eraser aria-hidden="true" className="size-4" />
                     Clear answer
                   </button>
                 ) : null}
                 {practice && q.hint ? (
                   hints[q.id] ? null : (
-                    <button type="button" onClick={() => setHints((h) => ({ ...h, [q.id]: true }))} className="flex h-10 items-center gap-1 rounded-btn px-3 text-sm font-semibold text-muted hover:bg-sunken hover:text-ink">
+                    <button type="button" onClick={() => setHints((h) => ({ ...h, [q.id]: true }))} className="flex h-10 touch:h-11 items-center gap-1 rounded-btn px-3 text-sm font-semibold text-muted hover:bg-sunken hover:text-ink">
                       <Lightbulb aria-hidden="true" className="size-4" />
                       Hint <Cost credits={COST.hint} className="border-border-subtle" />
                     </button>
@@ -397,7 +425,7 @@ export function Player({ config }: { config: AttemptConfig }) {
           </article>
 
           <p className="mt-4 hidden text-center text-xs text-faint sm:block">
-            <button type="button" onClick={() => setKeysOpen(true)} className="inline-flex items-center gap-1 underline underline-offset-4 hover:text-ink">
+            <button type="button" onClick={() => setKeysOpen(true)} className="inline-flex min-h-8 items-center gap-1 underline underline-offset-4 hover:text-ink">
               <Keyboard aria-hidden="true" className="size-3.5" /> Keyboard shortcuts
             </button>
           </p>
@@ -500,22 +528,7 @@ export function Player({ config }: { config: AttemptConfig }) {
       </Dialog>
 
       <Dialog open={keysOpen} onClose={() => setKeysOpen(false)} title="Keyboard shortcuts" description="Optional. Everything also works by tap or click.">
-        <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-sm">
-          {[
-            ["A–D or 1–4", "Choose an option"],
-            ["→ or N", "Next question"],
-            ["← or P", "Previous question"],
-            ...(practice ? [] : [["M", "Mark for review"]]),
-            ["?", "Show this list"],
-          ].map(([k, v]) => (
-            <div key={k} className="contents">
-              <dt>
-                <kbd className="rounded-md border border-border-subtle bg-sunken px-2 py-0.5 font-mono text-xs text-ink">{k}</kbd>
-              </dt>
-              <dd className="text-ink">{v}</dd>
-            </div>
-          ))}
-        </dl>
+        <ShortcutRows rows={playerShortcuts(practice)} />
       </Dialog>
 
       {finishing ? (
@@ -558,13 +571,13 @@ function TimerChip({ remaining, hidden, onToggle }: { remaining: number; hidden:
   const tone = remaining <= 60 ? "bg-danger text-white border-danger" : remaining <= 300 ? "bg-warning/15 text-warning-text border-warning/50" : "bg-surface text-ink border-border-subtle";
   const showAnyway = remaining <= 60;
   return (
-    <div className={`flex h-9 items-center gap-1 rounded-full border pl-3 pr-1 text-sm font-bold tabular-nums ${tone}`}>
+    <div className={`flex h-9 touch:h-11 items-center gap-1 rounded-full border pl-3 pr-1 text-sm font-bold tabular-nums ${tone}`}>
       <Timer aria-hidden="true" className="size-4" />
       <span aria-hidden="true" className="min-w-[3.2rem]">
         {hidden && !showAnyway ? "––:––" : clock(remaining)}
       </span>
       <span className="sr-only">Time left: {Math.ceil(remaining / 60)} minutes</span>
-      <button type="button" onClick={onToggle} aria-label={hidden ? "Show timer" : "Hide timer"} className="flex size-7 items-center justify-center rounded-full hover:bg-sunken/60">
+      <button type="button" onClick={onToggle} aria-label={hidden ? "Show timer" : "Hide timer"} className="flex size-7 touch:size-11 items-center justify-center rounded-full hover:bg-sunken/60">
         {hidden ? <Eye aria-hidden="true" className="size-4" /> : <EyeOff aria-hidden="true" className="size-4" />}
       </button>
     </div>
@@ -630,6 +643,7 @@ function Options({ q, value, onChange, reveal }: { q: Question; value: string | 
             <span aria-hidden="true" className={`flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${badge}`}>
               {o.key}
             </span>
+            <span className="sr-only">Option {o.key}: </span>
             <MathText className="min-w-0 flex-1 text-base font-medium text-ink">{o.text}</MathText>
             {trailing}
           </button>
@@ -639,7 +653,19 @@ function Options({ q, value, onChange, reveal }: { q: Question; value: string | 
   );
 }
 
-function NumericAnswer({ value, onChange, reveal, q }: { value: string; onChange: (v: string | null) => void; reveal: boolean; q: Question }) {
+function NumericAnswer({
+  value,
+  onChange,
+  onEnter,
+  reveal,
+  q,
+}: {
+  value: string;
+  onChange: (v: string | null) => void;
+  onEnter?: () => void;
+  reveal: boolean;
+  q: Question;
+}) {
   const [draft, setDraft] = useState(value);
   const invalid = draft !== "" && !/^-?\d*\.?\d{0,2}$/.test(draft);
   const correct = reveal && isCorrect(q, draft);
@@ -659,7 +685,10 @@ function NumericAnswer({ value, onChange, reveal, q }: { value: string; onChange
         onChange={(e) => setDraft(e.target.value)}
         onBlur={() => !invalid && onChange(draft.trim() === "" ? null : draft.trim())}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && !invalid) onChange(draft.trim() === "" ? null : draft.trim());
+          if (e.key === "Enter" && !invalid) {
+            onChange(draft.trim() === "" ? null : draft.trim());
+            onEnter?.();
+          }
         }}
         className={`mt-2 h-14 w-full rounded-input border-2 bg-surface px-4 text-xl font-semibold tabular-nums text-ink outline-none focus:border-line ${
           reveal ? (correct ? "border-success" : "border-danger") : invalid ? "border-danger" : "border-border-subtle"
@@ -736,7 +765,7 @@ function PracticeFeedback({
               type="button"
               aria-pressed={confidence === v}
               onClick={() => onConfidence(v as number)}
-              className={`h-10 rounded-full border px-4 text-sm font-semibold ${
+              className={`h-10 touch:h-11 rounded-full border px-4 text-sm font-semibold ${
                 confidence === v ? "border-2 border-line bg-surface text-ink shadow-brutal-sm" : "border-border-subtle text-muted hover:text-ink"
               }`}
             >

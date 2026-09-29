@@ -33,7 +33,7 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3 text-sm gap-1.5",
+  sm: "h-9 touch:h-11 px-3 text-sm gap-1.5",
   md: "h-11 px-5 text-[15px] gap-2",
   lg: "h-13 px-7 text-base gap-2",
 };
@@ -82,7 +82,7 @@ export function TextLink({ href, children, className = "" }: { href: string; chi
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-1 text-sm font-semibold text-primary-text underline decoration-1 underline-offset-4 hover:text-ink touch:min-h-11 ${className}`}
+      className={`inline-flex items-center gap-1 text-sm font-semibold text-primary-text underline decoration-1 underline-offset-4 hover:text-ink min-h-6 touch:min-h-11 ${className}`}
     >
       {children}
     </Link>

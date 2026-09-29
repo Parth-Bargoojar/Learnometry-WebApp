@@ -28,7 +28,7 @@
 
   /* AA text variants (DS §3.2a): the accents are fills; small text uses these. */
   --color-primary-text: #0e6e7d;
-  --color-success-text: #15803d;
+  --color-success-text: #166534;
   --color-danger-text: #b91c1c;
   --color-warning-text: #92400e;
 
@@ -38,7 +38,7 @@
   */
   --color-line: #0f172a;
   --color-muted: #475569;
-  --color-faint: #64748b;
+  --color-faint: #5b6b81;
   --color-sunken: #f1f5f9;
   --color-elevated: #ffffff;
   --color-on-primary: #0f172a;
@@ -76,7 +76,7 @@
   --color-on-ink: #0f172a;
   --color-primary-text: #22d3ee;
   --color-success-text: #4ade80;
-  --color-danger-text: #f87171;
+  --color-danger-text: #fca5a5;
   --color-warning-text: #fbbf24;
 }
 
@@ -107,6 +107,8 @@
 
 @layer base {
   body {
+    /* Installed on a notched phone in landscape, keep content out from under the notch. */
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
     background-color: var(--color-background);
     color: var(--color-ink);
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;

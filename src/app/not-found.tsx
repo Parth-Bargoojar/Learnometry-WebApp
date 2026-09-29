@@ -6,6 +6,7 @@ export default function NotFound() {
   return (
     <main id="main" className="flex flex-1 items-center justify-center px-4">
       <EmptyState
+        as="h1"
         title="We can't find that page"
         body="It may have moved, or the link was mistyped."
         action={

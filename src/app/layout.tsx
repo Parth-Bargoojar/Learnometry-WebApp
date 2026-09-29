@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { themeScript } from "@/lib/theme-script";
+import { PwaBoot } from "@/components/pwa-boot";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 
@@ -32,6 +33,8 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  /* iOS "Add to Home Screen": launch full screen under the app's own name. */
+  appleWebApp: { capable: true, title: "Learnometry", statusBarStyle: "default" },
   formatDetection: { telephone: false, address: false, email: false },
 };
 
@@ -39,6 +42,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  /* Lets the bottom bar's safe-area padding work on notched phones when installed. */
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f1f5f9" },
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
@@ -49,10 +54,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     /* data-theme is written before paint by the script below, hence the warning suppression. */
     <html lang="en-IN" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className="flex min-h-full flex-col bg-background text-ink">
+      <body className="flex min-h-full flex-col bg-background text-ink" suppressHydrationWarning>
         <Script id="theme" strategy="beforeInteractive">
           {themeScript}
         </Script>
+        <PwaBoot />
         {children}
       </body>
     </html>

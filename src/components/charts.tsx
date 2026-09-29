@@ -101,7 +101,7 @@ export function TrendLine({
         </span>
       </figcaption>
       <details className="mt-2 text-sm">
-        <summary className="cursor-pointer text-sm font-semibold text-primary-text underline underline-offset-4">View as table</summary>
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary-text underline underline-offset-4">View as table</summary>
         <table className="mt-2 w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border-subtle text-xs text-muted">

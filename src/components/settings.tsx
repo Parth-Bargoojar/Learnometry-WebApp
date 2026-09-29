@@ -25,9 +25,13 @@ import { TODAY, credits, learner } from "@/lib/data";
 import { GUARDIAN_CANNOT_SEE, GUARDIAN_CAN_SEE, adultOn, addBusinessDays, isEmail, isMinor } from "@/lib/guardian";
 import { fullDate } from "@/lib/format";
 import { siteUrl } from "@/lib/site";
+import { SHARED, useShared } from "@/lib/local-store";
+import { DEFAULT_PUSH_PREFS, type PushPrefs } from "@/lib/push";
+import { clearDeviceData } from "@/lib/pwa";
 import { useTheme, type ThemePref } from "./theme";
 import { Dialog } from "./dialog";
 import { GetCreditsButton } from "./credit-gate";
+import { PushSection } from "./push-settings";
 import { useToast } from "./toast";
 import { Cost, btn } from "./ui";
 
@@ -360,13 +364,22 @@ const EMAIL_PREFS = [
   { key: "weekly", label: "Weekly summary", note: "Sunday evening: tasks done and what's next" },
 ] as const;
 
+type NotificationPrefs = { email: { retest: boolean; plan: boolean; weekly: boolean }; push: PushPrefs };
+
+const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
+  email: { retest: true, plan: true, weekly: false },
+  push: DEFAULT_PUSH_PREFS,
+};
+
 export function NotificationSettings() {
-  const initial = { retest: true, plan: true, weekly: false };
-  const [saved, setSaved] = useState(initial);
-  const [v, setV] = useState(initial);
+  const [saved, setSaved] = useShared<NotificationPrefs>(SHARED.notificationPrefs, DEFAULT_NOTIFICATION_PREFS);
+  // Edits live in `draft` until Save; `null` means "nothing changed", so the form follows the stored value.
+  const [draft, setDraft] = useState<NotificationPrefs | null>(null);
+  const v = draft ?? saved;
   const toast = useToast();
   const dirty = JSON.stringify(v) !== JSON.stringify(saved);
   const guardian = learner.guardian;
+  const minor = !!guardian && isMinor(learner.dateOfBirth);
 
   return (
     <Panel title="Notifications" desc="No streak nags and no guilt messages, ever.">
@@ -374,6 +387,7 @@ export function NotificationSettings() {
         onSubmit={(e) => {
           e.preventDefault();
           setSaved(v);
+          setDraft(null);
           toast.show("Saved");
         }}
       >
@@ -387,7 +401,12 @@ export function NotificationSettings() {
                     <span className="block text-[15px] text-ink">{p.label}</span>
                     <span className="block text-xs text-muted">{p.note}</span>
                   </span>
-                  <input type="checkbox" checked={v[p.key]} onChange={(e) => setV({ ...v, [p.key]: e.target.checked })} className="size-5 shrink-0 accent-[var(--color-primary-deep)]" />
+                  <input
+                    type="checkbox"
+                    checked={v.email[p.key]}
+                    onChange={(e) => setDraft({ ...v, email: { ...v.email, [p.key]: e.target.checked } })}
+                    className="size-5 shrink-0 accent-[var(--color-primary-deep)]"
+                  />
                 </label>
               </li>
             ))}
@@ -401,31 +420,9 @@ export function NotificationSettings() {
           </ul>
         </fieldset>
 
-        <fieldset className="mt-6" disabled aria-describedby="push-note">
-          <legend className="text-sm font-semibold text-ink">Push notifications</legend>
-          <p id="push-note" className="mt-1 text-sm text-muted">
-            These work once you install Learnometry to your home screen and allow notifications.
-          </p>
-          <ul className="mt-2 divide-y divide-border-subtle opacity-60">
-            <li className="flex min-h-14 items-center justify-between gap-4 py-2">
-              <span className="text-[15px] text-ink">Retest ready</span>
-              <input type="checkbox" aria-label="Push: retest ready" className="size-5 accent-[var(--color-primary-deep)]" />
-            </li>
-            <li className="flex min-h-14 items-center justify-between gap-4 py-2">
-              <span>
-                <span className="block text-[15px] text-ink">Daily study reminder</span>
-                <span className="block text-xs text-muted">Off unless you turn it on</span>
-              </span>
-              <select aria-label="Reminder time" defaultValue="19:00" className="h-10 rounded-input border border-border-subtle bg-surface px-2 text-sm text-ink">
-                {["07:00", "16:00", "18:00", "19:00", "20:00", "21:00"].map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </li>
-          </ul>
-        </fieldset>
+        <PushSection prefs={v.push} onChange={(push) => setDraft({ ...v, push })} showGuardian={minor} notify={toast.show} />
 
-        {guardian && isMinor(learner.dateOfBirth) ? (
+        {minor && guardian ? (
           <p className="mt-5 text-sm text-muted">{guardian.guardianFirstName} gets emails about purchase requests only. Your notifications stay private.</p>
         ) : null}
         <SaveButton dirty={dirty} />
@@ -627,7 +624,7 @@ export function AccountSettings() {
             {guardian && isMinor(learner.dateOfBirth) ? ` We've let ${guardian.guardianFirstName} know.` : ""}
           </p>
         </div>
-        <Link href="/login" className={btn("secondary", "md", "mt-5")}>
+        <Link href="/login" onClick={() => void clearDeviceData()} className={btn("secondary", "md", "mt-5")}>
           Go to log in
         </Link>
       </Panel>

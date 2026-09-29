@@ -102,9 +102,7 @@ export default async function AdminQuestionPage(props: PageProps<"/admin/questio
               <Row label="Answered correctly">{meta.correctRate === null ? "—" : `${Math.round(meta.correctRate * 100)}%`}</Row>
               <Row label="Source"><span className="capitalize">{meta.source}</span></Row>
               <Row label="Miss usually means"><span className="capitalize">{q.missCause?.replace("_", " ") ?? "—"}</span></Row>
-              <div className="col-span-2">
-                <Row label="Learning objective">{meta.learningObjective}</Row>
-              </div>
+              <Row label="Learning objective" className="col-span-2">{meta.learningObjective}</Row>
             </dl>
           </Panel>
         </div>
@@ -113,9 +111,9 @@ export default async function AdminQuestionPage(props: PageProps<"/admin/questio
   );
 }
 
-function Row({ label, children }: { label: string; children: ReactNode }) {
+function Row({ label, children, className = "" }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <div className="min-w-0">
+    <div className={`min-w-0 ${className}`}>
       <dt className="text-xs font-semibold text-muted">{label}</dt>
       <dd className="mt-1 text-ink">{children}</dd>
     </div>

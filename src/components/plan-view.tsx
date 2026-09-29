@@ -77,7 +77,7 @@ export function PlanView() {
             type="button"
             aria-selected={view === v.key}
             onClick={() => router.replace(v.key === "today" ? "/plan" : `/plan?view=${v.key}`, { scroll: false })}
-            className={`h-10 shrink-0 rounded-full border-2 px-4 text-sm font-semibold transition-colors duration-150 ${
+            className={`h-10 touch:h-11 shrink-0 rounded-full border-2 px-4 text-sm font-semibold transition-colors duration-150 ${
               view === v.key ? "border-line bg-surface text-ink shadow-brutal-sm" : "border-transparent text-muted hover:text-ink"
             }`}
           >

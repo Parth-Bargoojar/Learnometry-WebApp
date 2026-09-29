@@ -34,7 +34,7 @@ export function ConceptList() {
             type="button"
             aria-pressed={filter === f}
             onClick={() => router.replace(f === "all" ? "?" : `?status=${f}`, { scroll: false })}
-            className={`h-10 shrink-0 rounded-full border px-4 text-sm font-semibold ${
+            className={`h-10 touch:h-11 shrink-0 rounded-full border px-4 text-sm font-semibold ${
               filter === f ? "border-2 border-line bg-surface text-ink shadow-brutal-sm" : "border-border-subtle text-muted hover:text-ink"
             }`}
           >

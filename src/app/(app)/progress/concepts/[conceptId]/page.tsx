@@ -93,7 +93,7 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
                       const weak = psev === "weak" || psev === "critical" || psev === "needs_work";
                       return (
                         <li key={p.id}>
-                          <Link href={`/progress/concepts/${p.id}`} className="flex flex-wrap items-center gap-2 text-[15px] text-ink hover:underline hover:underline-offset-4">
+                          <Link href={`/progress/concepts/${p.id}`} className="flex min-h-6 touch:min-h-11 flex-wrap items-center gap-2 text-[15px] text-ink hover:underline hover:underline-offset-4">
                             {p.name}
                             {psev ? <SeverityBadge value={psev} size="sm" /> : null}
                             {weak ? <span className="text-xs font-semibold text-warning-text">Fix this first</span> : null}
@@ -112,7 +112,7 @@ export default async function ConceptPage(props: PageProps<"/progress/concepts/[
                   <ul className="mt-2 flex flex-col gap-2">
                     {dependents.map((d) => (
                       <li key={d.id}>
-                        <Link href={`/progress/concepts/${d.id}`} className="text-[15px] text-ink hover:underline hover:underline-offset-4">
+                        <Link href={`/progress/concepts/${d.id}`} className="inline-flex min-h-6 touch:min-h-11 items-center text-[15px] text-ink hover:underline hover:underline-offset-4">
                           {d.name}
                         </Link>
                       </li>

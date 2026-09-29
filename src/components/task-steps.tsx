@@ -15,7 +15,7 @@ export function StepDone({ label }: { label: string }) {
       onClick={() => setDone((d) => !d)}
       className={
         done
-          ? "inline-flex h-9 items-center gap-1.5 rounded-btn border border-success/40 bg-success/10 px-3 text-sm font-semibold text-success-text"
+          ? "inline-flex h-9 touch:h-11 items-center gap-1.5 rounded-btn border border-success/40 bg-success/10 px-3 text-sm font-semibold text-success-text"
           : btn("secondary", "sm")
       }
     >

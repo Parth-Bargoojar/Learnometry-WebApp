@@ -23,6 +23,7 @@ import {
 import { ADMIN } from "@/lib/admin";
 import { abuseFlags, adminRefunds, adminUser, type AbuseStatus, type AdminRefund } from "@/lib/admin-data";
 import { SHARED, useShared } from "@/lib/local-store";
+import { clearDeviceData } from "@/lib/pwa";
 import { ThemeProvider, useTheme, type ThemePref } from "./theme";
 import { Popover, menuItem } from "./popover";
 
@@ -217,7 +218,7 @@ function AccountMenu() {
               </button>
             ))}
           </div>
-          <Link href="/login" className={`${menuItem} mt-1 border-t border-border-subtle`}>
+          <Link href="/login" onClick={() => void clearDeviceData()} className={`${menuItem} mt-1 border-t border-border-subtle`}>
             <LogOut aria-hidden="true" className="size-4 text-muted" />
             Sign out
           </Link>

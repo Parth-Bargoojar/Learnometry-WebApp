@@ -76,7 +76,7 @@ export function NotificationBell() {
           <div className="flex items-center justify-between gap-2 px-2.5 pb-1 pt-1.5">
             <p className="text-sm font-semibold text-ink">Notifications</p>
             {unread ? (
-              <button type="button" onClick={markAll} className="inline-flex min-h-9 items-center text-xs font-semibold text-primary-text underline underline-offset-4">
+              <button type="button" onClick={markAll} className="inline-flex min-h-9 touch:min-h-11 items-center text-xs font-semibold text-primary-text underline underline-offset-4">
                 Mark all as read
               </button>
             ) : null}

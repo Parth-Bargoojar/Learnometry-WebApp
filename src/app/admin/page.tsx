@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
         <Panel title="Needs attention" className="col-span-12 xl:col-span-7">
           <OpsAlerts />
         </Panel>
-        <Panel title="AI cost, last 7 days" meta="Daily total in rupees" className="col-span-12 xl:col-span-5" action={<Link href="/admin/ai" className="text-sm font-semibold text-primary-text underline underline-offset-4">Details</Link>}>
+        <Panel title="AI cost, last 7 days" meta="Daily total in rupees" className="col-span-12 xl:col-span-5" action={<Link href="/admin/ai" className="inline-flex min-h-6 items-center text-sm font-semibold text-primary-text underline underline-offset-4">Details</Link>}>
           <figure>
             <figcaption className="sr-only">AI cost per day for the last 7 days. Values are listed beside each bar.</figcaption>
             <ul className="flex flex-col gap-2">

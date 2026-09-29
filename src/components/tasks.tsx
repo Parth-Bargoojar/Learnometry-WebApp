@@ -55,7 +55,7 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
                 <button
                   type="button"
                   onClick={() => update(task.id, "pending", "Moved back to your list")}
-                  className="flex size-9 items-center justify-center rounded-btn text-muted hover:bg-sunken hover:text-ink"
+                  className="flex size-9 touch:size-11 items-center justify-center rounded-btn text-muted hover:bg-sunken hover:text-ink"
                   aria-label={`Undo: mark ${concept.name} as not done`}
                 >
                   <RotateCcw aria-hidden="true" className="size-4" />
@@ -73,13 +73,15 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
                 <button
                   type="button"
                   onClick={() => update(task.id, "completed", `${concept.name} marked done`)}
-                  className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-line hover:bg-success/15"
+                  className="group -m-2.5 flex size-11 shrink-0 items-center justify-center"
                   aria-label={`Mark ${concept.name}, ${TYPE_LABEL[task.type].toLowerCase()}, as done`}
-                />
+                >
+                  <span aria-hidden="true" className="size-6 rounded-full border-2 border-line group-hover:bg-success/15" />
+                </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <PriorityBadge value={task.priority} compact />
-                    <Link href={`/plan/tasks/${task.id}`} className="font-semibold text-ink hover:underline hover:underline-offset-4">
+                    <Link href={`/plan/tasks/${task.id}`} className="inline-flex min-h-6 touch:min-h-11 items-center font-semibold text-ink hover:underline hover:underline-offset-4">
                       {concept.name}
                     </Link>
                     <span className="ml-auto text-sm font-semibold tabular-nums text-ink">{task.minutes} min</span>
@@ -101,7 +103,7 @@ export function TaskList({ tasks, primaryFirst = true, compact = false }: { task
                     <button
                       type="button"
                       onClick={() => setSkipFor(task)}
-                      className="flex h-9 items-center gap-1 rounded-btn px-2 text-sm font-medium text-muted hover:bg-sunken hover:text-ink"
+                      className="flex h-9 touch:h-11 items-center gap-1 rounded-btn px-2 text-sm font-medium text-muted hover:bg-sunken hover:text-ink"
                     >
                       <MoreHorizontal aria-hidden="true" className="size-4" />
                       Skip or move

@@ -60,7 +60,7 @@ export default function CreditsPage() {
 
       <Card level="supporting" className="p-5 sm:p-6 lg:col-span-12" aria-labelledby="hist-h">
         <CardHeader id="hist-h" title="History" />
-        <div className="mt-3 overflow-x-auto">
+        <div role="region" aria-label="Credit history" tabIndex={0} className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[520px] text-left text-[15px]">
             <caption className="sr-only">Credit transactions, newest first</caption>
             <thead>

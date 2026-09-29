@@ -12,6 +12,7 @@ npm run dev        # http://localhost:3001 (the marketing site uses 3000)
 npm run typecheck
 npm run lint
 npm run build
+npm run audit        accessibility, performance budget and PWA checks (needs a production build)
 ```
 
 Copy `.env.example` to `.env.local`. `NEXT_PUBLIC_MARKETING_URL` points links to policies, FAQ and contact at the website.
@@ -47,7 +48,7 @@ src/
 
 ## Current state
 
-Front end complete for build phases **A–K** on sample data (JEE Main, Physics, Class 11 Mechanics):
+Front end complete for build phases **A–L** on sample data (JEE Main, Physics, Class 11 Mechanics):
 learner app, money (packs, plans, checkout, payment confirmation, credit gating), guardian flows
 (both sign-up paths, `/consent/[token]`, guardian portal at `/guardian`), auth screens, and depth
 (plan history, progress history, settings sub-pages, Help, notification popover).
@@ -68,5 +69,6 @@ Useful previews: `/dashboard?state=new` (S0), `/dashboard?state=out` (S7), `/con
 Rule: values that server pages read (flags, lists, config) live in `lib/`, never in a `"use client"`
 module — only components cross that boundary.
 
-Not yet built: Supabase auth and data, Razorpay, the AI gateway, the admin APIs behind the console, and the PWA,
-push and final accessibility/performance audits (L).
+Phase L (polish): the app is an installable PWA (`app/manifest.ts`, hand-written `public/sw.js`, `/offline`, install card on the dashboard, offline banner), push notifications are live in Settings › Notifications (permission asked only from a button; set `NEXT_PUBLIC_VAPID_PUBLIC_KEY` for real delivery), `?` opens the keyboard sheet, and `npm run audit` checks accessibility (axe, 44px touch targets, both themes), the performance budget and the offline/push/keyboard behaviour. Decisions: Web App Structure §8.21a (L1–L13); results: §14.1 and §15.1. The service worker only registers in production builds. Sign-out clears cached pages, the push subscription and the offline plan copy (`clearDeviceData` in `lib/pwa.ts`).
+
+Not yet built: Supabase auth and data, Razorpay, the AI gateway, the admin and push APIs behind the console, and the manual launch checks in Web App Structure §14.1 (screen readers, real iPhone and Android).

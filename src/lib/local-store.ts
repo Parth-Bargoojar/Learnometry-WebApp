@@ -60,6 +60,13 @@ export function writeShared<T>(key: string, value: T) {
   window.dispatchEvent(new Event(EVENT));
 }
 
+export function removeShared(key: string) {
+  try {
+    localStorage.removeItem(PREFIX + key);
+  } catch {}
+  window.dispatchEvent(new Event(EVENT));
+}
+
 const serverCache = new Map<string, unknown>();
 
 function serverSnapshot<T>(key: string, fallback: T): T {
@@ -99,6 +106,11 @@ export const SHARED = {
   planChangeSeen: "plan-change-seen",
   /** Notification ids marked read. */
   readNotifications: "read-notifications",
+  /* Phase L (PWA and push). `push` and `pushSubscription` stand in for the subscription row the API will hold. */
+  installDismissed: "install-dismissed",
+  notificationPrefs: "notification-prefs",
+  push: "push",
+  pushSubscription: "push-subscription",
   /* Admin console (phase K): overrides over the sample tables in admin-data.ts. */
   adminAudit: "admin-audit",
   adminQuestions: "admin-questions",

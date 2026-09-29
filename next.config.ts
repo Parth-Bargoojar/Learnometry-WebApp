@@ -20,6 +20,7 @@ const csp = [
   "font-src 'self' data:",
   `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
   "manifest-src 'self'",
+  "worker-src 'self'",
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
@@ -28,6 +29,18 @@ const nextConfig: NextConfig = {
   images: { formats: ["image/avif", "image/webp"] },
   async headers() {
     return [
+      {
+        /*
+          The worker must always be re-checked (an old cached copy would keep serving old
+          caches), and it may control the whole origin.
+        */
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
       {
         source: "/:path*",
         headers: [

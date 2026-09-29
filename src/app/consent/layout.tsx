@@ -9,7 +9,7 @@ export default function ConsentLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex h-16 items-center px-4 sm:px-8">
-        <a href={siteUrl("/")} aria-label="Learnometry home">
+        <a href={siteUrl("/")} aria-label="Learnometry home" className="inline-flex min-h-11 min-w-11 items-center">
           <Image src="/primary-logo.png" alt="Learnometry" width={611} height={133} sizes="170px" className="h-8 w-auto dark:hidden" priority />
           <Image src="/primary-logo-dark.png" alt="Learnometry" width={611} height={133} sizes="170px" className="hidden h-8 w-auto dark:block" />
         </a>
@@ -18,10 +18,10 @@ export default function ConsentLayout({ children }: LayoutProps<"/">) {
         <div className="w-full max-w-[520px] sm:rounded-card-lg sm:border-2 sm:border-line sm:bg-surface sm:p-8 sm:shadow-brutal-lg">{children}</div>
       </main>
       <footer className="flex flex-wrap justify-center gap-x-5 gap-y-1 px-4 pb-6 text-xs text-muted">
-        <a href={siteUrl("/guardian-consent")} className="inline-flex min-h-8 items-center hover:text-ink">Guardian consent</a>
-        <a href={siteUrl("/privacy")} className="inline-flex min-h-8 items-center hover:text-ink">Privacy</a>
-        <a href={siteUrl("/terms")} className="inline-flex min-h-8 items-center hover:text-ink">Terms</a>
-        <a href={siteUrl("/contact")} className="inline-flex min-h-8 items-center hover:text-ink">Contact</a>
+        <a href={siteUrl("/guardian-consent")} className="inline-flex min-h-8 touch:min-h-11 min-w-11 items-center justify-center hover:text-ink">Guardian consent</a>
+        <a href={siteUrl("/privacy")} className="inline-flex min-h-8 touch:min-h-11 min-w-11 items-center justify-center hover:text-ink">Privacy</a>
+        <a href={siteUrl("/terms")} className="inline-flex min-h-8 touch:min-h-11 min-w-11 items-center justify-center hover:text-ink">Terms</a>
+        <a href={siteUrl("/contact")} className="inline-flex min-h-8 touch:min-h-11 min-w-11 items-center justify-center hover:text-ink">Contact</a>
       </footer>
     </div>
   );

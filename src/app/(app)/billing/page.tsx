@@ -101,7 +101,7 @@ export default function BillingPage() {
             </li>
           ))}
         </ul>
-        <div className="relative mt-3 hidden overflow-x-auto sm:block">
+        <div role="region" aria-label="Payment history" tabIndex={0} className="relative mt-3 hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[560px] text-left text-[15px]">
             <caption className="sr-only">Payment history</caption>
             <thead>
@@ -125,7 +125,7 @@ export default function BillingPage() {
                   </td>
                   <td className="py-3 text-right font-semibold tabular-nums text-ink">₹{p.amount}</td>
                   <td className="py-3 text-right">
-                    <button type="button" className="inline-flex min-h-9 items-center gap-1 text-sm font-semibold text-primary-text underline underline-offset-4">
+                    <button type="button" className="inline-flex min-h-9 touch:min-h-11 items-center gap-1 text-sm font-semibold text-primary-text underline underline-offset-4">
                       <Download aria-hidden="true" className="size-4" />
                       Download<span className="sr-only"> {GSTIN ? "tax invoice" : "receipt"} for {p.item}</span>
                     </button>

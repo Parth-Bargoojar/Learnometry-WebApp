@@ -185,7 +185,7 @@ export function PurchaseButton({
         <p className="mt-0.5 text-xs text-muted">
           Sent {dayMonth(pending.requestedOn)} · lasts until {dayMonth(pending.expiresOn)}
         </p>
-        <button type="button" onClick={() => setStatus(pending.id, "cancelled")} className="mt-1 inline-flex min-h-9 items-center text-xs font-semibold text-primary-text underline underline-offset-4">
+        <button type="button" onClick={() => setStatus(pending.id, "cancelled")} className="mt-1 inline-flex min-h-9 touch:min-h-11 items-center text-xs font-semibold text-primary-text underline underline-offset-4">
           Cancel request
         </button>
       </div>

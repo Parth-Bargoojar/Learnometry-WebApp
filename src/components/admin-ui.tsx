@@ -31,7 +31,7 @@ export const num = "text-right tabular-nums";
 export function TablePanel({ children, caption, footer }: { children: ReactNode; caption?: string; footer?: ReactNode }) {
   return (
     <div className="overflow-hidden rounded-card border border-border-subtle bg-surface">
-      <div className="overflow-x-auto">
+      <div tabIndex={0} className="overflow-x-auto">
         <table className={table}>
           {caption ? <caption className="sr-only">{caption}</caption> : null}
           {children}
