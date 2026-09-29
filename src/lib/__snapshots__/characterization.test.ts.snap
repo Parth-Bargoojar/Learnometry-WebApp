@@ -98,10 +98,10 @@ exports[`admin rules > constants, breaker, reasons, adjustments 1`] = `
       10,
       0,
       {
-        "computed": "restricted",
+        "computed": "normal",
         "overridden": false,
-        "ratio": 1,
-        "state": "restricted",
+        "ratio": 0,
+        "state": "normal",
         "warningAtInr": 0,
       },
     ],

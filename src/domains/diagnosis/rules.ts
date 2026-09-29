@@ -4,6 +4,12 @@
  * stage-3 text, so the same code runs on sample data now and on database rows later.
  * Stage 3 (root-cause interpretation) is an AI call in production.
  */
+import {
+  CARELESS_TIME_SHARE,
+  CAUSE_TIE_ORDER,
+  LATE_POSITION_SHARE,
+  WRONG_ANSWER_TOLERANCE_PCT,
+} from "@/domains/learning/constants";
 import { confidenceFor, isCorrect, masteryFrom, priorityFor, retestOutcome, severityFor } from "@/domains/learning/rules";
 import type { AttemptConfig, Concept, ErrorCategory, Question, Response, WeaknessFinding } from "@/lib/types";
 
@@ -122,4 +128,138 @@ function mostCommon<T>(items: T[]): T | null {
   const counts = new Map<T, number>();
   for (const i of items) counts.set(i, (counts.get(i) ?? 0) + 1);
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
+
+/* ---------- alg-v1: error classification (ALGORITHMS.md §5) ---------- */
+
+export interface WrongAnswerEntry {
+  value: number;
+  category: ErrorCategory;
+}
+
+/** A numerical answer within ±1% of a known wrong answer maps to that entry's category. */
+export function matchWrongAnswer(given: number, entries: WrongAnswerEntry[]): ErrorCategory | null {
+  for (const e of entries) {
+    const tol = (Math.abs(e.value) * WRONG_ANSWER_TOLERANCE_PCT) / 100;
+    if (Math.abs(given - e.value) <= tol + 1e-12) return e.category;
+  }
+  return null;
+}
+
+export interface ItemEvidence {
+  answered: boolean;
+  correct: boolean;
+  /** Zero-based position in the paper and the paper length. */
+  position: number;
+  totalItems: number;
+  /** The timed attempt ran out of time. */
+  hitDeadline: boolean;
+  /** Category of the `misconception` tag on the chosen option, if any. */
+  optionMisconception?: ErrorCategory | null;
+  /** Category of a matched `wrong_answers` entry, if any (see `matchWrongAnswer`). */
+  wrongAnswerCategory?: ErrorCategory | null;
+  secondsSpent: number;
+  expectedSeconds: number;
+  /** The content marks this stem as easy to misread. */
+  misreadRisk?: boolean;
+  /** A direct prerequisite has mastery < 50 at Low confidence or better. */
+  prerequisiteWeak: boolean;
+  /** The learner tapped "Sure" (D8). */
+  saidSure?: boolean;
+}
+
+export interface ItemClassification {
+  /** An unanswered item that is not evidence of time pressure: excluded from the error profile. */
+  skipped: boolean;
+  candidates: ErrorCategory[];
+}
+
+const isLate = (position: number, total: number) => position >= total - Math.ceil(total * LATE_POSITION_SHARE);
+
+/**
+ * Stage 2 proposes candidate categories for one item; stage 3 (LLM) chooses among them
+ * (ALG §5). Correct items have none.
+ */
+export function classifyItem(e: ItemEvidence): ItemClassification {
+  if (!e.answered) {
+    const timePressure = e.hitDeadline || isLate(e.position, e.totalItems);
+    return timePressure ? { skipped: false, candidates: ["time_pressure"] } : { skipped: true, candidates: [] };
+  }
+  if (e.correct) return { skipped: false, candidates: [] };
+
+  const found: ErrorCategory[] = [];
+  const add = (c: ErrorCategory | null | undefined) => {
+    if (c && !found.includes(c)) found.push(c);
+  };
+  add(e.optionMisconception);
+  add(e.wrongAnswerCategory);
+  if (e.expectedSeconds > 0 && e.secondsSpent < e.expectedSeconds * CARELESS_TIME_SHARE) add(e.misreadRisk ? "misread" : "careless");
+  if (e.prerequisiteWeak) add("prerequisite");
+  if (found.length === 0) found.push("conceptual");
+  // D8: a confident wrong answer signals a misconception, so it leads.
+  if (e.saidSure) return { skipped: false, candidates: ["conceptual", ...found.filter((c) => c !== "conceptual")] };
+  return { skipped: false, candidates: found };
+}
+
+export interface ConceptCause {
+  category: ErrorCategory | null;
+  /** Fewer than two wrong items: shown with "likely" wording. */
+  likely: boolean;
+  counts: Partial<Record<ErrorCategory, number>>;
+}
+
+/** Deterministic concept-level cause: the most frequent candidate; ties by CAUSE_TIE_ORDER (ALG §5). */
+export function conceptCause(items: ItemClassification[], wrongItems: number): ConceptCause {
+  const counts: Partial<Record<ErrorCategory, number>> = {};
+  for (const item of items) for (const c of item.candidates) counts[c] = (counts[c] ?? 0) + 1;
+  let best: ErrorCategory | null = null;
+  for (const c of CAUSE_TIE_ORDER) {
+    const n = counts[c] ?? 0;
+    if (n > 0 && (best === null || n > (counts[best] ?? 0))) best = c;
+  }
+  return { category: best, likely: wrongItems < 2, counts };
+}
+
+/** Error profile of a concept: how many items fell into each first-choice category (ALG §4). */
+export function errorProfile(items: ItemClassification[]): Partial<Record<ErrorCategory, number>> {
+  const profile: Partial<Record<ErrorCategory, number>> = {};
+  for (const item of items) {
+    const first = item.candidates[0];
+    if (first) profile[first] = (profile[first] ?? 0) + 1;
+  }
+  return profile;
+}
+
+/* ---------- Stage-3 output validation (ALG §5, TRD §7.10) ---------- */
+
+export interface RootCauseOutput {
+  concept_id: string;
+  category: ErrorCategory | "insufficient_evidence";
+  cited_item_ids: string[];
+  explanation: string;
+  next_step: string;
+  certainty: "low" | "medium" | "high";
+}
+
+export interface RootCauseContext {
+  /** Candidate categories per concept, from stage 2. */
+  candidates: Record<string, ErrorCategory[]>;
+  /** Evidence item ids per concept. */
+  evidence: Record<string, string[]>;
+}
+
+/** Reasons a stage-3 answer must be rejected; empty when it is acceptable. */
+export function validateRootCause(out: RootCauseOutput, ctx: RootCauseContext): string[] {
+  const problems: string[] = [];
+  const allowed = ctx.candidates[out.concept_id];
+  const evidence = ctx.evidence[out.concept_id];
+  if (!allowed || !evidence) return ["unknown concept"];
+  if (out.category !== "insufficient_evidence" && !allowed.includes(out.category)) problems.push("category outside the candidate set");
+  const unknown = out.cited_item_ids.filter((id) => !evidence.includes(id));
+  if (unknown.length) problems.push("cites unknown items");
+  if (out.category !== "insufficient_evidence" && out.cited_item_ids.length === 0) problems.push("cites no evidence");
+  if (out.certainty === "high" && evidence.length < 3) problems.push("high certainty with fewer than 3 evidence items");
+  if (out.explanation.length > 240) problems.push("explanation too long");
+  if (out.next_step.length > 160) problems.push("next step too long");
+  return problems;
 }

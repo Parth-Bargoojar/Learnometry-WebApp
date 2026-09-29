@@ -4,6 +4,7 @@
  * value here becomes a read from `feature_flags` / config when the backend lands.
  */
 import { REFUND_MAX_USAGE, refundWindow } from "@/domains/billing/rules";
+import { ABUSE_DAYS, ABUSE_UTILISATION } from "@/domains/learning/constants";
 import { dayMonth } from "@/lib/iso-date";
 
 export const ADMIN = {
@@ -48,7 +49,8 @@ export const DEFAULT_BUDGET: BudgetConfig = { warningRatio: 0.2, restrictedRatio
  * An operator override lasts until the 00:00 IST reset.
  */
 export function breakerState(costTodayInr: number, revenueAvgInr: number, cfg: BudgetConfig = DEFAULT_BUDGET, override: BreakerOverride = null) {
-  const ratio = revenueAvgInr > 0 ? costTodayInr / revenueAvgInr : 1;
+  // With no revenue history (pre-launch) only the hard cap applies (ALG §12).
+  const ratio = revenueAvgInr > 0 ? costTodayInr / revenueAvgInr : 0;
   let computed: BreakerState = "normal";
   if (ratio >= cfg.restrictedRatio || costTodayInr >= cfg.hardCapInr) computed = "restricted";
   else if (ratio >= cfg.warningRatio) computed = "warning";
@@ -64,6 +66,18 @@ export const BREAKER_COPY: Record<BreakerState, { label: string; effect: string 
     effect: "Deep diagnostics and question-generation fallback are paused. Tests, scoring and plans still work, and learners see the “slower than usual” banner.",
   },
 };
+
+/* ---------- K10: abuse signal (ALG §12) ---------- */
+
+/**
+ * `utilisation` holds one value per IST day, oldest first: daily plan credits consumed ÷
+ * allowance. Flagged when the last `ABUSE_DAYS` days are all above the threshold. This only
+ * raises a flag for a person to review — it never throttles automatically.
+ */
+export function abuseSignal(utilisation: number[]): boolean {
+  if (utilisation.length < ABUSE_DAYS) return false;
+  return utilisation.slice(-ABUSE_DAYS).every((u) => u > ABUSE_UTILISATION);
+}
 
 /* ---------- K7: prerequisite cycle check (TRD §5.2) ---------- */
 

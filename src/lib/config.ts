@@ -5,4 +5,11 @@
  */
 export * from "@/domains/credits/costs";
 export * from "@/domains/credits/rules";
-export * from "@/domains/learning/rules";
+export {
+  confidenceFor,
+  priorityFor,
+  retestOutcome,
+  severityFor,
+  showsMasteryNumber,
+} from "@/domains/learning/rules";
+export type { Confidence, Priority, Severity } from "@/domains/learning/rules";

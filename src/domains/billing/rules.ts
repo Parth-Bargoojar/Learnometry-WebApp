@@ -142,3 +142,35 @@ export function applyCoupon(
 export function totalDue(item: CheckoutItem, coupon?: CouponResult | null) {
   return Math.max(0, item.priceInr - (item.prorationInr ?? 0) - (coupon?.ok ? coupon.discountInr ?? 0 : 0));
 }
+
+/* ---------- alg-v1 money (ALGORITHMS.md §12) — what the server charges and decides ---------- */
+
+/**
+ * Upgrade charge in whole rupees: the new price minus the unused value of the current
+ * pass rounded down, never below ₹1 (Razorpay cannot take ₹0).
+ */
+export function upgradeDue(input: { newPriceInr: number; currentPriceInr: number; remainingDays: number }): number {
+  const remaining = Math.max(0, Math.min(PASS_DAYS, input.remainingDays));
+  const credit = Math.floor((input.currentPriceInr * remaining) / PASS_DAYS);
+  return Math.max(1, input.newPriceInr - credit);
+}
+
+export interface RefundEligibility {
+  eligible: boolean;
+  withinWindow: boolean;
+  underUsage: boolean;
+  /** used ÷ issued; 0 when nothing was issued. */
+  usedShare: number;
+}
+
+/**
+ * Eligible when the request is within 7 days of the first payment and less than 20% of the
+ * daily credits issued this period were used. Expired-unused credits count as not used.
+ */
+export function refundEligibility(input: { now: Date; firstPaymentAt: Date; issued: number; used: number }): RefundEligibility {
+  const deadline = input.firstPaymentAt.getTime() + REFUND_WINDOW_DAYS * 86_400_000;
+  const withinWindow = input.now.getTime() <= deadline;
+  const usedShare = input.issued > 0 ? input.used / input.issued : 0;
+  const underUsage = usedShare < REFUND_MAX_USAGE;
+  return { eligible: withinWindow && underUsage, withinWindow, underUsage, usedShare };
+}
