@@ -12,6 +12,7 @@ export const inngest = new Inngest({ id: "learnometry" });
 export const EVENTS = {
   accountDeletionRequested: "account.deletion_requested",
   accountDeletionCancelled: "account.deletion_cancelled",
+  contentImported: "content.imported",
 } as const;
 
 /**

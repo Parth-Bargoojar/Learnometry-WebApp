@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { importContent } from "@/domains/content/import";
+import { runLlmValidators } from "@/domains/content/llm-validation";
 import { questionSchema, type ConceptFile } from "@/domains/content/schema";
 import { db, pg } from "./helpers";
 
@@ -82,5 +83,27 @@ describe("importContent", () => {
     expect(summary.missingConcepts).toEqual([{ concept: "no-such-concept", track: "jee_main" }, { concept: "no-such-concept", track: "neet" }]);
     expect(summary.orphaned).toEqual(expect.arrayContaining([`jee_main:${SLUG}`]));
     expect((await rows()).length).toBe(2);
+  });
+});
+
+describe("semantic validators (BE-3.3, mock provider)", () => {
+  it("records every check as pending and never as a pass", async () => {
+    const [q] = await pg<{ id: string; version_number: number }[]>`select id, version_number from questions q where slug = ${SLUG} and exam_id = (select id from exams where code = 'jee_main')`;
+    expect(await runLlmValidators(db, q.id, q.version_number)).toEqual(["semantic", "difficulty", "exam_style", "safety"]);
+    await runLlmValidators(db, q.id, q.version_number); // repeating replaces, does not stack
+    const rows = await pg<{ validator_type: string; status: string; details: { provider: string } }[]>`
+      select validator_type, status, details from question_validations where question_id = ${q.id} and version_number = ${q.version_number}
+        and validator_type in ('semantic','difficulty','exam_style','safety') order by 1`;
+    expect(rows.map((r) => [r.validator_type, r.status, r.details.provider])).toEqual([
+      ["difficulty", "pending", "mock"],
+      ["exam_style", "pending", "mock"],
+      ["safety", "pending", "mock"],
+      ["semantic", "pending", "mock"],
+    ]);
+  });
+
+  it("ignores a version that a newer import has replaced", async () => {
+    const [q] = await pg<{ id: string; version_number: number }[]>`select id, version_number from questions q where slug = ${SLUG} and exam_id = (select id from exams where code = 'jee_main')`;
+    expect(await runLlmValidators(db, q.id, q.version_number - 1)).toEqual([]);
   });
 });

@@ -19,6 +19,8 @@ export interface ImportSummary {
   orphaned: string[];
   /** Concepts named in the files that do not exist for a track. */
   missingConcepts: { concept: string; track: Track }[];
+  /** Rows created or changed, for the `content.imported` event. */
+  touched: { questionId: string; version: number }[];
 }
 
 /** What a learner and the engine see of an item, minus anything that is per-row. */
@@ -50,7 +52,7 @@ const canonical = (v: unknown): string =>
 const same = (a: unknown, b: unknown) => canonical(a) === canonical(b);
 
 export async function importContent(db: Db, files: ConceptFile[], opts: { dryRun?: boolean } = {}): Promise<ImportSummary> {
-  const summary: ImportSummary = { created: 0, changed: 0, unchanged: 0, orphaned: [], missingConcepts: [] };
+  const summary: ImportSummary = { created: 0, changed: 0, unchanged: 0, orphaned: [], missingConcepts: [], touched: [] };
   const tracks = [...new Set(files.flatMap((f) => f.items.flatMap((i) => i.tracks)))];
 
   await db.transaction(async (tx) => {
@@ -120,11 +122,13 @@ export async function importContent(db: Db, files: ConceptFile[], opts: { dryRun
             // Changed content must be reviewed again, so it leaves "published".
             await tx.update(s.questions).set({ ...rowValues, versionNumber: version, validationStatus: "validated", updatedAt: new Date() }).where(eq(s.questions.id, existing.id));
             await record(tx, existing.id, version, next, "Content file changed");
+            summary.touched.push({ questionId: existing.id, version });
           } else {
             summary.created++;
             if (opts.dryRun) continue;
             const [created] = await tx.insert(s.questions).values({ slug: q.id, ...rowValues, validationStatus: "validated" }).returning({ id: s.questions.id });
             await record(tx, created.id, 1, next, "Imported");
+            summary.touched.push({ questionId: created.id, version: 1 });
           }
         }
       }

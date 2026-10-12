@@ -8,6 +8,7 @@
 import { createDb } from "../src/lib/db/connection";
 import { loadContent } from "../src/domains/content/load";
 import { importContent } from "../src/domains/content/import";
+import { EVENTS, sendEvent } from "../src/inngest/client";
 
 async function main() {
   const args = new Set(process.argv.slice(2));
@@ -27,6 +28,11 @@ async function main() {
   try {
     const summary = await importContent(db, files, { dryRun: args.has("--dry-run") });
     console.log(`${args.has("--dry-run") ? "dry run: " : ""}created ${summary.created}, changed ${summary.changed}, unchanged ${summary.unchanged}`);
+    if (summary.touched.length > 0 && !args.has("--dry-run")) {
+      // Semantic validators run in a job; without Inngest configured they are queued by the next run of this script.
+      const sent = await sendEvent(EVENTS.contentImported, { items: summary.touched });
+      console.log(sent ? `queued semantic validation for ${summary.touched.length} questions` : "Inngest not reachable: semantic validators stay pending");
+    }
     if (summary.missingConcepts.length) console.warn("concepts missing from the database:", summary.missingConcepts);
     if (summary.orphaned.length) console.warn(`${summary.orphaned.length} questions in the database are no longer in the files (not deleted):`, summary.orphaned.slice(0, 20));
   } finally {
