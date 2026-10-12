@@ -47,3 +47,7 @@ m-*.png
 
 # phase L audit output
 /audit-report/
+
+# playwright
+/test-results
+/playwright-report

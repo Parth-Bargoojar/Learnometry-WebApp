@@ -5,9 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Check, CircleAlert, CircleCheck, ExternalLink, Lock, MailCheck, X } from "lucide-react";
+import { saveOnboardingStepAction } from "@/app/(onboarding)/onboarding/actions";
+import { signOutAction } from "@/app/(auth)/actions";
 import { COST, DAILY_MINUTE_PRESETS } from "@/lib/config";
 import { TODAY } from "@/lib/data";
 import { fullDate, shortDate } from "@/lib/format";
+import { istDate } from "@/lib/time";
+import { clearDeviceData } from "@/lib/pwa";
+import type { ErrorBody } from "@/lib/errors/app-error";
+import type { OnboardingAnswers } from "@/domains/identity/types";
 import {
   CONSENT,
   CONSENT_TERMS,
@@ -31,10 +37,9 @@ import { siteUrl } from "@/lib/site";
 /*
   Onboarding — Web App Structure §8.2, decisions D4 and D5.
   Learner path: date of birth first; under 18 nothing else is collected until a
-  guardian consents. Guardian path: the guardian adds the child, consents inline,
-  sets up the child's exam and time, and the child gets an invite.
-  Answers persist in session storage so Back and refresh keep them (the API
-  persists them in production).
+  guardian consents. Each step is saved on the server as you continue (BE-2.3), so Back,
+  refresh and another device all pick up where you left off. The guardian path (child,
+  consent, invite) is closed until BE-11 (BE-D50) and still runs on the simulated store.
 */
 
 type Answers = {
@@ -56,9 +61,7 @@ type Answers = {
   declaration?: boolean;
 };
 
-const KEY = "lm-onboarding";
 const STEPS_ADULT = ["about-you", "exam", "exam-date", "study-time"];
-const STEPS_MINOR = ["about-you", "guardian", "exam", "exam-date", "study-time"];
 const STEPS_GUARDIAN = ["child", "consent", "exam", "exam-date", "study-time"];
 const TITLES: Record<string, string> = {
   child: "Your child",
@@ -76,22 +79,38 @@ function ageFrom(a: Answers) {
   // Reject impossible dates like 31 Feb rather than rolling them over.
   const parsed = new Date(`${iso}T00:00:00Z`);
   if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== iso) return null;
-  return ageOn(iso, TODAY);
+  return ageOn(iso, istDate(new Date()));
 }
 
-export function Onboarding({ step }: { step: string }) {
+/** The server's saved answers, in the shape the screens edit. */
+function answersFrom(s: OnboardingAnswers): Answers {
+  return {
+    day: s.dob?.day,
+    month: s.dob?.month,
+    year: s.dob?.year,
+    cls: s.classLabel ?? undefined,
+    exam: s.exam ?? undefined,
+    examMonth: s.examMonth ?? undefined,
+    examYear: s.examYear ?? undefined,
+    notSure: s.notSure || undefined,
+    minutes: s.minutes ?? undefined,
+  };
+}
+
+const firstMessage = (e: ErrorBody) => (e.fields ? Object.values(e.fields)[0] : undefined) ?? e.message;
+
+export function Onboarding({ step, initial, welcomeCredits = 0 }: { step: string; initial: OnboardingAnswers; welcomeCredits?: number }) {
   const router = useRouter();
-  const [a, setA] = useState<Answers>({});
+  const [a, setA] = useState<Answers>(() => answersFrom(initial));
   const [draft, setDraft] = useState<SignupDraft | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     try {
-      const raw = sessionStorage.getItem(KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring browser-held answers after mount
-      if (raw) setA(JSON.parse(raw));
       const d = sessionStorage.getItem(SIGNUP_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reading the sign-up draft after mount
       if (d) setDraft(JSON.parse(d));
     } catch {}
     setLoaded(true);
@@ -99,20 +118,15 @@ export function Onboarding({ step }: { step: string }) {
 
   const update = (patch: Partial<Answers>) => {
     setError(null);
-    setA((prev) => {
-      const next = { ...prev, ...patch };
-      try {
-        sessionStorage.setItem(KEY, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+    setA((prev) => ({ ...prev, ...patch }));
   };
 
   const age = ageFrom(a);
   // The guardian path is chosen at sign-up; its own steps also imply it after a refresh.
   const guardianPath = draft?.role === "guardian" || step === "child" || step === "consent" || step === "invite-sent";
   const minor = !guardianPath && age !== null && age < 18;
-  const steps = guardianPath ? STEPS_GUARDIAN : minor ? STEPS_MINOR : STEPS_ADULT;
+  // Minors stop after "About you" (BE-D50), so their progress bar is the adult one.
+  const steps = guardianPath ? STEPS_GUARDIAN : STEPS_ADULT;
   const idx = steps.indexOf(step);
   const go = (s: string) => router.push(`/onboarding/${s}`);
   const child = guardianPath ? a.childName?.trim() || "your child" : null;
@@ -125,10 +139,33 @@ export function Onboarding({ step }: { step: string }) {
         <Waiting a={a} learnerName={draft?.name?.split(" ")[0] || ""} onApproved={() => go("exam")} />
       </Frame>
     );
-  if (step === "ready") return <Frame progress={null} title="All set"><Ready a={a} /></Frame>;
+  if (step === "minor-hold") return <Frame progress={null} title="Almost there"><MinorHold /></Frame>;
+  if (step === "ready") return <Frame progress={null} title="All set"><Ready a={a} welcomeCredits={welcomeCredits} /></Frame>;
   if (step === "invite-sent") return <Frame progress={null} title="Invite sent"><InviteSent a={a} /></Frame>;
 
+  /** Save the current learner step on the server, then follow its answer. */
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    const payload =
+      step === "about-you"
+        ? { step, dob: { day: a.day, month: a.month, year: a.year }, classLevel: minor ? undefined : a.cls }
+        : step === "exam"
+          ? { step, exam: a.exam }
+          : step === "exam-date"
+            ? { step, notSure: !!a.notSure, month: a.examMonth, year: a.examYear }
+            : { step, minutes: a.minutes };
+    const res = await saveOnboardingStepAction(payload);
+    if (!res.ok) {
+      setSaving(false);
+      setError(firstMessage(res.error));
+      return;
+    }
+    router.push(`/onboarding/${res.data.next}`);
+  };
+
   const next = () => {
+    if (saving) return;
     if (step === "child") {
       const name = a.childName?.trim();
       if (!name) return setError("Enter your child's first name.");
@@ -147,9 +184,9 @@ export function Onboarding({ step }: { step: string }) {
     }
     if (step === "about-you") {
       if (age === null) return setError("Enter your full date of birth.");
-      if (age < 13) return setError("Learnometry is for students aged 13 and over.");
-      if (!a.cls) return setError("Choose your class.");
-      return go(minor ? "guardian" : "exam");
+      if (age < MIN_AGE) return setError(`Learnometry is for students aged ${MIN_AGE} and over.`);
+      if (!minor && !a.cls) return setError("Choose your class.");
+      return void save();
     }
     if (step === "guardian") {
       if (!a.guardianName?.trim()) return setError("Enter your parent or guardian's name.");
@@ -162,12 +199,12 @@ export function Onboarding({ step }: { step: string }) {
     if (step === "exam" && !a.exam) return setError("Choose your exam.");
     if (step === "exam-date" && !a.notSure && (!a.examMonth || !a.examYear)) return setError("Choose a month and year, or tick “Not sure yet”.");
     if (step === "study-time" && !a.minutes) return setError("Choose how much time you have each day.");
-    const n = steps[idx + 1];
-    go(n ?? (guardianPath ? "invite-sent" : "ready"));
+    if (guardianPath) return go(steps[idx + 1] ?? "invite-sent");
+    return void save();
   };
 
   // Back from "exam" lands on the guardian or consent step: the waiting screen is done.
-  const back = () => (idx <= 0 ? router.push("/signup") : go(steps[idx - 1]));
+  const back = () => (idx > 0 ? go(steps[idx - 1]) : undefined);
 
   return (
     <Frame progress={{ n: idx + 1, of: steps.length }} title={TITLES[step]}>
@@ -182,7 +219,7 @@ export function Onboarding({ step }: { step: string }) {
         <div className="mx-auto w-full max-w-[560px] flex-1 px-4 pb-8 pt-8 sm:pt-12">
           {step === "child" ? <ChildDetails a={a} update={update} /> : null}
           {step === "consent" ? <InlineConsent a={a} update={update} child={child ?? "your child"} /> : null}
-          {step === "about-you" ? <AboutYou a={a} update={update} /> : null}
+          {step === "about-you" ? <AboutYou a={a} update={update} minor={minor} /> : null}
           {step === "guardian" ? <Guardian a={a} update={update} /> : null}
           {step === "exam" ? <Exam a={a} update={update} child={child} /> : null}
           {step === "exam-date" ? <ExamDate a={a} update={update} child={child} /> : null}
@@ -196,11 +233,15 @@ export function Onboarding({ step }: { step: string }) {
         </div>
         <div className="sticky bottom-0 border-t border-border-subtle bg-surface pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto flex h-[72px] max-w-[560px] items-center justify-between gap-3 px-4">
-            <button type="button" onClick={back} className={btn("ghost", "md")}>
-              <ArrowLeft aria-hidden="true" className="size-5" /> Back
-            </button>
-            <button type="submit" className={btn("primary", "md", "min-w-[9rem]")}>
-              {step === "consent" ? "Give consent" : "Continue"} <ArrowRight aria-hidden="true" className="size-5" />
+            {idx > 0 ? (
+              <button type="button" onClick={back} className={btn("ghost", "md")}>
+                <ArrowLeft aria-hidden="true" className="size-5" /> Back
+              </button>
+            ) : (
+              <span />
+            )}
+            <button type="submit" disabled={saving} className={btn("primary", "md", "min-w-[9rem]")}>
+              {saving ? "Saving…" : step === "consent" ? "Give consent" : "Continue"} <ArrowRight aria-hidden="true" className="size-5" />
             </button>
           </div>
         </div>
@@ -323,7 +364,7 @@ function ClassField({ a, update, legend = "Class" }: { a: Answers; update: (p: P
   );
 }
 
-function AboutYou({ a, update }: { a: Answers; update: (p: Partial<Answers>) => void }) {
+function AboutYou({ a, update, minor }: { a: Answers; update: (p: Partial<Answers>) => void; minor: boolean }) {
   return (
     <>
       <div className="mb-6">
@@ -333,8 +374,55 @@ function AboutYou({ a, update }: { a: Answers; update: (p: Partial<Answers>) => 
       <div className="mt-7">
         <DobFields a={a} update={update} legend="Date of birth" />
       </div>
-      <ClassField a={a} update={update} />
+      {minor ? (
+        <p role="status" className="mt-6 rounded-card-sm border border-border-subtle bg-sunken p-4 text-[15px] text-ink">
+          Accounts for students under 18 open soon. Your parent or guardian will be able to approve you.
+        </p>
+      ) : (
+        <ClassField a={a} update={update} />
+      )}
     </>
+  );
+}
+
+/** BE-D50: under-18 sign-up is held until guardian consent exists. Only name, email and date of birth are kept. */
+function MinorHold() {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  return (
+    <div className="mx-auto w-full max-w-[560px] px-4 pb-10 pt-10 sm:pt-14">
+      <Mascot size="md" />
+      <div className="mt-6">
+        <Heading title="Accounts for students under 18 open soon" help="Your parent or guardian will be able to approve you." />
+      </div>
+      <ul className="mt-6 flex flex-col gap-2.5 text-[15px] text-ink">
+        <li className="flex items-start gap-2.5">
+          <Lock aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted" />
+          We&apos;ve kept only your name, email and date of birth. Nothing else is stored.
+        </li>
+        <li className="flex items-start gap-2.5">
+          <Lock aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted" />
+          If you don&apos;t come back within {CONSENT.pendingDays} days, we delete them.
+        </li>
+      </ul>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={async () => {
+          setPending(true);
+          await clearDeviceData();
+          await signOutAction();
+          router.replace("/login");
+          router.refresh();
+        }}
+        className={btn("secondary", "md", "mt-8")}
+      >
+        {pending ? "Signing out…" : "Sign out"}
+      </button>
+      <a href={siteUrl("/faq")} className="mt-4 block text-sm font-semibold text-primary-text underline underline-offset-4">
+        Questions? Read the FAQ
+      </a>
+    </div>
   );
 }
 
@@ -695,7 +783,7 @@ function StudyTime({ a, update, child }: { a: Answers; update: (p: Partial<Answe
   );
 }
 
-function Ready({ a }: { a: Answers }) {
+function Ready({ a, welcomeCredits }: { a: Answers; welcomeCredits: number }) {
   const rows = [
     ["Exam", a.exam ?? "JEE Main"],
     ["Subject", "Physics · Class 11 Mechanics"],
@@ -706,7 +794,9 @@ function Ready({ a }: { a: Answers }) {
     <div className="mx-auto w-full max-w-[560px] px-4 pb-10 pt-10 text-center sm:pt-14">
       <Mascot size="lg" className="mx-auto" />
       <h1 className="mt-6 font-display text-3xl text-ink">You&apos;re set up</h1>
-      <p className="mt-2 text-[15px] text-muted">Your 100 welcome credits are ready. They cover your diagnostic and your first study plan.</p>
+      <p className="mt-2 text-[15px] text-muted">
+        {welcomeCredits > 0 ? `Your ${welcomeCredits} welcome credits are ready. They cover your diagnostic and your first study plan.` : "Your diagnostic is the next step."}
+      </p>
       <dl className="mt-7 divide-y divide-border-subtle rounded-card border border-border-subtle bg-surface text-left">
         {rows.map(([k, v]) => (
           <div key={k} className="flex items-center justify-between gap-4 px-4 py-3">
@@ -719,7 +809,7 @@ function Ready({ a }: { a: Answers }) {
         <Link href="/assess/diagnostic" className={btn("primary", "lg", "w-full sm:w-auto")}>
           Start diagnostic <Cost credits={COST.fullDiagnostic} />
         </Link>
-        <Link href="/dashboard?state=new" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary-text underline underline-offset-4">
+        <Link href="/dashboard" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary-text underline underline-offset-4">
           Go to home
         </Link>
       </div>

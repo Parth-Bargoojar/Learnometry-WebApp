@@ -4,7 +4,8 @@ import { daysBetween, shortDate } from "./iso-date";
 export { dayMonth, daysBetween, fullDate, shortDate, weekday } from "./iso-date";
 
 
-export const daysFromToday = (iso: string) => daysBetween(TODAY, iso);
+/** Days from `today` (default: the sample story's day) to `iso`. Real pages pass IST today. */
+export const daysFromToday = (iso: string, today: string = TODAY) => daysBetween(today, iso);
 
 /** "Today", "Tomorrow", "Fri 3 Oct" */
 export function relativeDay(iso: string) {

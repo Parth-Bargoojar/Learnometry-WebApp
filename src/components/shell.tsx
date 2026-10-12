@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ChevronLeft,
   ClipboardCheck,
@@ -22,8 +22,9 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { PLANS, creditStateFor, enoughFor } from "@/lib/config";
-import { credits, learner } from "@/lib/data";
+import { signOutAction } from "@/app/(auth)/actions";
+import { updateAppearanceAction } from "@/app/(app)/settings/actions";
+import { PLANS, enoughFor } from "@/lib/config";
 import { routeInfo } from "@/lib/routes";
 import { clearDeviceData, useStandalone } from "@/lib/pwa";
 import { ThemeProvider, useTheme, type ThemePref } from "./theme";
@@ -31,6 +32,7 @@ import { Dialog } from "./dialog";
 import { NotificationBell } from "./notifications";
 import { KeyboardSheet, useShortcutSheet } from "./keyboard-sheet";
 import { OfflineBanner } from "./pwa";
+import { useViewer } from "./viewer";
 
 /* DS §9 — order locked: Home, Assess, Practice, Plan, Progress. */
 const PRIMARY: { href: string; label: string; icon: LucideIcon }[] = [
@@ -47,12 +49,12 @@ const SECONDARY: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-const initials = `${learner.firstName[0]}${learner.lastName[0]}`;
-const plan = PLANS[learner.plan];
-
 export function AppShell({ children }: { children: ReactNode }) {
+  const viewer = useViewer();
+  // The theme is an account preference (BE-2.7): saved in the background, applied at once.
+  const persist = useCallback((theme: ThemePref) => void updateAppearanceAction({ theme }), []);
   return (
-    <ThemeProvider>
+    <ThemeProvider serverPref={viewer.theme} persist={persist}>
       <ShellFrame>{children}</ShellFrame>
     </ThemeProvider>
   );
@@ -212,6 +214,7 @@ function BottomTabs({ section }: { section: string }) {
 }
 
 function Avatar() {
+  const { initials } = useViewer();
   return (
     <span className="flex size-9 items-center justify-center rounded-full border border-line bg-primary/20 text-xs font-bold text-ink">
       {initials}
@@ -220,6 +223,8 @@ function Avatar() {
 }
 
 function UserBlock({ onShortcuts }: { onShortcuts: () => void }) {
+  const viewer = useViewer();
+  const plan = PLANS[viewer.plan];
   const [open, setOpen] = useState(false);
   return (
     <div className="border-t border-border-subtle p-3">
@@ -232,10 +237,11 @@ function UserBlock({ onShortcuts }: { onShortcuts: () => void }) {
         <Avatar />
         <span className="min-w-0">
           <span className="block truncate text-sm font-semibold text-ink">
-            {learner.firstName} {learner.lastName}
+            {viewer.firstName} {viewer.lastName}
           </span>
           <span className="block truncate text-xs text-muted">
-            {learner.exam} · {plan.name}
+            {viewer.examName ? `${viewer.examName} · ` : ""}
+            {plan.name}
           </span>
         </span>
       </button>
@@ -246,6 +252,8 @@ function UserBlock({ onShortcuts }: { onShortcuts: () => void }) {
 
 /** `onShortcuts` is passed only where a keyboard is likely (the desktop sidebar's account menu). */
 function AccountSheet({ open, onClose, onShortcuts }: { open: boolean; onClose: () => void; onShortcuts?: () => void }) {
+  const viewer = useViewer();
+  const plan = PLANS[viewer.plan];
   const { pref, setPref } = useTheme();
   const themes: { value: ThemePref; label: string; icon: LucideIcon }[] = [
     { value: "system", label: "System", icon: Monitor },
@@ -254,7 +262,7 @@ function AccountSheet({ open, onClose, onShortcuts }: { open: boolean; onClose: 
   ];
   const link = "flex min-h-12 items-center gap-3 rounded-btn px-3 text-[15px] font-medium text-ink hover:bg-sunken";
   return (
-    <Dialog open={open} onClose={onClose} title={`${learner.firstName} ${learner.lastName}`} description={`${learner.email} · ${plan.name} plan`} variant="sheet">
+    <Dialog open={open} onClose={onClose} title={`${viewer.firstName} ${viewer.lastName}`.trim()} description={`${viewer.email} · ${plan.name} plan`} variant="sheet">
       <nav aria-label="Account" className="flex flex-col gap-1">
         {SECONDARY.map((item) => (
           <Link key={item.href} href={item.href} onClick={onClose} className={link}>
@@ -299,19 +307,41 @@ function AccountSheet({ open, onClose, onShortcuts }: { open: boolean; onClose: 
           ))}
         </div>
       </fieldset>
-      <Link href="/login" onClick={() => void clearDeviceData()} className={`${link} mt-5 border-t border-border-subtle pt-2`}>
-        <LogOut aria-hidden="true" className="size-5 text-muted" />
-        Sign out
-      </Link>
+      <SignOutButton className={`${link} mt-5 w-full border-t border-border-subtle pt-2 text-left`} />
     </Dialog>
+  );
+}
+
+/** Clears this device's cached pages and push subscription, ends the session, then goes to the log-in screen (L7). */
+function SignOutButton({ className }: { className: string }) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      className={className}
+      onClick={async () => {
+        setPending(true);
+        await clearDeviceData();
+        await signOutAction();
+        router.replace("/login");
+        router.refresh();
+      }}
+    >
+      <LogOut aria-hidden="true" className="size-5 text-muted" />
+      {pending ? "Signing out…" : "Sign out"}
+    </button>
   );
 }
 
 /* ---------- Credit chip (DS §21, Web App Structure §7.8) ---------- */
 
 function CreditChip() {
+  const viewer = useViewer();
+  const plan = PLANS[viewer.plan];
   const [open, setOpen] = useState(false);
-  const state = creditStateFor(credits.balance, plan.periodCredits);
+  const state = viewer.creditState;
   const tone = {
     normal: "border-border-subtle bg-surface text-ink",
     low: "border-warning/45 bg-warning/15 text-warning-text",
@@ -327,15 +357,15 @@ function CreditChip() {
         className={`inline-flex h-9 touch:h-11 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold tabular-nums ${tone}`}
       >
         <Zap aria-hidden="true" className={`size-4 ${state === "normal" ? "text-primary-deep" : ""}`} />
-        {credits.balance}
+        {viewer.balance}
         <span className="hidden sm:inline"> credits</span>
         <span className="sr-only">. View credit details</span>
       </button>
-      <Dialog open={open} onClose={() => setOpen(false)} title={`${credits.balance} credits`} description={`${plan.name} plan · ${plan.periodCredits} a day, refilled at 00:00 IST`}>
-        <p className="mb-2 text-[15px] font-semibold text-ink">{enoughFor(credits.balance)}</p>
+      <Dialog open={open} onClose={() => setOpen(false)} title={`${viewer.balance} credits`} description={`${plan.name} plan · ${plan.periodCredits} a day, refilled at 00:00 IST`}>
+        <p className="mb-2 text-[15px] font-semibold text-ink">{enoughFor(viewer.balance)}</p>
         <ul className="divide-y divide-border-subtle">
-          {credits.buckets.map((b) => (
-            <li key={b.label} className="flex items-center justify-between gap-4 py-3">
+          {viewer.buckets.map((b) => (
+            <li key={b.key} className="flex items-center justify-between gap-4 py-3">
               <div>
                 <p className="font-medium text-ink">{b.label}</p>
                 <p className="text-xs text-muted">{b.note}</p>
