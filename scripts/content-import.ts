@@ -8,6 +8,7 @@
 import { createDb } from "../src/lib/db/connection";
 import { loadContent } from "../src/domains/content/load";
 import { importContent } from "../src/domains/content/import";
+import { runLlmValidators } from "../src/domains/content/llm-validation";
 import { EVENTS, sendEvent } from "../src/inngest/client";
 
 async function main() {
@@ -29,9 +30,14 @@ async function main() {
     const summary = await importContent(db, files, { dryRun: args.has("--dry-run") });
     console.log(`${args.has("--dry-run") ? "dry run: " : ""}created ${summary.created}, changed ${summary.changed}, unchanged ${summary.unchanged}`);
     if (summary.touched.length > 0 && !args.has("--dry-run")) {
-      // Semantic validators run in a job; without Inngest configured they are queued by the next run of this script.
+      // Semantic validators normally run in the `content.validate-llm` job. Without a reachable queue
+      // (a fresh environment, no Inngest keys yet) run them here so no question is left "pending".
       const sent = await sendEvent(EVENTS.contentImported, { items: summary.touched });
-      console.log(sent ? `queued semantic validation for ${summary.touched.length} questions` : "Inngest not reachable: semantic validators stay pending");
+      if (sent) console.log(`queued semantic validation for ${summary.touched.length} questions`);
+      else {
+        for (const t of summary.touched) await runLlmValidators(db, t.questionId, t.version);
+        console.log(`Inngest not reachable: recorded the semantic validators inline for ${summary.touched.length} questions`);
+      }
     }
     if (summary.missingConcepts.length) console.warn("concepts missing from the database:", summary.missingConcepts);
     if (summary.orphaned.length) console.warn(`${summary.orphaned.length} questions in the database are no longer in the files (not deleted):`, summary.orphaned.slice(0, 20));
