@@ -4,14 +4,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { CircleAlert, Eye, EyeOff, GraduationCap, Users } from "lucide-react";
+import { signInAction, signInWithGoogleAction, signUpAction } from "@/app/(auth)/actions";
 import { btn } from "./ui";
 import { siteUrl } from "@/lib/site";
 import { SIGNUP_KEY, type SignupDraft } from "@/lib/guardian";
+import type { ErrorBody } from "@/lib/errors/app-error";
 
 /*
-  Auth forms (Web App Structure §8.1). Supabase Auth replaces the simulated submit;
-  validation, error summary and field semantics are the production behaviour.
+  Auth forms (Web App Structure §8.1). Submits go to Server Actions (Supabase Auth on the
+  server, BE-D73); the browser never talks to Supabase. Client checks are a courtesy: the
+  server validates again and its field messages land in the same error summary.
 */
+
+/** Field errors from the server, or the general message anchored to `fallbackField`. */
+export function errorsFrom(error: ErrorBody, fallbackField: string): Record<string, string> {
+  return error.fields && Object.keys(error.fields).length ? error.fields : { [fallbackField]: error.message };
+}
+
+function rememberDraft(draft: SignupDraft) {
+  try {
+    sessionStorage.setItem(SIGNUP_KEY, JSON.stringify(draft));
+  } catch {}
+}
 
 export const input =
   "mt-1.5 h-12 w-full rounded-input border border-control bg-surface px-3.5 text-base text-ink transition-colors focus:border-ink aria-[invalid=true]:border-danger";
@@ -87,9 +101,24 @@ export function PasswordInput({
   );
 }
 
-function GoogleButton() {
+function GoogleButton({ onError }: { onError: (message: string) => void }) {
+  const [pending, setPending] = useState(false);
   return (
-    <button type="button" className={btn("secondary", "md", "w-full")}>
+    <button
+      type="button"
+      disabled={pending}
+      onClick={async () => {
+        setPending(true);
+        const res = await signInWithGoogleAction();
+        if (res.ok) {
+          window.location.assign(res.data.url);
+          return;
+        }
+        setPending(false);
+        onError(res.error.message);
+      }}
+      className={btn("secondary", "md", "w-full")}
+    >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
         <path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.3H12v4.4h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8.1z" />
         <path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z" />
@@ -111,31 +140,59 @@ function Divider() {
   );
 }
 
-export function LoginForm() {
+const LOGIN_NOTICE: Record<string, string> = {
+  link: "That link has expired or was already used. Log in, or ask for a new one.",
+  callback: "Google sign-in didn't finish. Try again, or use your email and password.",
+  deletion_pending: "This account has been closed and is being deleted.",
+  suspended: "This account is suspended. Contact support if you think that's a mistake.",
+};
+
+export function Notice({ children }: { children: React.ReactNode }) {
+  return (
+    <p role="status" className="mt-5 flex items-start gap-2 rounded-card-sm border border-border-subtle bg-sunken px-3 py-2.5 text-sm text-ink">
+      <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted" />
+      <span>{children}</span>
+    </p>
+  );
+}
+
+export function LoginForm({ next, notice }: { next?: string; notice?: string }) {
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const summary = useRef<HTMLDivElement>(null);
 
-  const submit = (e: FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    const next: Record<string, string> = {};
-    if (!/^\S+@\S+\.\S+$/.test(String(data.get("email")))) next.email = "Enter your email address, like name@example.com.";
-    if (!String(data.get("password"))) next.password = "Enter your password.";
-    setErrors(next);
-    if (Object.keys(next).length) {
+    const email = String(data.get("email")).trim();
+    const password = String(data.get("password"));
+    const found: Record<string, string> = {};
+    if (!/^\S+@\S+\.\S+$/.test(email)) found.email = "Enter your email address, like name@example.com.";
+    if (!password) found.password = "Enter your password.";
+    setErrors(found);
+    if (Object.keys(found).length) {
       requestAnimationFrame(() => summary.current?.focus());
       return;
     }
     setPending(true);
-    window.setTimeout(() => router.push("/dashboard"), 600);
+    const res = await signInAction({ email, password, next });
+    if (!res.ok) {
+      setPending(false);
+      setErrors(errorsFrom(res.error, "password"));
+      requestAnimationFrame(() => summary.current?.focus());
+      return;
+    }
+    if (res.data.needsVerification) rememberDraft({ role: "student", name: "", email });
+    router.push(res.data.next);
+    router.refresh();
   };
 
   return (
     <>
       <h1 className="font-display text-2xl text-ink sm:text-[28px]">Log in to Learnometry</h1>
       <p className="mt-1.5 text-[15px] text-muted">Pick up your plan where you left it.</p>
+      {notice && LOGIN_NOTICE[notice] ? <Notice>{LOGIN_NOTICE[notice]}</Notice> : null}
       <ErrorSummary errors={errors} refEl={summary} />
       <form noValidate onSubmit={submit} className="mt-6 flex flex-col gap-4">
         <Field id="email" label="Email" error={errors.email}>
@@ -161,7 +218,7 @@ export function LoginForm() {
         </button>
       </form>
       <Divider />
-      <GoogleButton />
+      <GoogleButton onError={(message) => setErrors({ email: message })} />
       <p className="mt-6 text-center text-sm text-muted">
         New here?{" "}
         <Link href="/signup" className="font-semibold text-primary-text underline underline-offset-4">
@@ -172,20 +229,26 @@ export function LoginForm() {
   );
 }
 
-export function SignupForm({ defaultRole = "student" }: { defaultRole?: "student" | "guardian" }) {
+export function SignupForm({ defaultRole = "student", guardianOpen = false }: { defaultRole?: "student" | "guardian"; guardianOpen?: boolean }) {
   const router = useRouter();
   const [role, setRole] = useState<"student" | "guardian">(defaultRole);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const summary = useRef<HTMLDivElement>(null);
+  // Guardian accounts open with the guardian stage (BE-D50): until then the choice explains itself.
+  const blocked = role === "guardian" && !guardianOpen;
 
-  const submit = (e: FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (blocked) return;
     const d = new FormData(e.currentTarget);
+    const name = String(d.get("name")).trim();
+    const email = String(d.get("email")).trim();
+    const password = String(d.get("new-password"));
     const next: Record<string, string> = {};
-    if (!String(d.get("name")).trim()) next.name = "Enter your name.";
-    if (!/^\S+@\S+\.\S+$/.test(String(d.get("email")))) next.email = "Enter your email address, like name@example.com.";
-    if (String(d.get("new-password")).length < 8) next["new-password"] = "Use at least 8 characters.";
+    if (!name) next.name = "Enter your name.";
+    if (!/^\S+@\S+\.\S+$/.test(email)) next.email = "Enter your email address, like name@example.com.";
+    if (password.length < 8) next["new-password"] = "Use at least 8 characters.";
     if (!d.get("terms")) next.terms = "Agree to the Terms and Privacy Policy to continue.";
     setErrors(next);
     if (Object.keys(next).length) {
@@ -193,11 +256,15 @@ export function SignupForm({ defaultRole = "student" }: { defaultRole?: "student
       return;
     }
     setPending(true);
-    const draft: SignupDraft = { role, name: String(d.get("name")).trim(), email: String(d.get("email")).trim() };
-    try {
-      sessionStorage.setItem(SIGNUP_KEY, JSON.stringify(draft));
-    } catch {}
-    window.setTimeout(() => router.push("/verify-email"), 600);
+    const res = await signUpAction({ role, name, email, password, terms: true });
+    if (!res.ok) {
+      setPending(false);
+      setErrors(errorsFrom(res.error, "email"));
+      requestAnimationFrame(() => summary.current?.focus());
+      return;
+    }
+    rememberDraft({ role, name, email });
+    router.push("/verify-email");
   };
 
   const roles = [
@@ -227,6 +294,7 @@ export function SignupForm({ defaultRole = "student" }: { defaultRole?: "student
             ))}
           </div>
         </fieldset>
+        {blocked ? <Notice>Parent and guardian accounts open soon. Students aged 18 and over can sign up now.</Notice> : null}
         <Field id="name" label={role === "student" ? "Your name" : "Your name (parent or guardian)"} error={errors.name}>
           <input id="name" name="name" autoComplete="name" aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-err" : undefined} className={`${input} ${errors.name ? "border-danger" : "border-border-subtle"}`} />
         </Field>
@@ -252,12 +320,12 @@ export function SignupForm({ defaultRole = "student" }: { defaultRole?: "student
             </p>
           ) : null}
         </div>
-        <button type="submit" disabled={pending} className={btn("primary", "md", "w-full")}>
+        <button type="submit" disabled={pending || blocked} className={btn("primary", "md", "w-full")}>
           {pending ? "Creating your account…" : "Create account"}
         </button>
       </form>
       <Divider />
-      <GoogleButton />
+      <GoogleButton onError={(message) => setErrors({ email: message })} />
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{" "}
         <Link href="/login" className="font-semibold text-primary-text underline underline-offset-4">

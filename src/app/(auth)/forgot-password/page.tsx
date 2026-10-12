@@ -3,6 +3,7 @@ import { ForgotPasswordForm } from "@/components/auth-recovery";
 
 export const metadata: Metadata = { title: "Reset your password" };
 
-export default function ForgotPasswordPage() {
-  return <ForgotPasswordForm />;
+export default async function ForgotPasswordPage(props: PageProps<"/forgot-password">) {
+  const { error } = await props.searchParams;
+  return <ForgotPasswordForm expired={error === "expired"} />;
 }
