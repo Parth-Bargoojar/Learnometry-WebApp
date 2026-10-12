@@ -104,3 +104,43 @@ export async function fillAboutYou(page: Page, dob: { day: string; month: string
   if (cls) await page.getByText(cls, { exact: true }).click();
   await page.getByRole("button", { name: /Continue/ }).click();
 }
+
+/** Sign the seed admin in through the UI, enrolling a fresh authenticator; returns its secret and the enrolment time. */
+export async function signInAdmin(page: Page) {
+  await resetAdminMfa();
+  await logIn(page, "admin@seed.learnometry.test", "Seed-Password-1!");
+  await expect(page).toHaveURL(/\/security\/2fa/);
+  await page.getByRole("button", { name: "Set up authenticator" }).click();
+  const secret = (await page.getByText(/Enter this key/).locator("span").innerText()).trim();
+  const at = Date.now();
+  await page.getByLabel("6-digit code").fill(totp(secret, at));
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  return { secret, at };
+}
+
+/** A validated, unpublished JEE Main question in the `fbd` concept, as the importer would leave it. */
+export async function insertValidatedQuestion(slug: string) {
+  const sql = postgres(process.env.DIRECT_DATABASE_URL!, { max: 1, prepare: false });
+  try {
+    await sql.begin(async (tx) => {
+      const [q] = await tx<{ id: string }[]>`
+        insert into questions (slug, exam_id, subject_id, chapter_id, topic_id, concept_id, question_type, difficulty, expected_time_seconds,
+          learning_objective, stem, options, answer, solution, pool, validation_status, content_hash)
+        select ${slug}, c.exam_id, ch.subject_id, ch.id, t.id, c.id, 'mcq', 0.55, 70, c.name,
+          ${"A $3\,\text{kg}$ block is pushed by $12$ N on a smooth floor. Find its acceleration."},
+          ${JSON.stringify([{ key: "A", text: "$2$" }, { key: "B", text: "$4$" }, { key: "C", text: "$36$" }])}::jsonb,
+          '{"key":"B"}'::jsonb, '{"steps":["$a = F/m = 4$."]}'::jsonb, 'practice', 'validated', ${slug}
+        from concepts c join topics t on t.id = c.topic_id join chapters ch on ch.id = t.chapter_id
+        where c.code = 'fbd' and c.exam_id = (select id from exams where code = 'jee_main')
+        returning id`;
+      await tx`insert into question_versions (question_id, version_number, content, answer, solution, difficulty, change_reason)
+        values (${q.id}, 1, '{}'::jsonb, '{"key":"B"}'::jsonb, '{"steps":[]}'::jsonb, 0.55, 'Imported')`;
+      for (const v of ["schema", "math", "duplicate"]) await tx`insert into question_validations (question_id, version_number, validator_type, status) values (${q.id}, 1, ${v}, 'pass')`;
+      for (const v of ["semantic", "difficulty", "exam_style", "safety"])
+        await tx`insert into question_validations (question_id, version_number, validator_type, status, details) values (${q.id}, 1, ${v}, 'warning', ${JSON.stringify({ pending: true })}::jsonb)`;
+    });
+  } finally {
+    await sql.end({ timeout: 2 });
+  }
+}

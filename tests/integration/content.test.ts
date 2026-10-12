@@ -87,7 +87,7 @@ describe("importContent", () => {
 });
 
 describe("semantic validators (BE-3.3, mock provider)", () => {
-  it("records every check as pending and never as a pass", async () => {
+  it("records every check as a pending warning and never as a pass", async () => {
     const [q] = await pg<{ id: string; version_number: number }[]>`select id, version_number from questions q where slug = ${SLUG} and exam_id = (select id from exams where code = 'jee_main')`;
     expect(await runLlmValidators(db, q.id, q.version_number)).toEqual(["semantic", "difficulty", "exam_style", "safety"]);
     await runLlmValidators(db, q.id, q.version_number); // repeating replaces, does not stack
@@ -95,10 +95,10 @@ describe("semantic validators (BE-3.3, mock provider)", () => {
       select validator_type, status, details from question_validations where question_id = ${q.id} and version_number = ${q.version_number}
         and validator_type in ('semantic','difficulty','exam_style','safety') order by 1`;
     expect(rows.map((r) => [r.validator_type, r.status, r.details.provider])).toEqual([
-      ["difficulty", "pending", "mock"],
-      ["exam_style", "pending", "mock"],
-      ["safety", "pending", "mock"],
-      ["semantic", "pending", "mock"],
+      ["difficulty", "warning", "mock"],
+      ["exam_style", "warning", "mock"],
+      ["safety", "warning", "mock"],
+      ["semantic", "warning", "mock"],
     ]);
   });
 

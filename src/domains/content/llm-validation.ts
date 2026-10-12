@@ -5,7 +5,7 @@ import * as s from "@/lib/db/schema";
 /*
   Semantic validators (BE-3.3): is the keyed answer correct, is the difficulty plausible, does it read
   like the exam, is it safe. They run through the AI gateway, which arrives in BE-6. Until then the
-  provider is `mock` and every result is recorded as `pending` with a `provider: "mock"` note, so a
+  provider is `mock` and every result is recorded as a `warning` flagged `pending: true` (BE-D74), so a
   reviewer sees that the semantic checks have NOT happened and cannot mistake silence for a pass.
 */
 
@@ -27,7 +27,8 @@ export interface QuestionJudge {
 /** Stand-in used until the gateway exists, and in every environment configured with the mock provider. */
 export const mockJudge: QuestionJudge = {
   provider: "mock",
-  judge: async (validator) => ({ status: "pending", details: { provider: "mock", note: `${validator} check not run: no AI provider configured (BE-6)` } }),
+  // A warning, not "pending": warnings never block publishing (K6), and "pending" would read as still running.
+  judge: async (validator) => ({ status: "warning", details: { provider: "mock", pending: true, note: `${validator} check not run: no AI provider configured (BE-6)` } }),
 };
 
 /** Record one verdict per validator for a question version. Safe to repeat: the previous result is replaced. */

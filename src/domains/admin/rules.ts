@@ -161,6 +161,21 @@ export function publishBlockers(status: QuestionStatus, results: Partial<Record<
 
 export const canSuspend = (status: QuestionStatus) => status === "published";
 
+export type QuestionAction = "review" | "publish" | "suspend";
+
+/** Why a question cannot take `action` (review / publish / suspend), or null when it can. */
+export function transitionBlocker(action: QuestionAction, status: QuestionStatus, results: Partial<Record<ValidatorType, ValidationResult>>): string | null {
+  if (action === "suspend") return canSuspend(status) ? null : `${QUESTION_STATUS_LABEL[status]}, not published.`;
+  if (action === "review") {
+    if (status === "published" || status === "suspended") return "Already past review.";
+    if (results.human === "pass") return "Already reviewed.";
+    const failed = AUTOMATED_VALIDATORS.filter((v) => results[v] === "fail");
+    return failed.length ? `Failed: ${failed.map((v) => VALIDATOR_LABEL[v]).join(", ")}.` : null;
+  }
+  const blockers = publishBlockers(status, results);
+  return blockers.length ? blockers.join(" ") : null;
+}
+
 /* ---------- K5: refunds ---------- */
 
 export function refundCheck(firstPayment: string, usedShare: number, today: string) {
