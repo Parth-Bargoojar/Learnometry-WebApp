@@ -7,7 +7,12 @@ export type ThemePref = "system" | "light" | "dark";
 
 const ThemeContext = createContext<{ pref: ThemePref; setPref: (p: ThemePref) => void }>({ pref: "system", setPref: () => {} });
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+/**
+ * `serverPref` is the account's saved theme (BE-2.7). It wins over this device's stored value so
+ * the choice follows the person; the stored value stays because the inline script needs it to
+ * paint the right theme before React loads. `persist` saves changes to the account.
+ */
+export function ThemeProvider({ children, serverPref, persist }: { children: ReactNode; serverPref?: ThemePref; persist?: (p: ThemePref) => void }) {
   const [pref, setPrefState] = useState<ThemePref>("system");
 
   const apply = useCallback((p: ThemePref) => {
@@ -20,6 +25,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     try {
       stored = (localStorage.getItem(KEY) as ThemePref) || "system";
     } catch {}
+    if (serverPref && serverPref !== stored) {
+      stored = serverPref;
+      try {
+        localStorage.setItem(KEY, serverPref);
+      } catch {}
+      apply(serverPref);
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading a browser-only preference after mount
     setPrefState(stored);
     const mq = matchMedia("(prefers-color-scheme: dark)");
@@ -32,7 +44,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     };
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
-  }, [apply]);
+  }, [apply, serverPref]);
 
   const setPref = useCallback(
     (p: ThemePref) => {
@@ -41,8 +53,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(KEY, p);
       } catch {}
       apply(p);
+      persist?.(p);
     },
-    [apply],
+    [apply, persist],
   );
 
   return <ThemeContext.Provider value={{ pref, setPref }}>{children}</ThemeContext.Provider>;

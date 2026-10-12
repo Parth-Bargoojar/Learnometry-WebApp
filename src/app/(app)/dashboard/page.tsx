@@ -23,23 +23,32 @@ import { Mascot } from "@/components/feedback";
 import { PairedBar } from "@/components/charts";
 import { TaskList } from "@/components/tasks";
 import { InstallCard } from "@/components/pwa";
+import { requireLearner } from "@/lib/auth/session";
+import { istDate, now } from "@/lib/time";
+import type { Viewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "Home" };
 
 /**
  * Home — a state machine, not a widget grid (Web App Structure §8.3).
- * `?state=new` previews S0 and `?state=out` previews S7 (credits exhausted);
- * the sample learner is in S4 (active plan).
+ * A real learner is in S0 until a diagnostic exists (BE-5 onwards moves them along). In
+ * development, `?state=active` and `?state=out` preview the sample S4 and S7 states; they
+ * are removed before launch (BE-D63).
  * Every block answers one question no other block answers: what now, what can I spend,
  * what else today, when is the retest, what am I weak at, am I improving (§8.3, §8.22).
  */
 export default async function DashboardPage(props: PageProps<"/dashboard">) {
   const { state } = await props.searchParams;
-  if (state === "new") return <NewLearner />;
-  return <ActivePlan balance={state === "out" ? 0 : credits.balance} />;
+  if (process.env.NODE_ENV !== "production") {
+    if (state === "active") return <ActivePlan balance={credits.balance} />;
+    if (state === "out") return <ActivePlan balance={0} />;
+  }
+  const viewer = await requireLearner();
+  return <NewLearner viewer={viewer} />;
 }
 
-function ContextLine() {
+/** The sample story's context line, used only by the development previews of S4 and S7. */
+function SampleContextLine() {
   return (
     <p className="mb-5 text-sm text-muted sm:mb-6">
       {shortDate(TODAY)} · {learner.subject} · {learner.exam} in {daysFromToday(learner.examDate)} days
@@ -47,9 +56,20 @@ function ContextLine() {
   );
 }
 
+function ContextLine({ viewer }: { viewer: Viewer & { learner: NonNullable<Viewer["learner"]> } }) {
+  const today = istDate(now());
+  const { learner } = viewer;
+  const exam = learner.targetDate ? `${learner.examName} in ${daysFromToday(learner.targetDate, today)} days` : `${learner.examName}, date not set`;
+  return (
+    <p className="mb-5 text-sm text-muted sm:mb-6">
+      {shortDate(today)} · {learner.subject ?? "Physics"} · {exam}
+    </p>
+  );
+}
+
 /* ---------------- S0: no diagnostic yet ---------------- */
 
-function NewLearner() {
+function NewLearner({ viewer }: { viewer: Viewer & { learner: NonNullable<Viewer["learner"]> } }) {
   const steps = [
     { icon: ClipboardCheck, title: "Diagnose", body: "A 30-minute test finds the concepts behind your wrong answers." },
     { icon: Route, title: "Plan", body: "Your gaps, ordered by exam weight and cut to your daily time." },
@@ -57,7 +77,7 @@ function NewLearner() {
   ];
   return (
     <>
-      <ContextLine />
+      <ContextLine viewer={viewer} />
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         <Card level="primary" className="p-6 sm:p-8 lg:col-span-8">
           <div className="flex flex-col-reverse gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -65,9 +85,9 @@ function NewLearner() {
               <h2 className="font-display text-2xl leading-tight text-ink sm:text-3xl">Take your first diagnostic</h2>
               <p className="mt-3 text-[15px] leading-relaxed text-muted">
                 30 minutes, 15 questions from Class 11 Mechanics. You get a score, the concepts behind each wrong answer, and a plan
-                that fits your {learner.dailyMinutes} minutes a day.
+                that fits your {viewer.learner.dailyMinutes} minutes a day.
               </p>
-              <p className="mt-3 text-sm font-semibold text-success-text">Free: covered by your 100 welcome credits.</p>
+              {viewer.balance >= COST.fullDiagnostic ? <p className="mt-3 text-sm font-semibold text-success-text">Free: covered by your welcome credits.</p> : null}
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <ButtonLink href="/assess/diagnostic" size="lg">
                   Start diagnostic <Cost credits={COST.fullDiagnostic} />
@@ -79,9 +99,13 @@ function NewLearner() {
         </Card>
         <Card level="structural" className="flex flex-col p-6 lg:col-span-4">
           <CardHeader title="Your credits" />
-          <p className="mt-3 font-display text-4xl tabular-nums text-ink">100</p>
-          <p className="mt-1 text-sm text-muted">Welcome credits · expire in 30 days</p>
-          <p className="mt-auto pt-4 text-sm text-ink">Enough for your diagnostic and your first study plan.</p>
+          <p className="mt-3 font-display text-4xl tabular-nums text-ink">{viewer.balance}</p>
+          <p className="mt-1 text-sm text-muted">
+            {viewer.buckets.length === 1 && viewer.buckets[0].key === "promotional"
+              ? `Welcome credits · ${viewer.buckets[0].note.toLowerCase()}`
+              : (viewer.buckets[0]?.label ?? "No credits yet")}
+          </p>
+          <p className="mt-auto pt-4 text-sm text-ink">{enoughFor(viewer.balance)}</p>
         </Card>
       </div>
       <section aria-labelledby="how" className="mt-8">
@@ -131,7 +155,7 @@ function ActivePlan({ balance }: { balance: number }) {
 
   return (
     <>
-      <ContextLine />
+      <SampleContextLine />
       {balance <= 0 ? (
         /* S7: above everything; non-credit work (the plan, revision tasks) stays usable. */
         <div className="mb-5">

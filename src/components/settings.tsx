@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import {
   Bell,
@@ -20,10 +20,13 @@ import {
   UserCog,
   type LucideIcon,
 } from "lucide-react";
-import { COST, DAILY_MINUTE_PRESETS, PLANS } from "@/lib/config";
-import { TODAY, credits, learner } from "@/lib/data";
-import { GUARDIAN_CANNOT_SEE, GUARDIAN_CAN_SEE, adultOn, addBusinessDays, isEmail, isMinor } from "@/lib/guardian";
+import { deleteAccountAction, signOutOtherDevicesAction, updateEngineAction, updateProfileAction, updateStudySettingsAction } from "@/app/(app)/settings/actions";
+import { signOutAction } from "@/app/(auth)/actions";
+import { COST, DAILY_MINUTE_PRESETS, PLANS, type PlanCode } from "@/lib/config";
+import { learner } from "@/lib/data";
+import { GUARDIAN_CANNOT_SEE, GUARDIAN_CAN_SEE, adultOn, isEmail, isMinor } from "@/lib/guardian";
 import { fullDate } from "@/lib/format";
+import type { ErrorBody } from "@/lib/errors/app-error";
 import { siteUrl } from "@/lib/site";
 import { SHARED, useShared } from "@/lib/local-store";
 import { DEFAULT_PUSH_PREFS, type PushPrefs } from "@/lib/push";
@@ -131,11 +134,22 @@ function SaveButton({ dirty, onClick }: { dirty: boolean; onClick?: () => void }
 
 /* ---------- Profile ---------- */
 
-export function ProfileSettings() {
-  const initial = { first: learner.firstName, last: learner.lastName, email: learner.email, cls: learner.className };
-  const [saved, setSaved] = useState(initial);
-  const [v, setV] = useState(initial);
-  const [error, setError] = useState<string | null>(null);
+const firstMessage = (e: ErrorBody) => (e.fields ? Object.values(e.fields)[0] : undefined) ?? e.message;
+
+export interface ProfileData {
+  first: string;
+  last: string;
+  email: string;
+  classLabel: string;
+  dateOfBirth: string;
+}
+
+export function ProfileSettings({ initial }: { initial: ProfileData }) {
+  const start = { first: initial.first, last: initial.last, email: initial.email, cls: initial.classLabel };
+  const [saved, setSaved] = useState(start);
+  const [v, setV] = useState(start);
+  const [error, setError] = useState<{ field: string; message: string } | null>(null);
+  const [pending, setPending] = useState(false);
   const toast = useToast();
   const dirty = JSON.stringify(v) !== JSON.stringify(saved);
 
@@ -143,20 +157,29 @@ export function ProfileSettings() {
     <Panel title="Profile">
       <form
         noValidate
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          if (!v.first.trim()) return setError("first");
-          if (!isEmail(v.email)) return setError("email");
+          if (!v.first.trim()) return setError({ field: "first", message: "Enter your first name." });
+          if (!isEmail(v.email)) return setError({ field: "email", message: "Enter an email like name@example.com." });
           setError(null);
-          toast.show(v.email !== saved.email ? `Saved. We sent a link to ${v.email} to confirm the change.` : "Saved");
-          setSaved(v);
+          setPending(true);
+          const res = await updateProfileAction({ firstName: v.first, lastName: v.last, email: v.email, classLabel: v.cls });
+          setPending(false);
+          if (!res.ok) {
+            const field = res.error.fields ? Object.keys(res.error.fields)[0] : "form";
+            return setError({ field: field === "firstName" ? "first" : field, message: firstMessage(res.error) });
+          }
+          toast.show(res.data.emailChanged ? `Saved. We sent a link to ${v.email} to confirm the change.` : "Saved");
+          // The address only changes once the new one is confirmed, so keep showing the current one.
+          setSaved(res.data.emailChanged ? { ...v, email: saved.email } : v);
+          if (res.data.emailChanged) setV({ ...v, email: saved.email });
         }}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="fn" className={label}>First name</label>
-            <input id="fn" value={v.first} onChange={(e) => setV({ ...v, first: e.target.value })} autoComplete="given-name" aria-invalid={error === "first"} aria-describedby={error === "first" ? "fn-err" : undefined} className={field} />
-            {error === "first" ? <p id="fn-err" className="mt-1.5 text-sm text-danger-text">Enter your first name.</p> : null}
+            <input id="fn" value={v.first} onChange={(e) => setV({ ...v, first: e.target.value })} autoComplete="given-name" aria-invalid={error?.field === "first"} aria-describedby={error?.field === "first" ? "fn-err" : undefined} className={field} />
+            {error?.field === "first" ? <p id="fn-err" className="mt-1.5 text-sm text-danger-text">{error.message}</p> : null}
           </div>
           <div>
             <label htmlFor="ln" className={label}>Last name</label>
@@ -171,12 +194,12 @@ export function ProfileSettings() {
               value={v.email}
               onChange={(e) => setV({ ...v, email: e.target.value })}
               autoComplete="email"
-              aria-invalid={error === "email"}
-              aria-describedby={error === "email" ? "em-err" : "em-help"}
+              aria-invalid={error?.field === "email"}
+              aria-describedby={error?.field === "email" ? "em-err" : "em-help"}
               className={field}
             />
-            {error === "email" ? (
-              <p id="em-err" className="mt-1.5 text-sm text-danger-text">Enter an email like name@example.com.</p>
+            {error?.field === "email" ? (
+              <p id="em-err" className="mt-1.5 text-sm text-danger-text">{error.message}</p>
             ) : (
               <p id="em-help" className="mt-1.5 text-xs text-muted">Changing it sends a confirmation link to the new address. The old one works until then.</p>
             )}
@@ -193,7 +216,7 @@ export function ProfileSettings() {
             <p className={label}>Date of birth</p>
             <p className="mt-1.5 flex h-11 items-center gap-2 text-ink">
               <Lock aria-hidden="true" className="size-4 text-muted" />
-              {fullDate(learner.dateOfBirth)}
+              {fullDate(initial.dateOfBirth)}
             </p>
             <p className="mt-1 text-xs text-muted">
               It decides whether guardian consent is needed, so only{" "}
@@ -201,7 +224,8 @@ export function ProfileSettings() {
             </p>
           </div>
         </div>
-        <SaveButton dirty={dirty} />
+        {error?.field === "form" ? <p role="alert" className="mt-4 text-sm text-danger-text">{error.message}</p> : null}
+        <SaveButton dirty={dirty && !pending} />
       </form>
       {toast.node}
     </Panel>
@@ -214,24 +238,39 @@ const EXAMS = ["JEE Main", "NEET", "CBSE Class 11"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const CUSTOM_MINUTES = Array.from({ length: 16 }, (_, i) => 15 + i * 15); // 15–240 in 15-min steps (§1.9)
 
-export function StudySettings() {
-  const initial = {
-    exam: learner.exam,
-    month: MONTHS[Number(learner.examDate.slice(5, 7)) - 1],
-    year: learner.examDate.slice(0, 4),
-    notSure: false,
-    minutes: learner.dailyMinutes,
-  };
-  const [saved, setSaved] = useState(initial);
-  const [v, setV] = useState(initial);
+export interface StudyData {
+  exam: string;
+  month: string;
+  year: string;
+  notSure: boolean;
+  minutes: number;
+  /** An active plan exists: a change may need a reschedule or a paid rebuild (J8). Plans arrive in BE-8. */
+  hasPlan: boolean;
+  balance: number;
+}
+
+export function StudySettings({ initial }: { initial: StudyData }) {
+  const start = { exam: initial.exam, month: initial.month, year: initial.year, notSure: initial.notSure, minutes: initial.minutes };
+  const [saved, setSaved] = useState(start);
+  const [v, setV] = useState(start);
   const [confirm, setConfirm] = useState<"reschedule" | "rebuild" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const toast = useToast();
   const dirty = JSON.stringify(v) !== JSON.stringify(saved);
   const custom = !(DAILY_MINUTE_PRESETS as readonly number[]).includes(v.minutes);
 
-  const commit = (planNote: string) => {
-    setSaved(v);
+  const commit = async (planNote: string) => {
+    setPending(true);
+    setError(null);
+    const res = await updateStudySettingsAction({ minutes: v.minutes, notSure: v.notSure, month: v.month, year: Number(v.year), exam: v.exam });
+    setPending(false);
     setConfirm(null);
+    if (!res.ok) {
+      setError(firstMessage(res.error));
+      return;
+    }
+    setSaved(v);
     toast.show(planNote);
   };
 
@@ -241,8 +280,9 @@ export function StudySettings() {
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          // A different exam changes the syllabus and marking → new plan. Time or date → reschedule.
-          setConfirm(v.exam !== saved.exam ? "rebuild" : "reschedule");
+          // With a plan: a different exam changes the syllabus and marking → new plan; time or date → reschedule.
+          if (initial.hasPlan) return setConfirm(v.exam !== saved.exam ? "rebuild" : "reschedule");
+          void commit("Saved");
         }}
       >
         <div className="flex flex-col gap-5">
@@ -314,7 +354,8 @@ export function StudySettings() {
             </select>
           </fieldset>
         </div>
-        <SaveButton dirty={dirty} />
+        {error ? <p role="alert" className="mt-4 text-sm text-danger-text">{error}</p> : null}
+        <SaveButton dirty={dirty && !pending} />
       </form>
 
       <Dialog
@@ -333,19 +374,19 @@ export function StudySettings() {
           </p>
         )}
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" autoFocus onClick={() => commit("Saved. Your plan wasn't changed.")} className={btn("secondary")}>
+          <button type="button" autoFocus onClick={() => void commit("Saved. Your plan wasn't changed.")} className={btn("secondary")}>
             Save without updating
           </button>
           {confirm === "rebuild" ? (
-            credits.balance >= COST.studyPlan ? (
-              <button type="button" onClick={() => commit("Saved. Building your new plan…")} className={btn("primary")}>
+            initial.balance >= COST.studyPlan ? (
+              <button type="button" onClick={() => void commit("Saved. Building your new plan…")} className={btn("primary")}>
                 Rebuild plan <Cost credits={COST.studyPlan} />
               </button>
             ) : (
-              <GetCreditsButton cost={COST.studyPlan} balance={credits.balance} what="A new plan" />
+              <GetCreditsButton cost={COST.studyPlan} balance={initial.balance} what="A new plan" />
             )
           ) : (
-            <button type="button" onClick={() => commit(`Saved. Your plan now fits ${v.minutes} minutes a day.`)} className={btn("primary")}>
+            <button type="button" onClick={() => void commit(`Saved. Your plan now fits ${v.minutes} minutes a day.`)} className={btn("primary")}>
               Update plan
             </button>
           )}
@@ -472,10 +513,11 @@ export function AppearanceSettings() {
 
 /* ---------- Explanation engine (D2) ---------- */
 
-export function AiSettings() {
-  const plan = PLANS[learner.plan];
-  const [saved, setSaved] = useState(learner.engine);
-  const [engine, setEngine] = useState(learner.engine);
+export function AiSettings({ planCode, initialEngine }: { planCode: PlanCode; initialEngine: "fast" | "standard" }) {
+  const plan = PLANS[planCode];
+  const [saved, setSaved] = useState(initialEngine);
+  const [engine, setEngine] = useState(initialEngine);
+  const [error, setError] = useState<string | null>(null);
   const toast = useToast();
   const note = "Your diagnosis, study plan and retest analysis always use our most accurate setup, whatever you pick.";
 
@@ -499,8 +541,11 @@ export function AiSettings() {
   return (
     <Panel title="Explanation engine" desc={note}>
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
+          setError(null);
+          const res = await updateEngineAction({ engine });
+          if (!res.ok) return setError(res.error.message);
           setSaved(engine);
           toast.show("Saved");
         }}
@@ -523,6 +568,7 @@ export function AiSettings() {
           </div>
         </fieldset>
         <p className="mt-3 text-xs text-muted">Both cost the same credits. On Plus and Pro the engine is chosen for each question, including Deep reasoning.</p>
+        {error ? <p role="alert" className="mt-3 text-sm text-danger-text">{error}</p> : null}
         <SaveButton dirty={engine !== saved} />
       </form>
       {toast.node}
@@ -607,12 +653,14 @@ function GuardianPrivacy() {
 
 /* ---------- Account ---------- */
 
-export function AccountSettings() {
+export function AccountSettings({ email, guardianFirstName }: { email: string; guardianFirstName?: string }) {
+  const router = useRouter();
   const [del, setDel] = useState(false);
   const [confirm, setConfirm] = useState("");
-  const [closed, setClosed] = useState(false);
+  const [closed, setClosed] = useState<{ eraseBy: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const toast = useToast();
-  const guardian = learner.guardian;
 
   if (closed) {
     return (
@@ -620,11 +668,11 @@ export function AccountSettings() {
         <div role="status" className="rounded-card-sm border border-border-subtle bg-sunken p-4 text-[15px] text-ink">
           <p className="font-semibold">Your account is closed.</p>
           <p className="mt-1 text-muted">
-            Everything is erased by {fullDate(addBusinessDays(TODAY, 7))}. Changed your mind? Log in within 48 hours to cancel.
-            {guardian && isMinor(learner.dateOfBirth) ? ` We've let ${guardian.guardianFirstName} know.` : ""}
+            Everything is erased by {fullDate(closed.eraseBy.slice(0, 10))}. Changed your mind? Log in within 48 hours to cancel.
+            {guardianFirstName ? ` We've let ${guardianFirstName} know.` : ""}
           </p>
         </div>
-        <Link href="/login" onClick={() => void clearDeviceData()} className={btn("secondary", "md", "mt-5")}>
+        <Link href="/login" className={btn("secondary", "md", "mt-5")}>
           Go to log in
         </Link>
       </Panel>
@@ -633,8 +681,15 @@ export function AccountSettings() {
 
   return (
     <Panel title="Account">
-      <p className="text-sm text-ink">Signed in as {learner.email}</p>
-      <button type="button" onClick={() => toast.show("Signed out on your other devices.")} className={btn("secondary", "md", "mt-4")}>
+      <p className="text-sm text-ink">Signed in as {email}</p>
+      <button
+        type="button"
+        onClick={async () => {
+          const res = await signOutOtherDevicesAction();
+          toast.show(res.ok ? "Signed out on your other devices." : res.error.message);
+        }}
+        className={btn("secondary", "md", "mt-4")}
+      >
         Sign out of all other devices
       </button>
       <div className="mt-8 rounded-card-sm border border-danger/35 p-4">
@@ -652,20 +707,32 @@ export function AccountSettings() {
           Type DELETE to confirm
         </label>
         <input id="confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={field} autoComplete="off" autoCapitalize="characters" spellCheck={false} />
+        {error ? <p role="alert" className="mt-3 text-sm text-danger-text">{error}</p> : null}
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" autoFocus onClick={() => setDel(false)} className={btn("secondary")}>
             Keep my account
           </button>
           <button
             type="button"
-            disabled={confirm !== "DELETE"}
-            onClick={() => {
+            disabled={confirm !== "DELETE" || pending}
+            onClick={async () => {
+              setPending(true);
+              setError(null);
+              const res = await deleteAccountAction({ confirmation: true });
+              if (!res.ok) {
+                setPending(false);
+                setError(res.error.message);
+                return;
+              }
+              await clearDeviceData();
+              await signOutAction().catch(() => undefined);
               setDel(false);
-              setClosed(true);
+              setClosed({ eraseBy: res.data.eraseBy });
+              router.refresh();
             }}
             className={btn("destructive")}
           >
-            Delete account
+            {pending ? "Closing…" : "Delete account"}
           </button>
         </div>
       </Dialog>
