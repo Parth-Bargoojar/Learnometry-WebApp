@@ -19,12 +19,11 @@ import {
   type ValidationResult,
   type ValidatorType,
 } from "@/lib/admin";
+import { discardCurriculumDraftAction, publishCurriculumAction, saveCurriculumDraftAction } from "@/app/admin/curriculum/actions";
 import { changeQuestionsAction } from "@/app/admin/questions/actions";
 import type { AdminQuestion, AdminQuestionDetail } from "@/domains/content/types";
-import { admins, curriculumEdges, curriculumVersion } from "@/lib/admin-data";
-import { SHARED, useShared } from "@/lib/local-store";
 import { MathText } from "./math";
-import { ReasonDialog, field, labelCls, nowIso, useAuditLog } from "./admin-core";
+import { ReasonDialog, field, labelCls } from "./admin-core";
 import { Pill, num, td, th, type Tone } from "./admin-ui";
 import { useToast } from "./toast";
 import { btn } from "./ui";
@@ -324,27 +323,37 @@ export function QuestionReview({ question }: { question: AdminQuestionDetail }) 
 /* Curriculum edges (K7)                                               */
 /* ------------------------------------------------------------------ */
 
-type CurriculumState = { draft: Edge[] | null; published: { version: string; at: string; edges: Edge[] } | null };
-
 const key = (e: Edge) => `${e.from}>${e.to}`;
-const bump = (v: string) => {
-  const [maj, min] = v.slice(1).split(".").map(Number);
-  return `v${maj}.${min + 1}`;
-};
 
-export function CurriculumEdges({ concepts }: { concepts: { id: string; name: string }[] }) {
-  const [state, set] = useShared<CurriculumState>(SHARED.adminCurriculum, { draft: null, published: null });
-  const log = useAuditLog();
+export function CurriculumEdges({
+  examCode,
+  version,
+  published,
+  draft: savedDraft,
+  concepts,
+  publishedAt,
+  publishedBy,
+}: {
+  examCode: string;
+  version: number;
+  published: Edge[];
+  draft: Edge[] | null;
+  concepts: { id: string; name: string }[];
+  publishedAt: string | null;
+  publishedBy: string | null;
+}) {
   const toast = useToast();
+  const router = useRouter();
+  const [saving, start] = useTransition();
   const id = useId();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [publishing, setPublishing] = useState(false);
+  const [draft, setLocal] = useState<Edge[]>(savedDraft ?? published);
 
+  const next = `v${version + 1}`;
   const name = (c: string) => concepts.find((x) => x.id === c)?.name ?? c;
-  const baseline = state.published?.edges ?? curriculumEdges;
-  const version = state.published?.version ?? curriculumVersion.published;
-  const draft = state.draft ?? baseline;
+  const baseline = published;
   const base = new Set(baseline.map(key));
   const now = new Set(draft.map(key));
   const added = draft.filter((e) => !base.has(key(e)));
@@ -355,7 +364,18 @@ export function CurriculumEdges({ concepts }: { concepts: { id: string; name: st
   const exists = candidate ? now.has(key(candidate)) : false;
   const cycle = candidate && !exists ? cyclePath(draft, candidate.from, candidate.to) : null;
 
-  const setDraft = (edges: Edge[]) => set((prev) => ({ ...prev, draft: edges }));
+  /** Show the change at once and save it as this track's draft; a refusal puts the old list back. */
+  const setDraft = (edges: Edge[]) => {
+    const before = draft;
+    setLocal(edges);
+    start(async () => {
+      const res = await saveCurriculumDraftAction({ exam: examCode, edges });
+      if (!res.ok) {
+        setLocal(before);
+        toast.show(res.error.message);
+      }
+    });
+  };
 
   return (
     <section aria-labelledby={`${id}-h`} className="rounded-card border border-border-subtle bg-surface p-5">
@@ -365,17 +385,28 @@ export function CurriculumEdges({ concepts }: { concepts: { id: string; name: st
             Prerequisites
           </h2>
           <p className="mt-0.5 text-sm text-muted">
-            Published {version} · draft {bump(version)} with {changes} change{changes === 1 ? "" : "s"}. Shared by every exam track.
+            Published v{version} · draft {next} with {changes} change{changes === 1 ? "" : "s"}. This track&apos;s own graph.
           </p>
         </div>
         <div className="flex gap-2">
           {changes ? (
-            <button type="button" onClick={() => set((prev) => ({ ...prev, draft: null }))} className={btn("ghost", "sm")}>
+            <button
+              type="button"
+              onClick={() =>
+                start(async () => {
+                  const res = await discardCurriculumDraftAction({ exam: examCode });
+                  if (!res.ok) return toast.show(res.error.message);
+                  setLocal(published);
+                  router.refresh();
+                })
+              }
+              className={btn("ghost", "sm")}
+            >
               Discard draft
             </button>
           ) : null}
-          <button type="button" disabled={!changes} onClick={() => setPublishing(true)} className={btn("primary", "sm")}>
-            Publish {bump(version)}
+          <button type="button" disabled={!changes || saving} onClick={() => setPublishing(true)} className={btn("primary", "sm")}>
+            Publish {next}
           </button>
         </div>
       </div>
@@ -477,25 +508,27 @@ export function CurriculumEdges({ concepts }: { concepts: { id: string; name: st
       </table>
 
       <p className="mt-3 text-xs text-muted">
-        Last published {stamp(state.published?.at ?? curriculumVersion.publishedAt)} by {state.published ? "you" : admins[curriculumVersion.publishedBy]}.
+        {publishedAt ? `Last published ${stamp(publishedAt)}${publishedBy ? ` by ${publishedBy}` : ""}.` : `v${version} is the initial graph.`}
       </p>
 
       <ReasonDialog
         open={publishing}
         onClose={() => setPublishing(false)}
-        title={`Publish curriculum ${bump(version)}?`}
+        title={`Publish curriculum ${next}?`}
         summary={
           <>
-            {added.length} edge{added.length === 1 ? "" : "s"} added, {removed.length} removed. New plans and diagnostics use {bump(version)} at once; existing plans keep their version until the next retest or rebuild.
+            {added.length} edge{added.length === 1 ? "" : "s"} added, {removed.length} removed. New plans and diagnostics use {next} at once; existing plans keep their version until the next retest or rebuild.
           </>
         }
-        confirmLabel={`Publish ${bump(version)}`}
-        onConfirm={(reason) => {
-          const next = bump(version);
-          set({ draft: null, published: { version: next, at: nowIso(), edges: draft } });
-          log({ action: "curriculum.published", resourceType: "curriculum", resourceId: next, summary: `Published ${next}: +${added.length} / −${removed.length} edges`, reason });
-          toast.show(`Curriculum ${next} published`);
-        }}
+        confirmLabel={`Publish ${next}`}
+        onConfirm={(reason) =>
+          start(async () => {
+            const res = await publishCurriculumAction({ exam: examCode, reason });
+            if (!res.ok) return toast.show(res.error.message);
+            toast.show(`Curriculum v${res.data.version} published`);
+            router.refresh();
+          })
+        }
       />
       {toast.node}
     </section>
