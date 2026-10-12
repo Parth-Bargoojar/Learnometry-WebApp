@@ -1,0 +1,244 @@
+concept: power
+questions:
+  - id: pwr-d01
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: diagnostic
+    parallel_group: pwr-def
+    stem: "Power is best described as:"
+    options:
+      - key: A
+        text: the total work done
+        misconception: mixes up power with work
+      - key: B
+        text: the force multiplied by the time
+        misconception: uses force × time (impulse) instead of work ÷ time
+      - key: C
+        text: the rate at which work is done
+      - key: D
+        text: the energy a machine can store
+        misconception: confuses power with stored energy
+    answer: C
+    solution:
+      - "Power $P = W/t$: how quickly work is done (or energy is transferred). Its SI unit is the watt, $1\\,\\text{W} = 1\\,\\text{J/s}$."
+  - id: pwr-d02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: diagnostic
+    parallel_group: pwr-calc
+    stem: "A machine does $600\\,\\text{J}$ of work in $12\\,\\text{s}$. Its power is:"
+    options:
+      - key: A
+        text: $7200\,\text{W}$
+        misconception: multiplies work by time instead of dividing
+      - key: B
+        text: $50\,\text{W}$
+      - key: C
+        text: $612\,\text{W}$
+        misconception: adds the numbers
+      - key: D
+        text: $0.02\,\text{W}$
+        misconception: divides time by work (upside down)
+    answer: B
+    solution:
+      - $P = W/t = 600/12 = 50\,\text{W}$.
+  - id: pwr-d03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 110
+    pool: diagnostic
+    parallel_group: pwr-crane
+    stem: A crane lifts a $200\,\text{kg}$ load through $15\,\text{m}$ in $10\,\text{s}$ at constant speed. Find the power it develops, in watts. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 3000
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 30000
+        category: calculation
+      - value: 300
+        category: calculation
+      - value: 2000
+        category: conceptual
+    solution:
+      - "Work done: $W = mgh = 200 \\times 10 \\times 15 = 30000\\,\\text{J}$."
+      - $P = W/t = 30000/10 = 3000\,\text{W}$.
+  - id: pwr-r01
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: retest
+    parallel_group: pwr-def
+    stem: Which quantity measures how fast work is done?
+    options:
+      - key: A
+        text: Power
+      - key: B
+        text: Energy
+        misconception: treats stored or total energy as a rate
+      - key: C
+        text: Momentum
+        misconception: mixes up an unrelated mechanics quantity
+      - key: D
+        text: Impulse
+        misconception: uses force × time instead of work ÷ time
+    answer: A
+    solution:
+      - Power is the rate of doing work, $P = W/t$, measured in watts (J/s).
+  - id: pwr-r02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: retest
+    parallel_group: pwr-calc
+    stem: "A pump does $900\\,\\text{J}$ of work in $15\\,\\text{s}$. Its power is:"
+    options:
+      - key: A
+        text: $13500\,\text{W}$
+        misconception: multiplies work by time
+      - key: B
+        text: $915\,\text{W}$
+        misconception: adds the numbers
+      - key: C
+        text: $0.017\,\text{W}$
+        misconception: divides time by work
+      - key: D
+        text: $60\,\text{W}$
+    answer: D
+    solution:
+      - $P = W/t = 900/15 = 60\,\text{W}$.
+  - id: pwr-r03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 110
+    pool: retest
+    parallel_group: pwr-crane
+    stem: A motor raises a $500\,\text{kg}$ load by $6\,\text{m}$ in $20\,\text{s}$ at constant speed. Find the power it develops, in watts. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 1500
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 30000
+        category: calculation
+      - value: 150
+        category: calculation
+      - value: 1000
+        category: conceptual
+    solution:
+      - $W = mgh = 500 \times 10 \times 6 = 30000\,\text{J}$.
+      - $P = W/t = 30000/20 = 1500\,\text{W}$.
+  - id: pwr-p01
+    type: numerical
+    difficulty: medium
+    expected_seconds: 100
+    pool: practice
+    stem: A car engine delivers $20\,\text{kW}$ at a steady speed of $10\,\text{m/s}$. Find the driving force, in newtons.
+    answer:
+      value: 2000
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 200000
+        category: calculation
+      - value: 2
+        category: calculation
+      - value: 20000
+        category: conceptual
+    solution:
+      - $P = Fv \Rightarrow F = P/v = 20000/10 = 2000\,\text{N}$.
+  - id: pwr-p02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: "One kilowatt-hour ($1\\,\\text{kW h}$) is equal to:"
+    options:
+      - key: A
+        text: $1000\,\text{J}$
+        misconception: "forgets that it is per hour: treats $1,\text{kW}$ as $1000,\text{J}$"
+      - key: B
+        text: $3.6 \times 10^{6}\,\text{J}$
+      - key: C
+        text: $3.6 \times 10^{3}\,\text{J}$
+        misconception: uses 3600 s but forgets to convert kW to W
+      - key: D
+        text: $6 \times 10^{4}\,\text{J}$
+        misconception: uses minutes instead of seconds
+    answer: B
+    solution:
+      - $1\,\text{kW h} = 1000\,\text{W} \times 3600\,\text{s} = 3.6 \times 10^{6}\,\text{J}$.
+  - id: pwr-p03
+    type: numerical
+    difficulty: hard
+    expected_seconds: 120
+    pool: practice
+    stem: A $1500\,\text{W}$ motor lifts a $60\,\text{kg}$ load at constant speed. Find the speed of the load, in m/s. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 2.5
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 25
+        category: calculation
+      - value: 0.4
+        category: calculation
+      - value: 150
+        category: conceptual
+    solution:
+      - "At constant speed the lifting force equals the weight: $F = mg = 600\\,\\text{N}$."
+      - $P = Fv \Rightarrow v = P/F = 1500/600 = 2.5\,\text{m/s}$.
+  - id: pwr-p04
+    type: numerical
+    difficulty: medium
+    expected_seconds: 100
+    pool: practice
+    stem: A force of $10\,\text{N}$ acts on a body moving at $4\,\text{m/s}$, at $60^\circ$ to the velocity. Find the instantaneous power delivered by the force, in watts.
+    answer:
+      value: 20
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 40
+        category: conceptual
+      - value: 34.6
+        category: conceptual
+    solution:
+      - $P = \vec F \cdot \vec v = Fv\cos\theta = 10 \times 4 \times \cos 60^\circ = 20\,\text{W}$.
+  - id: pwr-p05
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: "A body moves in a circle at constant speed. The power delivered to it by the centripetal force is:"
+    options:
+      - key: A
+        text: $F v$, since the force is always acting
+        misconception: forgets that only the component along the velocity counts
+      - key: B
+        text: negative, because the force opposes the straight-line motion
+        misconception: thinks the inward force opposes the motion
+      - key: C
+        text: zero, because the force is always perpendicular to the velocity
+      - key: D
+        text: positive, because the body keeps moving
+        misconception: assumes any moving body must be receiving power
+    answer: C
+    solution:
+      - $P = Fv\cos\theta$. The centripetal force is perpendicular to the velocity ($\theta = 90^\circ$), so $P = 0$ and the speed does not change.
+  - id: pwr-p06
+    type: numerical
+    difficulty: hard
+    expected_seconds: 130
+    pool: practice
+    stem: A $1000\,\text{kg}$ car accelerates from rest to $20\,\text{m/s}$ in $10\,\text{s}$. Ignoring friction and air resistance, find the average power developed by the engine, in watts.
+    answer:
+      value: 20000
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 200000
+        category: calculation
+      - value: 2000
+        category: calculation
+      - value: 10000
+        category: calculation
+    solution:
+      - "Work done equals the gain in kinetic energy: $\\Delta K = \\tfrac12 \\times 1000 \\times 20^2 = 2 \\times 10^5\\,\\text{J}$."
+      - $P_{avg} = \Delta K/t = 200000/10 = 20000\,\text{W}$.

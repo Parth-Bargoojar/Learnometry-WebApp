@@ -8,9 +8,10 @@ questions:
     stem: A block slides from rest down a frictionless slope, dropping a vertical height of $5\,\text{m}$. Find its speed at the bottom, in m/s.
     answer:
       value: 10
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - $mgh = \tfrac12 mv^2 \Rightarrow v = \sqrt{2gh} = \sqrt{100} = 10\,\text{m/s}$.
+    parallel_group: wet-slope
   - id: wet-d14
     type: mcq
     difficulty: easy
@@ -20,15 +21,19 @@ questions:
     options:
       - key: A
         text: $10\,\text{J}$
+        misconception: "forgets $g$: multiplies mass by height"
       - key: B
         text: $50\,\text{J}$
+        misconception: "forgets the mass: multiplies $g$ by height"
       - key: C
         text: $100\,\text{J}$
       - key: D
         text: $0\,\text{J}$
+        misconception: thinks constant speed means no work is done by the lifting force
     answer: C
     solution:
       - "At constant speed the lifting force equals $mg$: $W = mgh = 2 \\times 10 \\times 5 = 100\\,\\text{J}$."
+    parallel_group: wet-lift
   - id: wet-d15
     type: numerical
     difficulty: medium
@@ -37,6 +42,179 @@ questions:
     stem: The speed of a $1\,\text{kg}$ body increases from $2\,\text{m/s}$ to $4\,\text{m/s}$. Find the work done by the net force, in joules.
     answer:
       value: 6
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - $W = \Delta K = \tfrac12 (1)(4^2 - 2^2) = 6\,\text{J}$.
+    parallel_group: wet-dk
+  - id: wet-r01
+    type: numerical
+    difficulty: easy
+    expected_seconds: 90
+    pool: retest
+    parallel_group: wet-slope
+    stem: A block slides from rest down a frictionless slope, dropping a vertical height of $1.8\,\text{m}$. Find its speed at the bottom, in m/s.
+    answer:
+      value: 6
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 36
+        category: calculation
+      - value: 3
+        category: calculation
+    solution:
+      - $mgh = \tfrac12 mv^2 \Rightarrow v = \sqrt{2gh} = \sqrt{2 \times 10 \times 1.8} = \sqrt{36} = 6\,\text{m/s}$.
+  - id: wet-r02
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: retest
+    parallel_group: wet-lift
+    stem: "A $3\\,\\text{kg}$ mass is raised by $4\\,\\text{m}$ at constant speed. The work done by the lifting force is:"
+    options:
+      - key: A
+        text: $12\,\text{J}$
+        misconception: multiplies mass by height and forgets $g$
+      - key: B
+        text: $120\,\text{J}$
+      - key: C
+        text: $0\,\text{J}$
+        misconception: thinks constant speed means no work is done by the lifting force
+      - key: D
+        text: $30\,\text{J}$
+        misconception: uses the weight without the distance
+    answer: B
+    solution:
+      - "At constant speed, the lifting force equals $mg$: $W = mgh = 3 \\times 10 \\times 4 = 120\\,\\text{J}$."
+  - id: wet-r03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 90
+    pool: retest
+    parallel_group: wet-dk
+    stem: The speed of a $2\,\text{kg}$ body increases from $3\,\text{m/s}$ to $5\,\text{m/s}$. Find the work done by the net force, in joules.
+    answer:
+      value: 16
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 4
+        category: conceptual
+      - value: 34
+        category: conceptual
+      - value: 8
+        category: calculation
+    solution:
+      - $W = \Delta K = \tfrac12 m(v_2^2 - v_1^2) = \tfrac12 (2)(25 - 9) = 16\,\text{J}$.
+  - id: wet-p01
+    type: numerical
+    difficulty: easy
+    expected_seconds: 80
+    pool: practice
+    stem: A force of $10\,\text{N}$ acts at $60^\circ$ to the direction of motion while the body moves $5\,\text{m}$. Find the work done by the force, in joules.
+    answer:
+      value: 25
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 50
+        category: conceptual
+      - value: 43.3
+        category: conceptual
+    solution:
+      - $W = Fs\cos\theta = 10 \times 5 \times \cos 60^\circ = 25\,\text{J}$.
+  - id: wet-p02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: "A ball is thrown straight up and returns to the same point. The total work done by gravity on the ball over the whole trip is:"
+    options:
+      - key: A
+        text: zero
+      - key: B
+        text: negative, because the ball slowed down on the way up
+        misconception: counts only the upward leg
+      - key: C
+        text: positive, because the ball ends moving faster than it started
+        misconception: ignores that the final speed equals the initial speed (no air resistance)
+      - key: D
+        text: $mgh$, where $h$ is the maximum height
+        misconception: forgets the work on the way down cancels the work on the way up
+    answer: A
+    solution:
+      - "Gravity is conservative: the work depends only on the change in height. The ball returns to its starting height, so the net work is zero ($-mgh$ going up, $+mgh$ coming down)."
+  - id: wet-p03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 90
+    pool: practice
+    stem: A spring of constant $200\,\text{N/m}$ is compressed by $0.1\,\text{m}$. How much energy is stored in it, in joules?
+    answer:
+      value: 1
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 20
+        category: conceptual
+      - value: 2
+        category: calculation
+      - value: 10
+        category: calculation
+    solution:
+      - $U = \tfrac12 kx^2 = \tfrac12 \times 200 \times (0.1)^2 = 1\,\text{J}$.
+  - id: wet-p04
+    type: numerical
+    difficulty: hard
+    expected_seconds: 120
+    pool: practice
+    stem: A $2\,\text{kg}$ block slides along a rough horizontal surface with an initial speed of $6\,\text{m/s}$ and stops after $9\,\text{m}$. Find the magnitude of the friction force, in newtons (assume it is constant).
+    answer:
+      value: 4
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 36
+        category: conceptual
+      - value: 8
+        category: calculation
+      - value: 2
+        category: calculation
+    solution:
+      - "Work done by friction equals the change in kinetic energy: $-f s = 0 - \\tfrac12 mv^2$."
+      - $f = \tfrac12 mv^2/s = 36/9 = 4\,\text{N}$.
+  - id: wet-p05
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: "A person carries a suitcase horizontally at constant speed. The work done by the person's (vertical) lifting force on the suitcase is:"
+    options:
+      - key: A
+        text: $mgd$, where $d$ is the distance walked
+        misconception: multiplies force by distance without the angle between them
+      - key: B
+        text: negative, because the suitcase is being carried against gravity
+        misconception: thinks resisting gravity automatically means negative work
+      - key: C
+        text: positive, because the person gets tired
+        misconception: confuses physical effort with work done on the object
+      - key: D
+        text: zero, because the force is perpendicular to the displacement
+    answer: D
+    solution:
+      - $W = Fd\cos\theta$. The force is vertical and the displacement horizontal, so $\theta = 90^\circ$ and $W = 0$.
+  - id: wet-p06
+    type: numerical
+    difficulty: hard
+    expected_seconds: 120
+    pool: practice
+    stem: A $0.5\,\text{kg}$ ball is dropped from a height of $20\,\text{m}$. Ignoring air resistance, find its speed when it is $5\,\text{m}$ above the ground, in m/s. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 17.32
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 10
+        category: conceptual
+      - value: 20
+        category: conceptual
+      - value: 300
+        category: calculation
+    solution:
+      - "It has fallen $20 - 5 = 15\\,\\text{m}$. Energy conservation: $\\tfrac12 mv^2 = mg(15)$."
+      - $v = \sqrt{2 \times 10 \times 15} = \sqrt{300} \approx 17.32\,\text{m/s}$; the mass cancels.

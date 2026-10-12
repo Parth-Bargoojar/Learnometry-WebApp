@@ -1,0 +1,255 @@
+concept: fbd
+questions:
+  - id: fbd-d01
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: diagnostic
+    parallel_group: fbd-rest
+    stem: A book of mass $m$ rests on a horizontal table. Which forces belong on the free-body diagram *of the book*?
+    options:
+      - key: A
+        text: Weight $mg$ downward and the normal force $N$ upward
+      - key: B
+        text: Weight $mg$ downward only
+        misconception: forgets that the table pushes back (contact forces)
+      - key: C
+        text: Weight, the normal force, and the book's push on the table
+        misconception: puts a force exerted by the book on a different body onto the book's own diagram
+      - key: D
+        text: Weight, the normal force, and an upward "force of rest"
+        misconception: "invents a force: there is no extra force for being at rest"
+    answer: A
+    solution:
+      - A free-body diagram shows only the forces acting *on* the chosen body. The book feels its weight $mg$ (gravity) and the normal force $N$ from the table. The book's push on the table acts on the table, not on the book.
+    hint: List what touches the book, then add gravity.
+  - id: fbd-d02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: diagnostic
+    parallel_group: fbd-hang
+    stem: "A block of mass $4\\,\\text{kg}$ hangs at rest from a light string attached to the ceiling. Take $g = 10\\,\\text{m/s}^2$. The tension in the string is:"
+    options:
+      - key: A
+        text: $4\,\text{N}$
+        misconception: uses the mass in kg as if it were a force
+      - key: B
+        text: $40\,\text{N}$
+      - key: C
+        text: $0\,\text{N}$
+        misconception: thinks a body at rest has no force in the string
+      - key: D
+        text: $80\,\text{N}$
+        misconception: adds the ceiling's pull to the weight, counting the same force twice
+    answer: B
+    solution:
+      - "The block is in equilibrium, so the upward tension balances the weight: $T = mg = 4 \\times 10 = 40\\,\\text{N}$."
+  - id: fbd-d03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 120
+    pool: diagnostic
+    parallel_group: fbd-pair
+    stem: Blocks of $2\,\text{kg}$ and $3\,\text{kg}$ lie on a smooth horizontal table, joined by a light string. A horizontal force of $10\,\text{N}$ pulls the $3\,\text{kg}$ block directly away from the $2\,\text{kg}$ block. Find the tension in the string, in newtons.
+    answer:
+      value: 4
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 10
+        category: conceptual
+      - value: 6
+        category: conceptual
+      - value: 5
+        category: calculation
+    solution:
+      - "Treat both blocks as one system: $a = F/(m_1+m_2) = 10/5 = 2\\,\\text{m/s}^2$."
+      - "The string alone accelerates the $2\\,\\text{kg}$ block: $T = m_1 a = 2 \\times 2 = 4\\,\\text{N}$."
+    hint: Find the common acceleration first.
+  - id: fbd-r01
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: retest
+    parallel_group: fbd-rest
+    stem: A crate sits at rest on a level floor. Which forces belong on the free-body diagram *of the crate*?
+    options:
+      - key: A
+        text: Weight $mg$ downward only
+        misconception: forgets the floor's contact force
+      - key: B
+        text: Weight, the normal force, and the crate's push on the floor
+        misconception: includes a force that acts on the floor, not on the crate
+      - key: C
+        text: Weight $mg$ downward and the normal force $N$ upward
+      - key: D
+        text: Weight, the normal force, and a force "keeping it at rest"
+        misconception: invents a force for being at rest
+    answer: C
+    solution:
+      - "Only forces acting *on* the crate count: gravity ($mg$) and the floor's normal force ($N$). The crate's push on the floor belongs to the floor's diagram."
+  - id: fbd-r02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: retest
+    parallel_group: fbd-hang
+    stem: "A lamp of mass $6\\,\\text{kg}$ hangs at rest from a light cord. Take $g = 10\\,\\text{m/s}^2$. The tension in the cord is:"
+    options:
+      - key: A
+        text: $6\,\text{N}$
+        misconception: uses the mass in kg as if it were a force
+      - key: B
+        text: $120\,\text{N}$
+        misconception: counts the ceiling's pull and the weight as two separate forces to add
+      - key: C
+        text: $0\,\text{N}$
+        misconception: thinks nothing pulls on a body at rest
+      - key: D
+        text: $60\,\text{N}$
+    answer: D
+    solution:
+      - "At rest, tension balances weight: $T = mg = 6 \\times 10 = 60\\,\\text{N}$."
+  - id: fbd-r03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 120
+    pool: retest
+    parallel_group: fbd-pair
+    stem: Blocks of $1\,\text{kg}$ and $4\,\text{kg}$ lie on a smooth horizontal table, joined by a light string. A horizontal force of $10\,\text{N}$ pulls the $4\,\text{kg}$ block directly away from the $1\,\text{kg}$ block. Find the tension in the string, in newtons.
+    answer:
+      value: 2
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 8
+        category: conceptual
+      - value: 10
+        category: conceptual
+      - value: 2.5
+        category: calculation
+    solution:
+      - "Common acceleration: $a = 10/(1+4) = 2\\,\\text{m/s}^2$."
+      - "Tension accelerates only the $1\\,\\text{kg}$ block: $T = 1 \\times 2 = 2\\,\\text{N}$."
+  - id: fbd-p01
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: practice
+    stem: "A skydiver falls at a constant (terminal) speed. The air drag on the skydiver is:"
+    options:
+      - key: A
+        text: equal to the skydiver's weight, acting upward
+      - key: B
+        text: zero, because the speed is constant
+        misconception: believes constant speed means no forces rather than no *net* force
+      - key: C
+        text: greater than the weight, acting upward
+        misconception: thinks the drag must win for the speed to stay steady
+      - key: D
+        text: equal to the weight, acting downward
+        misconception: gets the direction of drag wrong
+    answer: A
+    solution:
+      - Constant velocity means zero acceleration, so the net force is zero. Weight acts down, so drag must act up with the same magnitude.
+  - id: fbd-p02
+    type: numerical
+    difficulty: hard
+    expected_seconds: 150
+    pool: practice
+    stem: Masses of $2\,\text{kg}$ and $3\,\text{kg}$ hang from the two ends of a light string over a smooth light pulley. Take $g = 10\,\text{m/s}^2$. Find the tension in the string, in newtons.
+    answer:
+      value: 24
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 20
+        category: conceptual
+      - value: 30
+        category: conceptual
+      - value: 25
+        category: calculation
+    solution:
+      - "The heavier block accelerates down: $a = (m_2 - m_1)g/(m_1+m_2) = (1 \\times 10)/5 = 2\\,\\text{m/s}^2$."
+      - "For the $2\\,\\text{kg}$ block (accelerating up): $T - m_1 g = m_1 a$, so $T = 2(10+2) = 24\\,\\text{N}$."
+    hint: Write Newton's second law for one block.
+  - id: fbd-p03
+    type: mcq
+    difficulty: medium
+    expected_seconds: 90
+    pool: practice
+    stem: "A lift accelerates upward at $2\\,\\text{m/s}^2$. A $60\\,\\text{kg}$ person stands on a weighing scale in it. Take $g = 10\\,\\text{m/s}^2$. The scale pushes up on the person with a force of:"
+    options:
+      - key: A
+        text: $600\,\text{N}$
+        misconception: forgets the lift is accelerating
+      - key: B
+        text: $720\,\text{N}$
+      - key: C
+        text: $480\,\text{N}$
+        misconception: subtracts the acceleration; that is the downward-acceleration case
+      - key: D
+        text: $120\,\text{N}$
+        misconception: keeps only $ma$ and drops the weight
+    answer: B
+    solution:
+      - "Newton's second law, upward positive: $N - mg = ma$, so $N = m(g + a) = 60 \\times 12 = 720\\,\\text{N}$."
+  - id: fbd-p04
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: A block slides down a *smooth* incline. Which forces act on it?
+    options:
+      - key: A
+        text: Weight, the normal force, and a force down the incline
+        misconception: adds a separate 'sliding force'; that is just a component of the weight
+      - key: B
+        text: Weight, the normal force, and friction up the incline
+        misconception: forgets the incline is smooth
+      - key: C
+        text: Weight (vertically down) and the normal force (perpendicular to the incline)
+      - key: D
+        text: Only the component of weight along the incline
+        misconception: mistakes a component for the whole force and drops the normal force
+    answer: C
+    solution:
+      - Only gravity and the contact force act. With no friction the contact force is purely the normal force, perpendicular to the surface. The pull "down the incline" is a component of the weight, not an extra force.
+  - id: fbd-p05
+    type: numerical
+    difficulty: hard
+    expected_seconds: 150
+    pool: practice
+    stem: A $4\,\text{kg}$ block on a smooth horizontal table is joined by a light string over a smooth pulley at the table's edge to a $1\,\text{kg}$ block hanging freely. Take $g = 10\,\text{m/s}^2$. Find the acceleration of the blocks, in $\text{m/s}^2$.
+    answer:
+      value: 2
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 10
+        category: conceptual
+      - value: 2.5
+        category: calculation
+      - value: 8
+        category: conceptual
+    solution:
+      - The hanging weight $m_2 g = 10\,\text{N}$ is the only external force along the string; it accelerates the total mass $5\,\text{kg}$.
+      - $a = m_2 g/(m_1+m_2) = 10/5 = 2\,\text{m/s}^2$.
+  - id: fbd-p06
+    type: mcq
+    difficulty: medium
+    expected_seconds: 90
+    pool: practice
+    stem: "A $10\\,\\text{kg}$ load is raised by a rope whose tension is $120\\,\\text{N}$. Take $g = 10\\,\\text{m/s}^2$. The acceleration of the load is:"
+    options:
+      - key: A
+        text: $12\,\text{m/s}^2$ upward
+        misconception: divides the tension by the mass and ignores the weight
+      - key: B
+        text: $2\,\text{m/s}^2$ downward
+        misconception: gets the sign of the net force wrong
+      - key: C
+        text: $0$, because the load is moving up steadily
+        misconception: assumes upward motion means constant speed
+      - key: D
+        text: $2\,\text{m/s}^2$ upward
+    answer: D
+    solution:
+      - Net force $= T - mg = 120 - 100 = 20\,\text{N}$ upward, so $a = 20/10 = 2\,\text{m/s}^2$ upward.

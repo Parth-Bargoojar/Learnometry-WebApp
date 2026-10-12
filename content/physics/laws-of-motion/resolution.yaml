@@ -9,12 +9,15 @@ questions:
     options:
       - key: A
         text: $10\sqrt{3}\,\text{N}$
+        misconception: uses the component into the surface ($mgcos	heta$) instead of the one along it
       - key: B
         text: $10\,\text{N}$
       - key: C
         text: $20\,\text{N}$
+        misconception: gives the full weight, ignoring the incline
       - key: D
         text: $5\,\text{N}$
+        misconception: applies $sin 30^circ$ twice
     answer: B
     solution:
       - "At rest, friction balances the component of weight along the incline: $f = mg\\sin 30^\\circ = 2 \\times 10 \\times 0.5 = 10\\,\\text{N}$. The value $mg\\cos 30^\\circ = 10\\sqrt{3}\\,\\text{N}$ is the component *into* the surface, which the normal force balances."
@@ -29,10 +32,13 @@ questions:
         text: $20\,\text{N}$
       - key: B
         text: $20\sqrt{3}\,\text{N}$
+        misconception: uses $sin 60^circ$ instead of $cos 60^circ$
       - key: C
         text: $40\,\text{N}$
+        misconception: gives the weight, ignoring the incline
       - key: D
         text: $10\,\text{N}$
+        misconception: applies $cos 60^circ$ twice
     answer: A
     solution:
       - "The normal force balances the weight component perpendicular to the surface: $N = mg\\cos 60^\\circ = 40 \\times 0.5 = 20\\,\\text{N}$."
@@ -44,7 +50,7 @@ questions:
     stem: A box is pulled by a rope with a force of $50\,\text{N}$ at $37^\circ$ above the horizontal. Find the horizontal component of the force, in newtons.
     answer:
       value: 40
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - "The horizontal component is adjacent to the $37^\\circ$ angle: $F_x = 50\\cos 37^\\circ = 50 \\times 0.8 = 40\\,\\text{N}$."
   - id: res-p01
@@ -74,7 +80,7 @@ questions:
     stem: A $5\,\text{kg}$ block rests on an incline of $37^\circ$. Find the normal force, in newtons.
     answer:
       value: 40
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - $N = mg\cos 37^\circ = 50 \times 0.8 = 40\,\text{N}$.
     hint: The normal force balances the component of weight *into* the surface.
@@ -86,7 +92,7 @@ questions:
     stem: A $4\,\text{kg}$ block is held at rest on a smooth $30^\circ$ incline by a force parallel to the incline. Find that force, in newtons.
     answer:
       value: 20
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - $F = mg\sin 30^\circ = 40 \times 0.5 = 20\,\text{N}$.
     hint: With no friction, the applied force alone must cancel $mg\sin\theta$.
@@ -117,7 +123,7 @@ questions:
     stem: A $6\,\text{kg}$ block is on a smooth incline of $53^\circ$. Find the component of its weight along the incline, in newtons.
     answer:
       value: 48
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - $mg\sin 53^\circ = 60 \times 0.8 = 48\,\text{N}$.
     hint: Use $\sin 53^\circ = 0.8$.
@@ -147,7 +153,7 @@ questions:
     stem: A force of $100\,\text{N}$ acts at $53^\circ$ above the horizontal. Find its vertical component, in newtons.
     answer:
       value: 80
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - $F_y = 100\sin 53^\circ = 80\,\text{N}$.
   - id: res-r03
@@ -158,6 +164,25 @@ questions:
     stem: An $8\,\text{kg}$ block slides down a smooth $37^\circ$ incline. Find its acceleration, in $\text{m/s}^2$.
     answer:
       value: 6
-      tolerance: 0.01
+      tolerance_pct: 1
     solution:
       - $a = g\sin 37^\circ = 10 \times 0.6 = 6\,\text{m/s}^2$.
+  - id: res-p06
+    type: numerical
+    difficulty: medium
+    expected_seconds: 100
+    pool: practice
+    stem: A $5\,\text{kg}$ block rests on a smooth incline of angle $37^\circ$ ($\sin 37^\circ = 0.6$). Find the force parallel to the incline needed to hold it in place, in newtons. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 30
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 50
+        category: conceptual
+      - value: 40
+        category: conceptual
+      - value: 24
+        category: calculation
+    solution:
+      - "With no friction, the component of weight along the incline must be balanced: $F = mg\\sin 37^\\circ = 5 \\times 10 \\times 0.6 = 30\\,\\text{N}$."
+    hint: Which component of the weight points along the incline?
