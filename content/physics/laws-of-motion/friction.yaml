@@ -1,0 +1,96 @@
+concept: friction
+questions:
+  - id: fri-d07
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: diagnostic
+    stem: A $5\,\text{kg}$ block rests on a horizontal floor with $\mu_s = 0.4$. A horizontal force of $15\,\text{N}$ is applied. What is the frictional force on the block?
+    options:
+      - key: A
+        text: $20\,\text{N}$
+      - key: B
+        text: $15\,\text{N}$
+      - key: C
+        text: $0\,\text{N}$
+      - key: D
+        text: $5\,\text{N}$
+    answer: B
+    solution:
+      - "Limiting friction is $\\mu_s mg = 0.4 \\times 50 = 20\\,\\text{N}$. The applied $15\\,\\text{N}$ is below that, so the block stays at rest and static friction only matches the applied force: $15\\,\\text{N}$. $20\\,\\text{N}$ is the *maximum*, not the actual value."
+  - id: fri-d08
+    type: mcq
+    difficulty: medium
+    expected_seconds: 90
+    pool: diagnostic
+    stem: What is the minimum coefficient of static friction needed for a block to stay at rest on an incline of $45^\circ$?
+    options:
+      - key: A
+        text: $0.5$
+      - key: B
+        text: $1$
+      - key: C
+        text: $\sqrt{2}$
+      - key: D
+        text: $1/\sqrt{2}$
+    answer: B
+    solution:
+      - The block is on the verge of slipping when $\mu_s = \tan\theta = \tan 45^\circ = 1$.
+  - id: fri-d09
+    type: numerical
+    difficulty: easy
+    expected_seconds: 90
+    pool: diagnostic
+    stem: A $2\,\text{kg}$ block slides on a horizontal floor with $\mu_k = 0.25$. Find its deceleration, in $\text{m/s}^2$.
+    answer:
+      value: 2.5
+      tolerance: 0.01
+    solution:
+      - $a = \mu_k g = 0.25 \times 10 = 2.5\,\text{m/s}^2$; the mass cancels.
+  - id: fri-r04
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: retest
+    stem: "A $10\\,\\text{kg}$ box on a floor with $\\mu_s = 0.5$ is pushed horizontally with $30\\,\\text{N}$. The friction force is:"
+    options:
+      - key: A
+        text: $50\,\text{N}$
+      - key: B
+        text: $30\,\text{N}$
+      - key: C
+        text: $0\,\text{N}$
+      - key: D
+        text: $20\,\text{N}$
+    answer: B
+    solution:
+      - Limiting friction is $50\,\text{N}$; $30\,\text{N}$ is below it, so static friction is $30\,\text{N}$.
+  - id: fri-r05
+    type: mcq
+    difficulty: medium
+    expected_seconds: 90
+    pool: retest
+    stem: "If $\\mu_s = 1/\\sqrt{3}$, the angle of repose is:"
+    options:
+      - key: A
+        text: $30^\circ$
+      - key: B
+        text: $45^\circ$
+      - key: C
+        text: $60^\circ$
+      - key: D
+        text: $37^\circ$
+    answer: A
+    solution:
+      - $\tan\theta = 1/\sqrt{3} \Rightarrow \theta = 30^\circ$.
+  - id: fri-r06
+    type: numerical
+    difficulty: easy
+    expected_seconds: 60
+    pool: retest
+    stem: A $4\,\text{kg}$ block slides on a floor with $\mu_k = 0.2$. Find the kinetic friction force, in newtons.
+    answer:
+      value: 8
+      tolerance: 0.01
+    solution:
+      - $f = \mu_k mg = 0.2 \times 40 = 8\,\text{N}$.

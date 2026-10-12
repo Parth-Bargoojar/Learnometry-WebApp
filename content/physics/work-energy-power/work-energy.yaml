@@ -1,0 +1,42 @@
+concept: work-energy
+questions:
+  - id: wet-d13
+    type: numerical
+    difficulty: easy
+    expected_seconds: 90
+    pool: diagnostic
+    stem: A block slides from rest down a frictionless slope, dropping a vertical height of $5\,\text{m}$. Find its speed at the bottom, in m/s.
+    answer:
+      value: 10
+      tolerance: 0.01
+    solution:
+      - $mgh = \tfrac12 mv^2 \Rightarrow v = \sqrt{2gh} = \sqrt{100} = 10\,\text{m/s}$.
+  - id: wet-d14
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: diagnostic
+    stem: "A $2\\,\\text{kg}$ mass is raised by $5\\,\\text{m}$ at constant speed. The work done by the lifting force is:"
+    options:
+      - key: A
+        text: $10\,\text{J}$
+      - key: B
+        text: $50\,\text{J}$
+      - key: C
+        text: $100\,\text{J}$
+      - key: D
+        text: $0\,\text{J}$
+    answer: C
+    solution:
+      - "At constant speed the lifting force equals $mg$: $W = mgh = 2 \\times 10 \\times 5 = 100\\,\\text{J}$."
+  - id: wet-d15
+    type: numerical
+    difficulty: medium
+    expected_seconds: 90
+    pool: diagnostic
+    stem: The speed of a $1\,\text{kg}$ body increases from $2\,\text{m/s}$ to $4\,\text{m/s}$. Find the work done by the net force, in joules.
+    answer:
+      value: 6
+      tolerance: 0.01
+    solution:
+      - $W = \Delta K = \tfrac12 (1)(4^2 - 2^2) = 6\,\text{J}$.

@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { PLANS } from "@/domains/credits/costs";
 import { seedReference, MECHANICS_CHAPTERS } from "@/lib/db/seed/reference";
+import { loadContent } from "@/domains/content/load";
 import { seedSampleQuestions } from "@/lib/db/seed/questions";
 import { db } from "./helpers";
 
@@ -14,7 +15,7 @@ describe("seed (BE-D62)", () => {
         `select 'exams' t, count(*)::int n from exams union all select 'concepts', count(*)::int from concepts
          union all select 'edges', count(*)::int from concept_edges union all select 'plans', count(*)::int from plans
          union all select 'flags', count(*)::int from feature_flags union all select 'coupons', count(*)::int from coupons
-         union all select 'questions', count(*)::int from questions where slug ~ '^[dpr][0-9]{2}$'`,
+         union all select 'questions', count(*)::int from questions`,
       )).map((r) => `${r.t}=${r.n}`);
     await seedReference(db);
     await seedSampleQuestions(db);
@@ -70,9 +71,9 @@ describe("seed (BE-D62)", () => {
   it("publishes sample questions whose answers are consistent with their options", async () => {
     const qs = await rows<{ slug: string; question_type: string; options: { key: string }[] | null; answer: { key?: string; value?: number }; pool: string }>(
       `select q.slug, q.question_type, q.options, q.answer, q.pool from questions q join exams e on e.id = q.exam_id
-       where e.code = 'jee_main' and q.slug ~ '^[dpr][0-9]{2}$' and q.validation_status = 'published'`,
+       where e.code = 'jee_main' and q.validation_status = 'published'`,
     );
-    expect(qs.length).toBe(29);
+    expect(qs.length).toBe(loadContent().files.reduce((n, f) => n + f.items.filter((i) => i.tracks.includes("jee_main")).length, 0));
     for (const q of qs) {
       if (q.question_type === "mcq") {
         expect(q.options!.map((o) => o.key), q.slug).toContain(q.answer.key);

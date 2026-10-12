@@ -1,0 +1,96 @@
+concept: circular
+questions:
+  - id: cir-d10
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: diagnostic
+    stem: "A car takes a flat circular turn of radius $50\\,\\text{m}$. If $\\mu_s = 0.5$, the maximum safe speed is closest to:"
+    options:
+      - key: A
+        text: $15.8\,\text{m/s}$
+      - key: B
+        text: $25\,\text{m/s}$
+      - key: C
+        text: $10\,\text{m/s}$
+      - key: D
+        text: $22.4\,\text{m/s}$
+    answer: A
+    solution:
+      - "Friction provides the centripetal force: $\\mu mg = mv^2/r$, so $v = \\sqrt{\\mu g r} = \\sqrt{0.5 \\times 10 \\times 50} = \\sqrt{250} \\approx 15.8\\,\\text{m/s}$."
+  - id: cir-d11
+    type: numerical
+    difficulty: easy
+    expected_seconds: 90
+    pool: diagnostic
+    stem: A $0.5\,\text{kg}$ stone moves in a horizontal circle of radius $1\,\text{m}$ at $4\,\text{m/s}$. Ignoring gravity, find the tension in the string, in newtons.
+    answer:
+      value: 8
+      tolerance: 0.01
+    solution:
+      - $T = mv^2/r = 0.5 \times 16 / 1 = 8\,\text{N}$.
+  - id: cir-d12
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: diagnostic
+    stem: "A road of radius $10\\,\\text{m}$ is banked so that a car at $10\\,\\text{m/s}$ needs no friction. The banking angle is:"
+    options:
+      - key: A
+        text: $30^\circ$
+      - key: B
+        text: $37^\circ$
+      - key: C
+        text: $45^\circ$
+      - key: D
+        text: $60^\circ$
+    answer: C
+    solution:
+      - $\tan\theta = v^2/(rg) = 100/100 = 1$, so $\theta = 45^\circ$.
+  - id: cir-r07
+    type: numerical
+    difficulty: easy
+    expected_seconds: 60
+    pool: retest
+    stem: A $1\,\text{kg}$ ball moves at $2\,\text{m/s}$ in a circle of radius $0.5\,\text{m}$. Find the centripetal force, in newtons.
+    answer:
+      value: 8
+      tolerance: 0.01
+    solution:
+      - $F = mv^2/r = 4 / 0.5 = 8\,\text{N}$.
+  - id: cir-r08
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: retest
+    stem: "The maximum speed on a flat curve of radius $40\\,\\text{m}$ with $\\mu_s = 0.4$ is closest to:"
+    options:
+      - key: A
+        text: $16\,\text{m/s}$
+      - key: B
+        text: $12.6\,\text{m/s}$
+      - key: C
+        text: $8\,\text{m/s}$
+      - key: D
+        text: $20\,\text{m/s}$
+    answer: B
+    solution:
+      - $v = \sqrt{\mu g r} = \sqrt{160} \approx 12.6\,\text{m/s}$.
+  - id: cir-r09
+    type: mcq
+    difficulty: hard
+    expected_seconds: 120
+    pool: retest
+    stem: "A curve of radius $30\\,\\text{m}$ is designed for $15\\,\\text{m/s}$ with no friction. The banking angle is:"
+    options:
+      - key: A
+        text: $30^\circ$
+      - key: B
+        text: $37^\circ$
+      - key: C
+        text: $45^\circ$
+      - key: D
+        text: $53^\circ$
+    answer: B
+    solution:
+      - $\tan\theta = v^2/(rg) = 225/300 = 0.75 \Rightarrow \theta = 37^\circ$.
