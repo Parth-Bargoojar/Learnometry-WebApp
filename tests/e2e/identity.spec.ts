@@ -32,8 +32,21 @@ test("signup → verify → onboarding → dashboard (S0) with welcome credits",
   await expect(page.getByRole("heading", { name: "Take your first diagnostic" })).toBeVisible();
   await expect(page.getByText("Welcome credits · expire", { exact: false })).toBeVisible();
   await expect(page.getByText("Ada Lovelace").first()).toBeAttached(); // the sidebar name is hidden on phones
-  // The credit chip shows the ledger balance.
-  await expect(page.getByRole("button", { name: /100.*credit/i }).first()).toBeVisible();
+  // The credit chip shows the ledger balance: 100 welcome + 30 free for the current month (BE-D36).
+  await expect(page.getByRole("button", { name: /130.*credit/i }).first()).toBeVisible();
+
+  // The Credits screen is the same ledger: balance, buckets and history rows.
+  await page.goto("/credits");
+  await expect(page.locator("#bal-h + p")).toHaveText("130");
+  await page.getByText("Breakdown", { exact: true }).click();
+  const main = page.locator("#main");
+  await expect(main.getByText("Free monthly", { exact: true })).toBeVisible();
+  await expect(main.getByText("Promotional", { exact: true })).toBeVisible();
+  const history = page.getByRole("region", { name: "Credit history" });
+  await expect(history.getByText("Welcome credits")).toBeVisible();
+  await expect(history.getByText("Free monthly credits")).toBeVisible();
+  await expect(history.getByText("+100")).toBeVisible();
+  await expect(history.getByText("+30")).toBeVisible();
 });
 
 test("onboarding resumes where it stopped, from a fresh login", async ({ page, context }) => {

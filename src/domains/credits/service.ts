@@ -1,12 +1,12 @@
 import "server-only";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Tx } from "@/lib/db/connection";
 import * as s from "@/lib/db/schema";
-import { endOfIstDay, addIstDays } from "@/lib/time";
+import { addIstDays, endOfIstDay, endOfIstMonth, istDate, istMonth } from "@/lib/time";
 
 /*
   Credit ledger — the grant half (BE-D33, BE-D35, BE-D36). Reservations, spending and expiry
-  arrive in BE-4; the welcome grant is needed at the end of onboarding, so grants exist now.
+  live in spend.ts.
 
   Rules that already hold:
     · every grant is one lot + one ledger row + the balance change, in the caller's transaction;
@@ -104,4 +104,84 @@ export async function grantWelcomeCredits(tx: Tx, learnerId: string, now: Date):
     grantKey: WELCOME_GRANT_KEY,
     description: "Welcome credits",
   });
+}
+
+/* ---------- Free monthly credits (BE-D36, BE-D78) ---------- */
+
+export const FREE_MONTHLY_AMOUNT = 30;
+
+/**
+ * The 30 free credits of the IST month containing `now`, expiring at 23:59:59 IST on its last
+ * day. The grant key `monthly:YYYY-MM` makes the cron and the mid-month catch-up idempotent.
+ */
+export async function grantFreeMonthlyCredits(tx: Tx, learnerId: string, now: Date): Promise<GrantResult> {
+  const [free] = await tx.select({ credits: s.plans.periodCredits }).from(s.plans).where(eq(s.plans.code, "free"));
+  return grantLot(tx, {
+    learnerId,
+    bucket: "free_monthly",
+    type: "subscription_grant",
+    amount: free?.credits ?? FREE_MONTHLY_AMOUNT,
+    expiresAt: endOfIstMonth(now),
+    grantKey: `monthly:${istMonth(now)}`,
+    description: "Free monthly credits",
+  });
+}
+
+/**
+ * Learners who get free monthly credits: onboarded, account active (a minor without consent is
+ * `consent_pending`, a deleting account is `deletion_pending`) and without a running pass.
+ */
+export async function eligibleForFreeMonthly(tx: Tx, now: Date): Promise<string[]> {
+  const rows = await tx
+    .select({ id: s.learners.id })
+    .from(s.learners)
+    .innerJoin(s.users, eq(s.users.id, s.learners.userId))
+    .where(
+      and(
+        eq(s.learners.onboardingCompleted, true),
+        eq(s.users.status, "active"),
+        sql`not exists (select 1 from public.subscriptions sub where sub.learner_id = ${s.learners.id} and sub.current_period_end > ${now.toISOString()}::timestamptz)`,
+      ),
+    );
+  return rows.map((r) => r.id);
+}
+
+/* ---------- Daily plan credits (BE-D36; used from BE-10 when passes exist) ---------- */
+
+/**
+ * Daily plan credits for one learner on a running pass: the plan's allowance as one lot that
+ * expires at 23:59:59 IST today (no rollover). Key `daily:YYYY-MM-DD` makes the 00:00 cron, a
+ * retry and an immediate top-up on pass start/upgrade (BE-10) all safe to repeat.
+ */
+export async function grantDailyPlanCredits(tx: Tx, learnerId: string, now: Date): Promise<GrantResult> {
+  const [sub] = await tx
+    .select({ credits: s.plans.periodCredits })
+    .from(s.subscriptions)
+    .innerJoin(s.plans, eq(s.plans.id, s.subscriptions.planId))
+    .where(and(eq(s.subscriptions.learnerId, learnerId), sql`${s.subscriptions.currentPeriodEnd} > ${now.toISOString()}::timestamptz`, eq(s.plans.creditPeriod, "daily")))
+    .orderBy(sql`${s.plans.periodCredits} desc`)
+    .limit(1);
+  if (!sub) {
+    const [acct] = await tx.select({ balance: s.creditAccounts.balance }).from(s.creditAccounts).where(eq(s.creditAccounts.learnerId, learnerId));
+    return { granted: false, lotId: null, balance: acct?.balance ?? 0 };
+  }
+  return grantLot(tx, {
+    learnerId,
+    bucket: "daily_plan",
+    type: "subscription_grant",
+    amount: sub.credits,
+    expiresAt: endOfIstDay(now),
+    grantKey: `daily:${istDate(now)}`,
+    description: "Daily plan credits",
+  });
+}
+
+/** Learners with a running daily-credit pass. */
+export async function learnersWithDailyPass(tx: Tx, now: Date): Promise<string[]> {
+  const rows = await tx
+    .selectDistinct({ id: s.subscriptions.learnerId })
+    .from(s.subscriptions)
+    .innerJoin(s.plans, eq(s.plans.id, s.subscriptions.planId))
+    .where(and(sql`${s.subscriptions.currentPeriodEnd} > ${now.toISOString()}::timestamptz`, eq(s.plans.creditPeriod, "daily")));
+  return rows.map((r) => r.id);
 }

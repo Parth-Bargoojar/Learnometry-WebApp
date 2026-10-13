@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, lte, sql } from "drizzle-orm";
-import { grantWelcomeCredits } from "@/domains/credits/service";
+import { grantFreeMonthlyCredits, grantWelcomeCredits } from "@/domains/credits/service";
 import { ADULT_AGE, ageOn } from "@/domains/guardian/rules";
 import { asUser } from "@/lib/db/client";
 import { system } from "@/lib/db/system";
@@ -157,6 +157,8 @@ export async function saveOnboardingStep(userId: string, input: OnboardingInput,
 
         // Eligible: verified email (sign-in requires it), onboarded, adult (BE-D36). Idempotent by grant key.
         const grant = await grantWelcomeCredits(tx, learner.id, at);
+        // A sign-up mid-month also gets the current month's 30 (BE-D36).
+        await grantFreeMonthlyCredits(tx, learner.id, at);
         await tx.insert(s.productEvents).values({ name: "onboarding.completed", userId, learnerId: learner.id, isMinor: false, properties: { welcomeGranted: grant.granted } });
         return { next: "ready", welcomeCredits: grant.granted ? (await welcomeAmount(tx)) : 0 };
       }

@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { Onboarding } from "@/components/onboarding";
+import { loadWelcomeCredits } from "@/domains/credits/queries";
 import { getOnboarding } from "@/domains/identity/service";
 import { LEARNER_STEPS, MINOR_ONLY_STEPS, onboardingRedirect } from "@/domains/identity/rules";
 import { homeFor, requireViewer } from "@/lib/auth/session";
@@ -23,5 +24,6 @@ export default async function OnboardingStep(props: PageProps<"/onboarding/[step
   const to = onboardingRedirect(step, { held: answers.held, completed: answers.completed, resume });
   if (to) redirect(to);
 
-  return <Onboarding step={step} initial={answers} welcomeCredits={viewer.balance} />;
+  const welcome = step === "ready" && viewer.learner ? await loadWelcomeCredits(viewer.userId, viewer.learner.id) : 0;
+  return <Onboarding step={step} initial={answers} welcomeCredits={welcome} />;
 }
