@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { ArrowRight, Clock, Package, Sparkles, UserCheck } from "lucide-react";
 import { CREDIT_PACKS, PLANS } from "@/lib/config";
-import { credits, learner } from "@/lib/data";
-import { isMinor } from "@/lib/guardian";
+import type { ActionResult } from "@/lib/errors/app-error";
 import { Dialog } from "./dialog";
+import { useViewer } from "./viewer";
 import { Cost, btn } from "./ui";
 
 /*
@@ -26,7 +26,7 @@ export function SpendLink({
   variant = "primary",
   size = "md",
   className = "",
-  balance = credits.balance,
+  balance,
 }: {
   href: string;
   cost: number;
@@ -38,14 +38,16 @@ export function SpendLink({
   className?: string;
   balance?: number;
 }) {
-  if (balance >= cost) {
+  const viewer = useViewer();
+  const have = balance ?? viewer.balance;
+  if (have >= cost) {
     return (
       <Link href={href} className={btn(variant, size, className)}>
         {children} <Cost credits={cost} />
       </Link>
     );
   }
-  return <GetCreditsButton cost={cost} balance={balance} what={what} variant={variant} size={size} className={className} />;
+  return <GetCreditsButton cost={cost} balance={have} what={what} variant={variant} size={size} className={className} />;
 }
 
 export function GetCreditsButton({
@@ -76,9 +78,28 @@ export function GetCreditsButton({
   );
 }
 
+/**
+ * The server is the authority (BE-D34): an action that reserves credits answers
+ * `insufficient_credits` when another tab spent them. Pass every action result to `handle`;
+ * it opens the same sheet and returns true so the caller stops.
+ */
+export function useCreditGate() {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState<string | undefined>();
+  return {
+    handle(result: ActionResult<unknown>): boolean {
+      if (result.ok || result.error.code !== "insufficient_credits") return false;
+      setMessage(result.error.message);
+      setOpen(true);
+      return true;
+    },
+    sheet: <GetCreditsSheet open={open} onClose={() => setOpen(false)} description={message} />,
+  };
+}
+
 export function GetCreditsSheet({ open, onClose, description }: { open: boolean; onClose: () => void; description?: string }) {
-  const plan = PLANS[learner.plan];
-  const minor = isMinor(learner.dateOfBirth) && learner.guardian;
+  const viewer = useViewer();
+  const plan = PLANS[viewer.plan];
   const refill = plan.period === "daily" ? `Your plan credits refill to ${plan.periodCredits} at 00:00 IST, for free.` : "Your 30 free credits refill on the 1st of the month.";
   const row = "flex min-h-16 items-center gap-3 rounded-card-sm border border-border-subtle p-3 hover:border-line";
   return (
@@ -112,10 +133,10 @@ export function GetCreditsSheet({ open, onClose, description }: { open: boolean;
           </Link>
         </li>
       </ul>
-      {minor && learner.guardian ? (
+      {viewer.needsApproval ? (
         <p className="mt-4 flex items-start gap-2 text-sm text-muted">
           <UserCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-          {learner.guardian.guardianFirstName} approves and pays for packs and passes. Choosing one sends a request.
+          Your guardian approves and pays for packs and passes. Choosing one sends a request.
         </p>
       ) : null}
     </Dialog>

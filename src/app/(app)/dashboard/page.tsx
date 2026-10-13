@@ -70,6 +70,7 @@ function ContextLine({ viewer }: { viewer: Viewer & { learner: NonNullable<Viewe
 /* ---------------- S0: no diagnostic yet ---------------- */
 
 function NewLearner({ viewer }: { viewer: Viewer & { learner: NonNullable<Viewer["learner"]> } }) {
+  const promo = viewer.buckets.find((b) => b.key === "promotional");
   const steps = [
     { icon: ClipboardCheck, title: "Diagnose", body: "A 30-minute test finds the concepts behind your wrong answers." },
     { icon: Route, title: "Plan", body: "Your gaps, ordered by exam weight and cut to your daily time." },
@@ -101,9 +102,7 @@ function NewLearner({ viewer }: { viewer: Viewer & { learner: NonNullable<Viewer
           <CardHeader title="Your credits" />
           <p className="mt-3 font-display text-4xl tabular-nums text-ink">{viewer.balance}</p>
           <p className="mt-1 text-sm text-muted">
-            {viewer.buckets.length === 1 && viewer.buckets[0].key === "promotional"
-              ? `Welcome credits · ${viewer.buckets[0].note.toLowerCase()}`
-              : (viewer.buckets[0]?.label ?? "No credits yet")}
+            {promo ? `Welcome credits · ${promo.note.toLowerCase()}` : (viewer.buckets[0]?.label ?? "No credits yet")}
           </p>
           <p className="mt-auto pt-4 text-sm text-ink">{enoughFor(viewer.balance)}</p>
         </Card>
