@@ -1,0 +1,55 @@
+concept: vectors
+questions:
+  - id: vec-d04
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: diagnostic
+    stem: "A vector of magnitude $10$ units makes an angle of $30^\\circ$ with the $x$-axis. Its components $(A_x, A_y)$ are:"
+    options:
+      - key: A
+        text: $(5,\ 5\sqrt{3})$
+        misconception: swaps sine and cosine
+      - key: B
+        text: $(5\sqrt{3},\ 5)$
+      - key: C
+        text: $(10,\ 5)$
+        misconception: takes the full magnitude as the $x$-component
+      - key: D
+        text: $(5,\ 5)$
+        misconception: halves both components
+    answer: B
+    solution:
+      - $A_x = 10\cos 30^\circ = 5\sqrt{3}$ and $A_y = 10\sin 30^\circ = 5$.
+  - id: vec-d05
+    type: numerical
+    difficulty: easy
+    expected_seconds: 60
+    pool: diagnostic
+    stem: Two forces of $3\,\text{N}$ and $4\,\text{N}$ act on a particle at right angles to each other. Find the magnitude of the resultant, in newtons.
+    answer:
+      value: 5
+      tolerance_pct: 1
+    solution:
+      - $R = \sqrt{3^2 + 4^2} = 5\,\text{N}$.
+  - id: vec-d06
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: diagnostic
+    stem: What angle does the vector $\vec{A} = \hat{i} + \hat{j}$ make with the $x$-axis?
+    options:
+      - key: A
+        text: $30^\circ$
+        misconception: picks a familiar angle instead of computing $	an	heta = A_y/A_x$
+      - key: B
+        text: $60^\circ$
+        misconception: picks a familiar angle instead of computing $	an	heta = A_y/A_x$
+      - key: C
+        text: $45^\circ$
+      - key: D
+        text: $90^\circ$
+        misconception: treats $hat i + hat j$ as the angle between the unit vectors
+    answer: C
+    solution:
+      - $\tan\theta = A_y / A_x = 1$, so $\theta = 45^\circ$.

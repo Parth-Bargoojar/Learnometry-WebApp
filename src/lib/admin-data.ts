@@ -10,15 +10,13 @@ import {
   DIAGNOSTIC_ID,
   TODAY,
   attemptHistory,
-  chapters,
   conceptById,
-  concepts,
   creditHistory,
   credits,
   learner,
   questions,
 } from "./data";
-import type { Edge, QuestionStatus, ValidationResult, ValidatorType } from "./admin";
+import type { QuestionStatus, ValidationResult, ValidatorType } from "./admin";
 import { AUTOMATED_VALIDATORS, DEFAULT_BUDGET } from "./admin";
 
 /* ------------------------------------------------------------------ */
@@ -630,40 +628,6 @@ export const questionMeta: QuestionMeta[] = questions.map((q, i) => {
   OVERRIDES[q.id]?.(m);
   return m;
 });
-
-export const questionMetaById = (id: string) => questionMeta.find((m) => m.id === id) ?? null;
-
-/* ------------------------------------------------------------------ */
-/* Curriculum (K7)                                                     */
-/* ------------------------------------------------------------------ */
-
-export const tracks = [
-  { code: "jee_main", name: "JEE Main", source: null },
-  { code: "neet", name: "NEET", source: "JEE Main" },
-  { code: "cbse_11", name: "CBSE Class 11", source: "JEE Main" },
-] as const;
-
-export type TrackCode = (typeof tracks)[number]["code"];
-
-/** Per-track exam importance (0–1). The graph is shared; weights differ per track (TRD §5.2). */
-export const trackWeights: Record<TrackCode, Record<string, number>> = {
-  jee_main: Object.fromEntries(concepts.map((c) => [c.id, c.examWeight])),
-  neet: { vectors: 0.55, projectile: 0.6, fbd: 0.7, resolution: 0.75, friction: 0.7, circular: 0.65, pseudo: 0.3, "work-energy": 0.85, power: 0.6 },
-  cbse_11: { vectors: 0.6, projectile: 0.7, fbd: 0.8, resolution: 0.7, friction: 0.75, circular: 0.7, pseudo: 0.4, "work-energy": 0.8, power: 0.65 },
-};
-
-export const curriculumVersion = { published: "v1.2", publishedAt: "2026-09-20T12:00:00+05:30", publishedBy: "usr_admin_aarav", draft: "v1.3" };
-
-export const curriculumEdges: Edge[] = concepts.flatMap((c) => c.prerequisites.map((p) => ({ from: p, to: c.id })));
-
-export const curriculumTree = chapters.map((ch) => {
-  const inChapter = concepts.filter((c) => c.chapterId === ch.id);
-  const topics = [...new Set(inChapter.map((c) => c.topic))];
-  return { ...ch, topics: topics.map((t) => ({ name: t, concepts: inChapter.filter((c) => c.topic === t) })) };
-});
-
-/** Launch scope is 6 chapters (TRD §5.2); the sample graph holds the first 3. */
-export const LAUNCH_CHAPTERS = 6;
 
 /* ------------------------------------------------------------------ */
 /* Dashboard                                                           */

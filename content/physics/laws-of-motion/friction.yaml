@@ -1,0 +1,219 @@
+concept: friction
+questions:
+  - id: fri-d07
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: diagnostic
+    stem: A $5\,\text{kg}$ block rests on a horizontal floor with $\mu_s = 0.4$. A horizontal force of $15\,\text{N}$ is applied. What is the frictional force on the block?
+    options:
+      - key: A
+        text: $20\,\text{N}$
+        misconception: gives the *maximum* static friction, not the friction actually acting
+      - key: B
+        text: $15\,\text{N}$
+      - key: C
+        text: $0\,\text{N}$
+        misconception: thinks there is no friction when the block does not move
+      - key: D
+        text: $5\,\text{N}$
+        misconception: subtracts the applied force from the limiting value
+    answer: B
+    solution:
+      - "Limiting friction is $\\mu_s mg = 0.4 \\times 50 = 20\\,\\text{N}$. The applied $15\\,\\text{N}$ is below that, so the block stays at rest and static friction only matches the applied force: $15\\,\\text{N}$. $20\\,\\text{N}$ is the *maximum*, not the actual value."
+  - id: fri-d08
+    type: mcq
+    difficulty: medium
+    expected_seconds: 90
+    pool: diagnostic
+    stem: What is the minimum coefficient of static friction needed for a block to stay at rest on an incline of $45^\circ$?
+    options:
+      - key: A
+        text: $0.5$
+        misconception: takes $	an 45^circ$ as one half
+      - key: B
+        text: $1$
+      - key: C
+        text: $\sqrt{2}$
+        misconception: uses $1/cos	heta$ instead of $	an	heta$
+      - key: D
+        text: $1/\sqrt{2}$
+        misconception: uses $sin	heta$ instead of $	an	heta$
+    answer: B
+    solution:
+      - The block is on the verge of slipping when $\mu_s = \tan\theta = \tan 45^\circ = 1$.
+  - id: fri-d09
+    type: numerical
+    difficulty: easy
+    expected_seconds: 90
+    pool: diagnostic
+    stem: A $2\,\text{kg}$ block slides on a horizontal floor with $\mu_k = 0.25$. Find its deceleration, in $\text{m/s}^2$.
+    answer:
+      value: 2.5
+      tolerance_pct: 1
+    solution:
+      - $a = \mu_k g = 0.25 \times 10 = 2.5\,\text{m/s}^2$; the mass cancels.
+  - id: fri-r04
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: retest
+    stem: "A $10\\,\\text{kg}$ box on a floor with $\\mu_s = 0.5$ is pushed horizontally with $30\\,\\text{N}$. The friction force is:"
+    options:
+      - key: A
+        text: $50\,\text{N}$
+      - key: B
+        text: $30\,\text{N}$
+      - key: C
+        text: $0\,\text{N}$
+      - key: D
+        text: $20\,\text{N}$
+    answer: B
+    solution:
+      - Limiting friction is $50\,\text{N}$; $30\,\text{N}$ is below it, so static friction is $30\,\text{N}$.
+  - id: fri-r05
+    type: mcq
+    difficulty: medium
+    expected_seconds: 90
+    pool: retest
+    stem: "If $\\mu_s = 1/\\sqrt{3}$, the angle of repose is:"
+    options:
+      - key: A
+        text: $30^\circ$
+      - key: B
+        text: $45^\circ$
+      - key: C
+        text: $60^\circ$
+      - key: D
+        text: $37^\circ$
+    answer: A
+    solution:
+      - $\tan\theta = 1/\sqrt{3} \Rightarrow \theta = 30^\circ$.
+  - id: fri-r06
+    type: numerical
+    difficulty: easy
+    expected_seconds: 60
+    pool: retest
+    stem: A $4\,\text{kg}$ block slides on a floor with $\mu_k = 0.2$. Find the kinetic friction force, in newtons.
+    answer:
+      value: 8
+      tolerance_pct: 1
+    solution:
+      - $f = \mu_k mg = 0.2 \times 40 = 8\,\text{N}$.
+  - id: fri-p01
+    type: numerical
+    difficulty: easy
+    expected_seconds: 75
+    pool: practice
+    stem: A $20\,\text{kg}$ box rests on a horizontal floor with $\mu_s = 0.3$. What is the smallest horizontal force that will start it moving, in newtons? Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 60
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 200
+        category: conceptual
+      - value: 6
+        category: calculation
+    solution:
+      - "It just starts to move when the push equals limiting friction: $f_{max} = \\mu_s mg = 0.3 \\times 20 \\times 10 = 60\\,\\text{N}$."
+  - id: fri-p02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 90
+    pool: practice
+    stem: "A block of mass $m$ rests on a rough incline of angle $30^\\circ$ and does not slide. The friction force on it is:"
+    options:
+      - key: A
+        text: $mg/2$, directed up the incline
+      - key: B
+        text: $\mu mg\cos 30^\circ$, directed up the incline
+        misconception: uses the limiting-friction formula for a block that is not about to slip
+      - key: C
+        text: $mg/2$, directed down the incline
+        misconception: "gets the direction wrong: friction opposes the tendency to slide down"
+      - key: D
+        text: $mg\cos 30^\circ$, directed up the incline
+        misconception: mixes up the two components of the weight
+    answer: A
+    solution:
+      - "The block is in equilibrium along the incline, so static friction balances the component of weight along it: $f = mg\\sin 30^\\circ = mg/2$, pointing up the incline."
+  - id: fri-p03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 110
+    pool: practice
+    stem: A $10\,\text{kg}$ block on a horizontal floor is pushed with a horizontal force of $60\,\text{N}$. The coefficient of kinetic friction is $0.4$. Find its acceleration, in $\text{m/s}^2$. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 2
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 6
+        category: conceptual
+      - value: 10
+        category: conceptual
+      - value: 1
+        category: calculation
+    solution:
+      - "Kinetic friction: $f = \\mu_k mg = 0.4 \\times 100 = 40\\,\\text{N}$."
+      - $a = (F - f)/m = (60 - 40)/10 = 2\,\text{m/s}^2$.
+  - id: fri-p04
+    type: numerical
+    difficulty: hard
+    expected_seconds: 130
+    pool: practice
+    stem: A block slides down a rough incline of angle $37^\circ$ ($\sin 37^\circ = 0.6$, $\cos 37^\circ = 0.8$) with $\mu_k = 0.5$. Find its acceleration, in $\text{m/s}^2$. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 2
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 6
+        category: conceptual
+      - value: 10
+        category: conceptual
+      - value: 4
+        category: calculation
+      - value: 5
+        category: conceptual
+    solution:
+      - "Along the incline: $mg\\sin\\theta - \\mu_k mg\\cos\\theta = ma$."
+      - $a = g(\sin\theta - \mu_k\cos\theta) = 10(0.6 - 0.5 \times 0.8) = 2\,\text{m/s}^2$.
+  - id: fri-p05
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: Which statement about friction between two dry surfaces is correct?
+    options:
+      - key: A
+        text: Static friction always equals $\mu_s N$
+        misconception: treats the maximum as the actual value even when the body is not about to slip
+      - key: B
+        text: Static friction adjusts up to a maximum value; once sliding starts, kinetic friction is usually a little smaller
+      - key: C
+        text: Kinetic friction grows as the sliding speed increases
+        misconception: assumes friction behaves like air drag
+      - key: D
+        text: Friction is larger on a bigger contact area for the same load
+        misconception: thinks contact area changes dry friction in this model
+    answer: B
+    solution:
+      - Static friction matches the applied force up to $\mu_s N$; it is not always at that limit. Once sliding, $f_k = \mu_k N$ with $\mu_k \lesssim \mu_s$, roughly independent of speed and contact area.
+  - id: fri-p06
+    type: numerical
+    difficulty: medium
+    expected_seconds: 100
+    pool: practice
+    stem: A $2\,\text{kg}$ block on a rough horizontal surface ($\mu_k = 0.5$) is pulled by a horizontal force of $18\,\text{N}$. Find its acceleration, in $\text{m/s}^2$. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 4
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 9
+        category: conceptual
+      - value: 5
+        category: calculation
+      - value: 8
+        category: calculation
+    solution:
+      - $f_k = \mu_k mg = 0.5 \times 20 = 10\,\text{N}$.
+      - $a = (18 - 10)/2 = 4\,\text{m/s}^2$.

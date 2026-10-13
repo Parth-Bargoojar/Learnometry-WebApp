@@ -1,0 +1,250 @@
+concept: pseudo
+questions:
+  - id: pse-d01
+    type: mcq
+    difficulty: easy
+    expected_seconds: 75
+    pool: diagnostic
+    parallel_group: pse-brake
+    stem: "A bus brakes sharply and a standing passenger lurches forward. In the frame of the *bus*, this is described as:"
+    options:
+      - key: A
+        text: a pseudo force acting forward on the passenger
+      - key: B
+        text: a real force from the bus pushing the passenger forward
+        misconception: treats the pseudo force as if something is pushing the passenger
+      - key: C
+        text: no force at all, since the passenger is not accelerating in the bus frame
+        misconception: ignores that Newton's laws only hold as written in inertial frames
+      - key: D
+        text: the passenger's weight acting forward
+        misconception: mixes up the direction of gravity with the braking effect
+    answer: A
+    solution:
+      - The bus is accelerating (backward), so it is a non-inertial frame. To use Newton's laws there, we add a pseudo force $-m\vec a_{frame}$, which points forward here. In the ground frame, no force pushes the passenger forward; the passenger just keeps moving.
+  - id: pse-d02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: diagnostic
+    parallel_group: pse-lift
+    stem: "A lift accelerates *upward* with acceleration $a$. A person of mass $m$ stands on a scale inside. The scale reads (as a force):"
+    options:
+      - key: A
+        text: $m(g - a)$
+        misconception: uses the downward-acceleration formula
+      - key: B
+        text: $m(g + a)$
+      - key: C
+        text: $mg$
+        misconception: forgets the lift's acceleration changes the scale reading
+      - key: D
+        text: $ma$
+        misconception: drops the weight and keeps only the extra force
+    answer: B
+    solution:
+      - "Ground frame, upward positive: $N - mg = ma \\Rightarrow N = m(g+a)$. In the lift's frame, the pseudo force $ma$ acts downward and adds to the weight."
+  - id: pse-d03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 100
+    pool: diagnostic
+    parallel_group: pse-num
+    stem: A $50\,\text{kg}$ person stands on a weighing scale in a lift that accelerates *downward* at $2\,\text{m/s}^2$. What force does the scale exert on the person, in newtons? Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 400
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 600
+        category: conceptual
+      - value: 500
+        category: conceptual
+      - value: 100
+        category: conceptual
+    solution:
+      - "Downward positive: $mg - N = ma \\Rightarrow N = m(g - a) = 50 \\times 8 = 400\\,\\text{N}$."
+  - id: pse-r01
+    type: mcq
+    difficulty: easy
+    expected_seconds: 75
+    pool: retest
+    parallel_group: pse-brake
+    stem: "A car turns sharply to the left and a bag on the back seat slides to the right. In the frame of the *car*, this is described as:"
+    options:
+      - key: A
+        text: a real force from the seat pushing the bag to the right
+        misconception: treats the pseudo force as a push from something
+      - key: B
+        text: no force, since the bag is not accelerating in the car frame
+        misconception: ignores that the car frame is accelerating
+      - key: C
+        text: a pseudo force acting to the right on the bag
+      - key: D
+        text: a force toward the centre of the turn
+        misconception: "mixes up the direction: the pseudo force points away from the centre"
+    answer: C
+    solution:
+      - A turning car is a non-inertial frame accelerating toward the centre (left). The pseudo force $-m\vec a_{frame}$ points to the right, away from the centre. From the ground, the bag simply keeps going straight.
+  - id: pse-r02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: retest
+    parallel_group: pse-lift
+    stem: "A lift accelerates *downward* with acceleration $a$ (less than $g$). A person of mass $m$ stands on a scale inside. The scale reads (as a force):"
+    options:
+      - key: A
+        text: $m(g + a)$
+        misconception: uses the upward-acceleration formula
+      - key: B
+        text: $mg$
+        misconception: forgets the lift's acceleration changes the reading
+      - key: C
+        text: $ma$
+        misconception: drops the weight and keeps only the extra force
+      - key: D
+        text: $m(g - a)$
+    answer: D
+    solution:
+      - "Downward positive: $mg - N = ma \\Rightarrow N = m(g - a)$."
+  - id: pse-r03
+    type: numerical
+    difficulty: medium
+    expected_seconds: 100
+    pool: retest
+    parallel_group: pse-num
+    stem: A $60\,\text{kg}$ person stands on a weighing scale in a lift that accelerates *upward* at $3\,\text{m/s}^2$. What force does the scale exert on the person, in newtons? Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 780
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 420
+        category: conceptual
+      - value: 600
+        category: conceptual
+      - value: 180
+        category: conceptual
+    solution:
+      - "Upward positive: $N - mg = ma \\Rightarrow N = m(g + a) = 60 \\times 13 = 780\\,\\text{N}$."
+  - id: pse-p01
+    type: numerical
+    difficulty: medium
+    expected_seconds: 130
+    pool: practice
+    stem: A small ball hangs from the roof of a car by a light string. The car accelerates horizontally at $7.5\,\text{m/s}^2$. Find the angle the string makes with the vertical when the ball is at rest relative to the car, in degrees. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 36.87
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 53.13
+        category: conceptual
+      - value: 45
+        category: conceptual
+      - value: 75
+        category: calculation
+    solution:
+      - In the car frame the ball is in equilibrium under tension, weight $mg$ and the pseudo force $ma$ (backward).
+      - $\tan\theta = ma/mg = 7.5/10 = 0.75 \Rightarrow \theta \approx 36.87^\circ$.
+    hint: Balance horizontal and vertical components in the car's frame.
+  - id: pse-p02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: "An observer in a frame accelerating with acceleration $\\vec a$ describes the motion of a body of mass $m$. The pseudo force they must include is:"
+    options:
+      - key: A
+        text: $+m\vec a$, in the direction of the frame's acceleration
+        misconception: gets the direction of the pseudo force wrong
+      - key: B
+        text: $-m\vec a$, opposite to the frame's acceleration
+      - key: C
+        text: $-m\vec g$, directed upward
+        misconception: mixes the pseudo force up with the normal force or gravity
+      - key: D
+        text: zero, because pseudo forces only appear in rotating frames
+        misconception: believes pseudo forces need rotation; any accelerating frame has them
+    answer: B
+    solution:
+      - "In a frame with acceleration $\\vec a$, Newton's second law holds if we add $\\vec F_{pseudo} = -m\\vec a$: equal in size to $ma$ and opposite to the frame's acceleration."
+  - id: pse-p03
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: practice
+    stem: "A lift's cable snaps and the lift falls freely. A $60\\,\\text{kg}$ person inside stands on a scale. The scale reads:"
+    options:
+      - key: A
+        text: $0\,\text{N}$
+      - key: B
+        text: $600\,\text{N}$
+        misconception: forgets the lift's acceleration is $g$
+      - key: C
+        text: $1200\,\text{N}$
+        misconception: adds the acceleration instead of subtracting it
+      - key: D
+        text: $60\,\text{N}$
+        misconception: reads the mass number as a force
+    answer: A
+    solution:
+      - "For a lift accelerating down at $a = g$: $N = m(g - a) = 0$. The person and scale fall together, so there is no push between them (apparent weightlessness)."
+  - id: pse-p04
+    type: numerical
+    difficulty: easy
+    expected_seconds: 80
+    pool: practice
+    stem: A $3\,\text{kg}$ block rests on the floor of a train that accelerates forward at $2\,\text{m/s}^2$. In the train's frame, find the magnitude of the pseudo force on the block, in newtons.
+    answer:
+      value: 6
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 1.5
+        category: calculation
+      - value: 30
+        category: conceptual
+      - value: 0.67
+        category: calculation
+    solution:
+      - $F_{pseudo} = ma = 3 \times 2 = 6\,\text{N}$, directed backward (opposite to the train's acceleration).
+  - id: pse-p05
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: Which statement about pseudo forces is correct?
+    options:
+      - key: A
+        text: They are real forces and have a reaction force like any other
+        misconception: applies Newton's third law to a force that has no source body
+      - key: B
+        text: They exist in the ground frame as well, but are small
+        misconception: thinks pseudo forces are real but weak
+      - key: C
+        text: They appear only when we use an accelerating frame, and they have no reaction pair acting on any other body
+      - key: D
+        text: They are zero in every frame, so they can always be ignored
+        misconception: thinks a pseudo force has no effect, when it is needed to explain motion seen from an accelerating frame
+    answer: C
+    solution:
+      - A pseudo force is a bookkeeping term $-m\vec a_{frame}$ added so Newton's second law works in a non-inertial frame. No body exerts it, so there is no third-law partner; it vanishes in an inertial frame.
+  - id: pse-p06
+    type: numerical
+    difficulty: hard
+    expected_seconds: 150
+    pool: practice
+    misread_risk: true
+    stem: A $2\,\text{kg}$ mass hangs from a spring balance fixed to the roof of a lift. The lift is moving *downward* and is slowing down at $3\,\text{m/s}^2$. What does the balance read, in newtons? Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 26
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 14
+        category: conceptual
+      - value: 20
+        category: conceptual
+      - value: 6
+        category: conceptual
+    solution:
+      - "Moving down but slowing down means the acceleration points *upward*: $a = 3\\,\\text{m/s}^2$ up."
+      - "Upward positive: $T - mg = ma \\Rightarrow T = m(g + a) = 2 \\times 13 = 26\\,\\text{N}$."
+    hint: Which way does the acceleration point when a downward-moving body slows down?

@@ -2,7 +2,7 @@
   `npm run db:seed` (BE-D62) — idempotent.
 
     reference data   exams, Class 11 Mechanics graph on 3 tracks, plans, coupon, flags   (always)
-    sample questions the current sample bank, published                                  (not production)
+    sample questions content/**.yaml imported and published                              (local database only, or --samples)
     seed accounts    rohan, sunita, new, out, adult, admin @seed.learnometry.test         (local/dev/staging)
 
   Accounts are created only against a local Supabase (127.0.0.1 / localhost) unless you pass
@@ -19,15 +19,20 @@ async function main() {
   const url = process.env.DIRECT_DATABASE_URL || process.env.DATABASE_URL;
   if (!url) throw new Error("Set DIRECT_DATABASE_URL (npm run db:start prints the local one)");
   const production = process.env.NODE_ENV === "production" || args.has("--production");
+  const localDb = /@(127\.0\.0\.1|localhost)[:/]/.test(url);
+  // Sample questions are published without review, so a hosted database gets them only on request.
+  const withSamples = !args.has("--reference-only") && !production && (localDb || args.has("--samples"));
   const referenceOnly = args.has("--reference-only") || production;
 
   const { db, sql } = createDb(url, { max: 2 });
   try {
     const summary = await seedReference(db);
     console.log("reference:", summary);
-    if (!referenceOnly) {
+    if (withSamples) {
       const n = await seedSampleQuestions(db);
       console.log(`sample questions: ${n}`);
+    } else {
+      console.log("sample questions: skipped (not a local database; pass --samples to force)");
     }
 
     const api = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";

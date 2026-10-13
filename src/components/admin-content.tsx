@@ -1,25 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useId, useState, useTransition } from "react";
 import { CircleAlert, CircleCheck, CircleDashed, OctagonAlert, Trash2, TriangleAlert, type LucideIcon } from "lucide-react";
 import {
   AUTOMATED_VALIDATORS,
   QUESTION_STATUS_LABEL,
   VALIDATOR_LABEL,
   canSuspend,
+  transitionBlocker,
   cyclePath,
   publishBlockers,
   stamp,
   type Edge,
+  type QuestionAction,
   type QuestionStatus,
   type ValidationResult,
   type ValidatorType,
 } from "@/lib/admin";
-import { admins, curriculumEdges, curriculumVersion, type QuestionMeta } from "@/lib/admin-data";
-import { SHARED, useShared } from "@/lib/local-store";
+import { discardCurriculumDraftAction, publishCurriculumAction, saveCurriculumDraftAction } from "@/app/admin/curriculum/actions";
+import { changeQuestionsAction } from "@/app/admin/questions/actions";
+import type { AdminQuestion, AdminQuestionDetail } from "@/domains/content/types";
 import { MathText } from "./math";
-import { ReasonDialog, field, labelCls, nowIso, useAuditLog } from "./admin-core";
+import { ReasonDialog, field, labelCls } from "./admin-core";
 import { Pill, num, td, th, type Tone } from "./admin-ui";
 import { useToast } from "./toast";
 import { btn } from "./ui";
@@ -28,17 +32,8 @@ import { btn } from "./ui";
 /* Question state (K6)                                                 */
 /* ------------------------------------------------------------------ */
 
-type QPatch = { status?: QuestionStatus; human?: ValidationResult; note?: string; by?: string; at?: string };
-
-function useQuestionPatches() {
-  return useShared<Record<string, QPatch>>(SHARED.adminQuestions, {});
-}
-
-function merged(m: QuestionMeta, p?: QPatch) {
-  const validations = p?.human ? { ...m.validations, human: { result: p.human } } : m.validations;
-  const results = Object.fromEntries(Object.entries(validations).map(([k, v]) => [k, v.result])) as Record<ValidatorType, ValidationResult>;
-  return { ...m, status: p?.status ?? m.status, statusNote: p?.note ?? m.statusNote, validations, results };
-}
+type TransitionResult = { done: string[]; skipped: { id: string; reason: string }[] };
+const results = (q: AdminQuestion) => Object.fromEntries(Object.entries(q.validations).map(([k, v]) => [k, v.result])) as Record<ValidatorType, ValidationResult>;
 
 export const STATUS_TONE: Record<QuestionStatus, Tone> = { draft: "outline", validated: "info", reviewed: "warning", published: "success", suspended: "danger" };
 
@@ -64,32 +59,40 @@ function ValidationSummary({ results }: { results: Record<ValidatorType, Validat
   );
 }
 
-export interface QuestionRow {
-  meta: QuestionMeta;
-  stem: string;
-  concept: string;
-  chapter: string;
+export type QuestionRow = AdminQuestion;
+
+/** Calls the server action and reports its outcome; the page re-renders from the database afterwards. */
+function useQuestionChange() {
+  const toast = useToast();
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const change = (action: QuestionAction, ids: string[], reason: string, done?: (r: TransitionResult) => void) =>
+    start(async () => {
+      const res = await changeQuestionsAction({ action, ids, reason });
+      if (!res.ok) return toast.show(res.error.message);
+      const verb = action === "review" ? "Reviewed" : action === "publish" ? "Published" : "Suspended";
+      toast.show(`${verb} ${res.data.done.length}${res.data.skipped.length ? `, skipped ${res.data.skipped.length}` : ""}`);
+      done?.(res.data);
+      router.refresh();
+    });
+  return { change, pending, toast };
 }
 
-export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; statusFilter?: QuestionStatus }) {
-  const [patches, set] = useQuestionPatches();
-  const log = useAuditLog();
-  const toast = useToast();
+export function QuestionTable({ rows }: { rows: QuestionRow[] }) {
+  const { change, pending, toast } = useQuestionChange();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulk, setBulk] = useState<"publish" | "suspend" | null>(null);
 
-  const visible = useMemo(
-    () => rows.map((r) => ({ ...r, q: merged(r.meta, patches[r.meta.id]) })).filter((r) => !statusFilter || r.q.status === statusFilter),
-    [rows, patches, statusFilter],
-  );
-  const chosen = visible.filter((r) => selected.has(r.meta.id));
+  const visible = rows;
+  const chosen = visible.filter((r) => selected.has(r.id));
   const plan = (kind: "publish" | "suspend") => {
-    const ok = chosen.filter((r) => (kind === "publish" ? !publishBlockers(r.q.status, r.q.results).length : canSuspend(r.q.status)));
-    const skipped = chosen.filter((r) => !ok.includes(r));
+    const blocker = (r: QuestionRow) => transitionBlocker(kind, r.status, results(r));
+    const ok = chosen.filter((r) => !blocker(r));
+    const skipped = chosen.filter((r) => blocker(r)).map((r) => ({ row: r, why: blocker(r)! }));
     return { ok, skipped };
   };
   const p = bulk ? plan(bulk) : null;
-  const allOn = visible.length > 0 && visible.every((r) => selected.has(r.meta.id));
+  const allOn = visible.length > 0 && visible.every((r) => selected.has(r.id));
 
   const toggle = (id: string) =>
     setSelected((prev) => {
@@ -142,7 +145,7 @@ export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; sta
                     type="checkbox"
                     aria-label="Select all shown questions"
                     checked={allOn}
-                    onChange={() => setSelected(allOn ? new Set() : new Set(visible.map((r) => r.meta.id)))}
+                    onChange={() => setSelected(allOn ? new Set() : new Set(visible.map((r) => r.id)))}
                     className="size-6 accent-[var(--color-ink)]"
                   />
                 </th>
@@ -158,26 +161,27 @@ export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; sta
             </thead>
             <tbody>
               {visible.map((r) => (
-                <tr key={r.meta.id} className={selected.has(r.meta.id) ? "bg-sunken" : undefined}>
+                <tr key={r.id} className={selected.has(r.id) ? "bg-sunken" : undefined}>
                   <td className={td}>
-                    <input type="checkbox" aria-label={`Select ${r.meta.id}`} checked={selected.has(r.meta.id)} onChange={() => toggle(r.meta.id)} className="size-6 accent-[var(--color-ink)]" />
+                    <input type="checkbox" aria-label={`Select ${r.slug}`} checked={selected.has(r.id)} onChange={() => toggle(r.id)} className="size-6 accent-[var(--color-ink)]" />
                   </td>
                   <td className={`${td} max-w-md`}>
-                    <Link href={`/admin/questions/${r.meta.id}`} className="font-mono text-[13px] font-semibold text-ink underline decoration-border-subtle underline-offset-4 hover:decoration-line">
-                      {r.meta.id}
+                    <Link href={`/admin/questions/${r.id}`} className="font-mono text-[13px] font-semibold text-ink underline decoration-border-subtle underline-offset-4 hover:decoration-line">
+                      {r.slug}
                     </Link>
+                    <span className="ml-2 text-xs text-muted">{r.exam}</span>
                     <MathText as="span" className="mt-0.5 line-clamp-2 block text-muted">{r.stem}</MathText>
                   </td>
                   <td className={td}>
-                    {r.concept}
-                    <span className="block text-xs text-muted">{r.chapter}</span>
+                    {r.conceptName}
+                    <span className="block text-xs text-muted">{r.chapterName}</span>
                   </td>
-                  <td className={td}>{r.meta.use}</td>
-                  <td className={`${td} capitalize`}>{r.meta.difficulty}</td>
-                  <td className={td}><ValidationSummary results={r.q.results} /></td>
-                  <td className={td}><Pill tone={STATUS_TONE[r.q.status]}>{QUESTION_STATUS_LABEL[r.q.status]}</Pill></td>
-                  <td className={`${td} ${num}`}>{r.meta.served || "—"}</td>
-                  <td className={`${td} ${num}`}>{r.meta.correctRate === null ? "—" : `${Math.round(r.meta.correctRate * 100)}%`}</td>
+                  <td className={td}>{r.use}</td>
+                  <td className={`${td} capitalize`}>{r.difficulty}</td>
+                  <td className={td}><ValidationSummary results={results(r)} /></td>
+                  <td className={td}><Pill tone={STATUS_TONE[r.status]}>{QUESTION_STATUS_LABEL[r.status]}</Pill></td>
+                  <td className={`${td} ${num}`}>{r.served || "—"}</td>
+                  <td className={`${td} ${num}`}>{r.correctRate === null ? "—" : `${Math.round(r.correctRate * 100)}%`}</td>
                 </tr>
               ))}
             </tbody>
@@ -194,16 +198,16 @@ export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; sta
             <div className="flex flex-col gap-2">
               <p>
                 {bulk === "publish" ? "Publishes" : "Suspends"} <strong>{p.ok.length}</strong>
-                {p.ok.length ? `: ${p.ok.map((r) => r.meta.id).join(", ")}` : ""}.{" "}
+                {p.ok.length ? `: ${p.ok.map((r) => r.slug).join(", ")}` : ""}.{" "}
                 {bulk === "publish" ? "They can appear in new assessments at once." : "They leave new assessments at once; attempts in progress still score them."}
               </p>
               {p.skipped.length ? (
                 <div>
                   <p className="font-semibold">Skips {p.skipped.length}:</p>
                   <ul className="mt-1 list-disc pl-4 text-muted">
-                    {p.skipped.map((r) => (
-                      <li key={r.meta.id}>
-                        {r.meta.id}: {bulk === "publish" ? publishBlockers(r.q.status, r.q.results).join(" ") : `${QUESTION_STATUS_LABEL[r.q.status]}, not published.`}
+                    {p.skipped.map(({ row, why }) => (
+                      <li key={row.id}>
+                        {row.slug}: {why}
                       </li>
                     ))}
                   </ul>
@@ -217,36 +221,28 @@ export function QuestionTable({ rows, statusFilter }: { rows: QuestionRow[]; sta
         destructive={bulk === "suspend"}
         onConfirm={(reason) => {
           if (!p || !bulk) return;
-          const status: QuestionStatus = bulk === "publish" ? "published" : "suspended";
-          set((prev) => {
-            const next = { ...prev };
-            for (const r of p.ok) next[r.meta.id] = { ...next[r.meta.id], status, note: bulk === "suspend" ? reason : undefined, by: "usr_admin_aarav", at: nowIso() };
-            return next;
-          });
-          for (const r of p.ok) log({ action: `question.${status}`, resourceType: "question", resourceId: r.meta.id, summary: `${QUESTION_STATUS_LABEL[r.q.status]} → ${QUESTION_STATUS_LABEL[status]} (bulk)`, reason });
-          setSelected(new Set());
-          toast.show(`${bulk === "publish" ? "Published" : "Suspended"} ${p.ok.length}${p.skipped.length ? `, skipped ${p.skipped.length}` : ""}`);
+          change(bulk, p.ok.map((r) => r.id), reason, () => setSelected(new Set()));
         }}
       />
+      {pending ? <p className="sr-only" role="status">Saving…</p> : null}
       {toast.node}
     </>
   );
 }
 
 /** Detail page panel: validators, status and the actions they allow. */
-export function QuestionReview({ meta }: { meta: QuestionMeta }) {
-  const [patches, set] = useQuestionPatches();
-  const log = useAuditLog();
-  const toast = useToast();
-  const q = merged(meta, patches[meta.id]);
-  const blockers = publishBlockers(q.status, q.results);
-  const autoFail = AUTOMATED_VALIDATORS.some((v) => q.results[v] === "fail");
-  const [action, setAction] = useState<"review" | "publish" | "suspend" | null>(null);
+export function QuestionReview({ question }: { question: AdminQuestionDetail }) {
+  const { change, toast } = useQuestionChange();
+  const q = question;
+  const res = results(q);
+  const blockers = publishBlockers(q.status, res);
+  const autoFail = AUTOMATED_VALIDATORS.some((v) => res[v] === "fail");
+  const [action, setAction] = useState<QuestionAction | null>(null);
 
   const copy = {
     review: { title: "Record your review?", summary: "You checked the stem, answer, solution, syllabus fit and exam style. Status becomes Reviewed.", label: "Mark reviewed" },
-    publish: { title: `Publish ${meta.id}?`, summary: "It can appear in new diagnostics, practice and retests at once.", label: "Publish" },
-    suspend: { title: `Suspend ${meta.id}?`, summary: "It leaves new assessments at once. Attempts in progress still score it, and past results don't change.", label: "Suspend" },
+    publish: { title: `Publish ${q.slug}?`, summary: "It can appear in new diagnostics, practice and retests at once.", label: "Publish" },
+    suspend: { title: `Suspend ${q.slug}?`, summary: "It leaves new assessments at once. Attempts in progress still score it, and past results don't change.", label: "Suspend" },
   } as const;
 
   return (
@@ -268,7 +264,7 @@ export function QuestionReview({ meta }: { meta: QuestionMeta }) {
           </ul>
         ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
-          {q.results.human !== "pass" && !autoFail ? (
+          {res.human !== "pass" && !autoFail && q.status !== "published" ? (
             <button type="button" onClick={() => setAction("review")} className={btn("secondary", "sm")}>
               Mark reviewed
             </button>
@@ -315,21 +311,7 @@ export function QuestionReview({ meta }: { meta: QuestionMeta }) {
         confirmLabel={action ? copy[action].label : ""}
         destructive={action === "suspend"}
         onConfirm={(reason) => {
-          if (!action) return;
-          const before = q.status;
-          const patch: QPatch =
-            action === "review"
-              ? { human: "pass", status: q.status === "draft" || q.status === "validated" ? "reviewed" : q.status }
-              : { status: action === "publish" ? "published" : "suspended", note: action === "suspend" ? reason : undefined };
-          set((prev) => ({ ...prev, [meta.id]: { ...prev[meta.id], ...patch, by: "usr_admin_aarav", at: nowIso() } }));
-          log({
-            action: action === "review" ? "question.reviewed" : `question.${patch.status}`,
-            resourceType: "question",
-            resourceId: meta.id,
-            summary: action === "review" ? "Human review: pass" : `${QUESTION_STATUS_LABEL[before]} → ${QUESTION_STATUS_LABEL[patch.status!]}`,
-            reason,
-          });
-          toast.show(action === "review" ? "Review recorded" : action === "publish" ? "Published" : "Suspended");
+          if (action) change(action, [q.id], reason);
         }}
       />
       {toast.node}
@@ -341,27 +323,37 @@ export function QuestionReview({ meta }: { meta: QuestionMeta }) {
 /* Curriculum edges (K7)                                               */
 /* ------------------------------------------------------------------ */
 
-type CurriculumState = { draft: Edge[] | null; published: { version: string; at: string; edges: Edge[] } | null };
-
 const key = (e: Edge) => `${e.from}>${e.to}`;
-const bump = (v: string) => {
-  const [maj, min] = v.slice(1).split(".").map(Number);
-  return `v${maj}.${min + 1}`;
-};
 
-export function CurriculumEdges({ concepts }: { concepts: { id: string; name: string }[] }) {
-  const [state, set] = useShared<CurriculumState>(SHARED.adminCurriculum, { draft: null, published: null });
-  const log = useAuditLog();
+export function CurriculumEdges({
+  examCode,
+  version,
+  published,
+  draft: savedDraft,
+  concepts,
+  publishedAt,
+  publishedBy,
+}: {
+  examCode: string;
+  version: number;
+  published: Edge[];
+  draft: Edge[] | null;
+  concepts: { id: string; name: string }[];
+  publishedAt: string | null;
+  publishedBy: string | null;
+}) {
   const toast = useToast();
+  const router = useRouter();
+  const [saving, start] = useTransition();
   const id = useId();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [publishing, setPublishing] = useState(false);
+  const [draft, setLocal] = useState<Edge[]>(savedDraft ?? published);
 
+  const next = `v${version + 1}`;
   const name = (c: string) => concepts.find((x) => x.id === c)?.name ?? c;
-  const baseline = state.published?.edges ?? curriculumEdges;
-  const version = state.published?.version ?? curriculumVersion.published;
-  const draft = state.draft ?? baseline;
+  const baseline = published;
   const base = new Set(baseline.map(key));
   const now = new Set(draft.map(key));
   const added = draft.filter((e) => !base.has(key(e)));
@@ -372,7 +364,18 @@ export function CurriculumEdges({ concepts }: { concepts: { id: string; name: st
   const exists = candidate ? now.has(key(candidate)) : false;
   const cycle = candidate && !exists ? cyclePath(draft, candidate.from, candidate.to) : null;
 
-  const setDraft = (edges: Edge[]) => set((prev) => ({ ...prev, draft: edges }));
+  /** Show the change at once and save it as this track's draft; a refusal puts the old list back. */
+  const setDraft = (edges: Edge[]) => {
+    const before = draft;
+    setLocal(edges);
+    start(async () => {
+      const res = await saveCurriculumDraftAction({ exam: examCode, edges });
+      if (!res.ok) {
+        setLocal(before);
+        toast.show(res.error.message);
+      }
+    });
+  };
 
   return (
     <section aria-labelledby={`${id}-h`} className="rounded-card border border-border-subtle bg-surface p-5">
@@ -382,17 +385,28 @@ export function CurriculumEdges({ concepts }: { concepts: { id: string; name: st
             Prerequisites
           </h2>
           <p className="mt-0.5 text-sm text-muted">
-            Published {version} · draft {bump(version)} with {changes} change{changes === 1 ? "" : "s"}. Shared by every exam track.
+            Published v{version} · draft {next} with {changes} change{changes === 1 ? "" : "s"}. This track&apos;s own graph.
           </p>
         </div>
         <div className="flex gap-2">
           {changes ? (
-            <button type="button" onClick={() => set((prev) => ({ ...prev, draft: null }))} className={btn("ghost", "sm")}>
+            <button
+              type="button"
+              onClick={() =>
+                start(async () => {
+                  const res = await discardCurriculumDraftAction({ exam: examCode });
+                  if (!res.ok) return toast.show(res.error.message);
+                  setLocal(published);
+                  router.refresh();
+                })
+              }
+              className={btn("ghost", "sm")}
+            >
               Discard draft
             </button>
           ) : null}
-          <button type="button" disabled={!changes} onClick={() => setPublishing(true)} className={btn("primary", "sm")}>
-            Publish {bump(version)}
+          <button type="button" disabled={!changes || saving} onClick={() => setPublishing(true)} className={btn("primary", "sm")}>
+            Publish {next}
           </button>
         </div>
       </div>
@@ -494,25 +508,27 @@ export function CurriculumEdges({ concepts }: { concepts: { id: string; name: st
       </table>
 
       <p className="mt-3 text-xs text-muted">
-        Last published {stamp(state.published?.at ?? curriculumVersion.publishedAt)} by {state.published ? "you" : admins[curriculumVersion.publishedBy]}.
+        {publishedAt ? `Last published ${stamp(publishedAt)}${publishedBy ? ` by ${publishedBy}` : ""}.` : `v${version} is the initial graph.`}
       </p>
 
       <ReasonDialog
         open={publishing}
         onClose={() => setPublishing(false)}
-        title={`Publish curriculum ${bump(version)}?`}
+        title={`Publish curriculum ${next}?`}
         summary={
           <>
-            {added.length} edge{added.length === 1 ? "" : "s"} added, {removed.length} removed. New plans and diagnostics use {bump(version)} at once; existing plans keep their version until the next retest or rebuild.
+            {added.length} edge{added.length === 1 ? "" : "s"} added, {removed.length} removed. New plans and diagnostics use {next} at once; existing plans keep their version until the next retest or rebuild.
           </>
         }
-        confirmLabel={`Publish ${bump(version)}`}
-        onConfirm={(reason) => {
-          const next = bump(version);
-          set({ draft: null, published: { version: next, at: nowIso(), edges: draft } });
-          log({ action: "curriculum.published", resourceType: "curriculum", resourceId: next, summary: `Published ${next}: +${added.length} / −${removed.length} edges`, reason });
-          toast.show(`Curriculum ${next} published`);
-        }}
+        confirmLabel={`Publish ${next}`}
+        onConfirm={(reason) =>
+          start(async () => {
+            const res = await publishCurriculumAction({ exam: examCode, reason });
+            if (!res.ok) return toast.show(res.error.message);
+            toast.show(`Curriculum v${res.data.version} published`);
+            router.refresh();
+          })
+        }
       />
       {toast.node}
     </section>

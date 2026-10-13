@@ -1,0 +1,220 @@
+concept: circular
+questions:
+  - id: cir-d10
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: diagnostic
+    stem: "A car takes a flat circular turn of radius $50\\,\\text{m}$. If $\\mu_s = 0.5$, the maximum safe speed is closest to:"
+    options:
+      - key: A
+        text: $15.8\,\text{m/s}$
+      - key: B
+        text: $25\,\text{m/s}$
+        misconception: divides $mu g r$ by $g$ instead of taking a square root
+      - key: C
+        text: $10\,\text{m/s}$
+        misconception: guesses from the numbers given instead of using $mu mg = mv^2/r$
+      - key: D
+        text: $22.4\,\text{m/s}$
+        misconception: uses $mu = 1$ instead of $0.5$
+    answer: A
+    solution:
+      - "Friction provides the centripetal force: $\\mu mg = mv^2/r$, so $v = \\sqrt{\\mu g r} = \\sqrt{0.5 \\times 10 \\times 50} = \\sqrt{250} \\approx 15.8\\,\\text{m/s}$."
+  - id: cir-d11
+    type: numerical
+    difficulty: easy
+    expected_seconds: 90
+    pool: diagnostic
+    stem: A $0.5\,\text{kg}$ stone moves in a horizontal circle of radius $1\,\text{m}$ at $4\,\text{m/s}$. Ignoring gravity, find the tension in the string, in newtons.
+    answer:
+      value: 8
+      tolerance_pct: 1
+    solution:
+      - $T = mv^2/r = 0.5 \times 16 / 1 = 8\,\text{N}$.
+  - id: cir-d12
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: diagnostic
+    stem: "A road of radius $10\\,\\text{m}$ is banked so that a car at $10\\,\\text{m/s}$ needs no friction. The banking angle is:"
+    options:
+      - key: A
+        text: $30^\circ$
+        misconception: picks a familiar angle instead of computing $	an	heta = v^2/(rg)$
+      - key: B
+        text: $37^\circ$
+        misconception: picks a familiar angle instead of computing $	an	heta = v^2/(rg)$
+      - key: C
+        text: $45^\circ$
+      - key: D
+        text: $60^\circ$
+        misconception: inverts the ratio or picks a familiar angle
+    answer: C
+    solution:
+      - $\tan\theta = v^2/(rg) = 100/100 = 1$, so $\theta = 45^\circ$.
+  - id: cir-r07
+    type: numerical
+    difficulty: easy
+    expected_seconds: 60
+    pool: retest
+    stem: A $1\,\text{kg}$ ball moves at $2\,\text{m/s}$ in a circle of radius $0.5\,\text{m}$. Find the centripetal force, in newtons.
+    answer:
+      value: 8
+      tolerance_pct: 1
+    solution:
+      - $F = mv^2/r = 4 / 0.5 = 8\,\text{N}$.
+  - id: cir-r08
+    type: mcq
+    difficulty: medium
+    expected_seconds: 120
+    pool: retest
+    stem: "The maximum speed on a flat curve of radius $40\\,\\text{m}$ with $\\mu_s = 0.4$ is closest to:"
+    options:
+      - key: A
+        text: $16\,\text{m/s}$
+      - key: B
+        text: $12.6\,\text{m/s}$
+      - key: C
+        text: $8\,\text{m/s}$
+      - key: D
+        text: $20\,\text{m/s}$
+    answer: B
+    solution:
+      - $v = \sqrt{\mu g r} = \sqrt{160} \approx 12.6\,\text{m/s}$.
+  - id: cir-r09
+    type: mcq
+    difficulty: hard
+    expected_seconds: 120
+    pool: retest
+    stem: "A curve of radius $30\\,\\text{m}$ is designed for $15\\,\\text{m/s}$ with no friction. The banking angle is:"
+    options:
+      - key: A
+        text: $30^\circ$
+      - key: B
+        text: $37^\circ$
+      - key: C
+        text: $45^\circ$
+      - key: D
+        text: $53^\circ$
+    answer: B
+    solution:
+      - $\tan\theta = v^2/(rg) = 225/300 = 0.75 \Rightarrow \theta = 37^\circ$.
+  - id: cir-p01
+    type: numerical
+    difficulty: easy
+    expected_seconds: 75
+    pool: practice
+    stem: A $2\,\text{kg}$ ball moves in a horizontal circle of radius $2.5\,\text{m}$ at a constant speed of $5\,\text{m/s}$. Find the centripetal force on it, in newtons.
+    answer:
+      value: 20
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 10
+        category: calculation
+      - value: 50
+        category: conceptual
+      - value: 4
+        category: conceptual
+    solution:
+      - $F = mv^2/r = 2 \times 25 / 2.5 = 20\,\text{N}$.
+  - id: cir-p02
+    type: mcq
+    difficulty: medium
+    expected_seconds: 75
+    pool: practice
+    stem: A car turns on a flat, level road. Which force provides the centripetal force?
+    options:
+      - key: A
+        text: The engine's driving force
+        misconception: confuses the force that speeds the car up with the one that turns it
+      - key: B
+        text: A centrifugal force pointing outward
+        misconception: treats a frame effect as a real force that causes the turn
+      - key: C
+        text: Static friction between the tyres and the road
+      - key: D
+        text: The normal force from the road
+        misconception: the normal force is vertical here and cannot point toward the centre
+    answer: C
+    solution:
+      - On a flat road the only horizontal force from the road is friction. It points toward the centre of the turn and supplies $mv^2/r$.
+  - id: cir-p03
+    type: numerical
+    difficulty: hard
+    expected_seconds: 130
+    pool: practice
+    stem: A car rounds a flat circular bend of radius $40\,\text{m}$. The coefficient of static friction between tyres and road is $0.4$. Find the maximum speed at which it can turn without skidding, in m/s. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 12.65
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 160
+        category: calculation
+      - value: 4
+        category: conceptual
+      - value: 40
+        category: conceptual
+    solution:
+      - "At the limit, friction supplies the centripetal force: $\\mu_s mg = mv^2/r$."
+      - $v = \sqrt{\mu_s g r} = \sqrt{0.4 \times 10 \times 40} = \sqrt{160} \approx 12.65\,\text{m/s}$.
+  - id: cir-p04
+    type: numerical
+    difficulty: hard
+    expected_seconds: 150
+    pool: practice
+    stem: A $0.5\,\text{kg}$ ball on a string moves in a vertical circle of radius $1\,\text{m}$. At the lowest point its speed is $5\,\text{m/s}$. Find the tension in the string there, in newtons. Take $g = 10\,\text{m/s}^2$.
+    answer:
+      value: 17.5
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 12.5
+        category: conceptual
+      - value: 5
+        category: conceptual
+      - value: 7.5
+        category: conceptual
+    solution:
+      - At the bottom, the net force toward the centre (upward) gives $T - mg = mv^2/r$.
+      - $T = mg + mv^2/r = 5 + 0.5 \times 25/1 = 17.5\,\text{N}$.
+    hint: Which way is the centre from the lowest point?
+  - id: cir-p05
+    type: mcq
+    difficulty: easy
+    expected_seconds: 60
+    pool: practice
+    stem: "A stone whirled in a horizontal circle on a string suddenly has the string cut. Seen from above, the stone then moves:"
+    options:
+      - key: A
+        text: radially outward, along the string's direction
+        misconception: believes an outward 'centrifugal' force throws it outward
+      - key: B
+        text: on continuing around the same circle for a while
+        misconception: thinks the motion has momentum of its own around the circle
+      - key: C
+        text: in a straight line toward the centre
+        misconception: thinks the loss of the pull makes it move inward
+      - key: D
+        text: in a straight line along the tangent to the circle at that point
+    answer: D
+    solution:
+      - With no force, the stone keeps its velocity (Newton's first law). The velocity at the instant of cutting is along the tangent, so it moves off in a straight line along it.
+  - id: cir-p06
+    type: numerical
+    difficulty: medium
+    expected_seconds: 110
+    pool: practice
+    stem: A particle moves uniformly in a circle of radius $2\,\text{m}$ with a period of $4\,\text{s}$. Find its centripetal acceleration, in $\text{m/s}^2$.
+    answer:
+      value: 4.93
+      tolerance_pct: 1
+    wrong_answers:
+      - value: 3.14
+        category: conceptual
+      - value: 1.57
+        category: conceptual
+      - value: 9.87
+        category: calculation
+    solution:
+      - "Speed: $v = 2\\pi r/T = 2\\pi \\times 2/4 = \\pi\\,\\text{m/s}$."
+      - $a_c = v^2/r = \pi^2/2 \approx 4.93\,\text{m/s}^2$.

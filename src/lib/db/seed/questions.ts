@@ -1,69 +1,29 @@
-import { eq } from "drizzle-orm";
-import { questions as sampleQuestions } from "@/lib/data";
-import { sha256 } from "@/lib/security/crypto";
-import type { Question } from "@/lib/types";
+import { and, inArray } from "drizzle-orm";
+import { importContent } from "@/domains/content/import";
+import { loadContent } from "@/domains/content/load";
 import type { Db } from "../connection";
 import * as s from "../schema";
 
 /*
-  The sample question bank as seed data (BE-1.5). Development and staging only: production
-  content arrives through the content pipeline (BE-3) as Draft and is published after review.
-  Pool by id prefix: d = diagnostic, r = retest, p = practice. Published so BE-5 has items.
+  The content bank as seed data (BE-1.5, rewritten in BE-3). The YAML files in `content/` are
+  the single source: this imports them through the same importer as `npm run content:import`
+  and then publishes them, so a development database has questions to assess with. It refuses
+  to run with validation errors. Development and staging only: in production, content is
+  reviewed and published by a person in /admin/questions.
 */
-const DIFFICULTY = { easy: 0.3, medium: 0.55, hard: 0.8 } as const;
-const POOL = { d: "diagnostic", r: "retest", p: "practice" } as const;
+export async function seedSampleQuestions(db: Db): Promise<number> {
+  const { files, findings } = loadContent();
+  const errors = findings.filter((f) => f.severity === "error");
+  if (errors.length > 0) throw new Error(`Content has ${errors.length} validation errors; run npm run content:validate`);
 
-const answerOf = (q: Question) => (q.type === "mcq" ? { key: q.answer } : { value: Number(q.answer), ...(q.tolerance !== undefined ? { tolerance: q.tolerance } : {}) });
+  const summary = await importContent(db, files);
+  if (summary.missingConcepts.length > 0) throw new Error(`Seed the reference data first: missing ${JSON.stringify(summary.missingConcepts)}`);
 
-export async function seedSampleQuestions(db: Db, examCode = "jee_main"): Promise<number> {
-  return db.transaction(async (tx) => {
-    const [exam] = await tx.select().from(s.exams).where(eq(s.exams.code, examCode));
-    if (!exam) throw new Error(`Seed the reference data first: exam ${examCode} is missing`);
-    const conceptRows = await tx.select().from(s.concepts).where(eq(s.concepts.examId, exam.id));
-    const byCode = new Map(conceptRows.map((c) => [c.code, c]));
-    const topics = new Map((await tx.select().from(s.topics)).map((t) => [t.id, t]));
-    const chapters = new Map((await tx.select().from(s.chapters)).map((c) => [c.id, c]));
-
-    let n = 0;
-    for (const q of sampleQuestions) {
-      const concept = byCode.get(q.conceptId);
-      if (!concept) continue;
-      const topic = topics.get(concept.topicId)!;
-      const chapter = chapters.get(topic.chapterId)!;
-      const answer = answerOf(q);
-      const solution = { steps: [q.solution], ...(q.hint ? { hint: q.hint } : {}) };
-      const values = {
-        slug: q.id,
-        examId: exam.id,
-        subjectId: chapter.subjectId,
-        chapterId: chapter.id,
-        topicId: topic.id,
-        conceptId: concept.id,
-        questionType: q.type === "mcq" ? ("mcq" as const) : ("numeric" as const),
-        difficulty: DIFFICULTY[q.difficulty],
-        expectedTimeSeconds: q.expectedSeconds,
-        learningObjective: concept.name,
-        stem: q.stem,
-        options: q.options?.map((o) => ({ key: o.key, text: o.text })) ?? null,
-        answer,
-        solution,
-        hint: q.hint ?? null,
-        pool: POOL[q.id[0] as keyof typeof POOL] ?? ("practice" as const),
-        sourceType: "original" as const,
-        validationStatus: "published" as const,
-        contentHash: sha256(JSON.stringify([q.stem, q.options, answer])),
-      };
-      const [row] = await tx
-        .insert(s.questions)
-        .values(values)
-        .onConflictDoUpdate({ target: [s.questions.examId, s.questions.slug], set: { ...values, updatedAt: new Date() } })
-        .returning({ id: s.questions.id });
-      await tx
-        .insert(s.questionVersions)
-        .values({ questionId: row.id, versionNumber: 1, content: { stem: q.stem, options: q.options ?? null }, answer, solution, difficulty: DIFFICULTY[q.difficulty], changeReason: "Seed" })
-        .onConflictDoNothing();
-      n++;
-    }
-    return n;
-  });
+  const tracks = [...new Set(files.flatMap((f) => f.items.flatMap((i) => i.tracks)))];
+  const exams = await db.select({ id: s.exams.id }).from(s.exams).where(inArray(s.exams.code, tracks));
+  await db
+    .update(s.questions)
+    .set({ validationStatus: "published", updatedAt: new Date() })
+    .where(and(inArray(s.questions.examId, exams.map((e) => e.id)), inArray(s.questions.slug, files.flatMap((f) => f.items.map((i) => i.id)))));
+  return files.reduce((n, f) => n + f.items.length, 0);
 }
